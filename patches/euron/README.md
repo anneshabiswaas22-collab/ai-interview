@@ -4,9 +4,23 @@ This is a reviewable patch for the **disposable upstream checkout**, not an impo
 
 `0001-zod4.patch` upgrades the API and web app from Zod 3.25.76 to 4.6.7 and updates the pnpm lockfile, including peer-resolution details, in response to [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5). Zod 4 is a major upgrade: validate behavior and compatibility before adoption; do not assume an empty advisory scan proves security.
 
+The first patched integration run passed 149 of 150 tests but exposed an export-audit race: the API ended the response before writing the audit record, so a client could receive the export before the record existed. The revised candidate patch records the access before streaming; an interrupted transfer is recorded as an export attempt. The existing integration test checks that the audit record exists when the response finishes. A new full run must pass before the fix is accepted.
+
 ## Local experiment
 
-On Node 24 with the project's pnpm 9.15.0, the updated checkout passed `pnpm lint` (two existing warnings), `pnpm typecheck`, all 232 upstream `pnpm test` unit tests and `pnpm build`; `pnpm audit --prod` reported no known advisories. The patch was applied to a second clean checkout and its three files matched the tested checkout. These are preliminary results; Postgres/Redis integration and the offline browser demo must also pass on the patched checkout. No live provider, actual microphone or production environment was tested.
+On Node 24 with the project's pnpm 9.15.0, the initial dependency-updated checkout passed `pnpm lint` (two existing warnings), `pnpm typecheck`, all 232 upstream `pnpm test` unit tests and `pnpm build`; `pnpm audit --prod` reported no known advisories. These are preliminary results; the revised patch's Postgres/Redis integration and offline browser demo must also pass. No live provider, actual microphone or production environment was tested.
+
+## Try the local candidate demo
+
+With Git, Docker Desktop or Docker Engine with Compose v2, `make`, and `openssl` installed, run this from the AI Interview repository. Choose a destination that does not already exist:
+
+```sh
+bash scripts/prepare_candidate_demo.sh ../euron-demo --start
+```
+
+When startup finishes, open `http://localhost:3550` and use the demo credentials printed by the script. It downloads a separate pinned checkout and applies the candidate dependency patch; it does not install the application into this repository. The local demo uses deterministic stand-ins and **does not provide real AI evaluation**. Use synthetic data. The upstream demo seed enables optional proctoring for one sample user, so check the setting before using the camera. The demo stack downloads images and can take several minutes to build.
+
+To prepare the checkout without starting containers, omit `--start`.
 
 Apply the patch only in a disposable checkout:
 

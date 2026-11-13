@@ -5,6 +5,7 @@ on:
     paths:
       - patches/euron/**
       - scripts/diagnose_euron_signup.py
+      - scripts/prepare_candidate_demo.sh
       - .github/workflows/euron-zod-verification.yml
   workflow_dispatch:
 
@@ -57,6 +58,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Exercise candidate checkout helper
+        working-directory: project
+        run: bash scripts/prepare_candidate_demo.sh "$RUNNER_TEMP/euron-candidate"
       - run: git apply --unidiff-zero --check ../project/patches/euron/0001-zod4.patch && git apply --unidiff-zero ../project/patches/euron/0001-zod4.patch
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --prod

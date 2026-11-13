@@ -5,6 +5,16 @@ index fca7096..af64aba 100644
 @@ -45 +45 @@
 -    "zod": "^3.25.76"
 +    "zod": "^4.6.7"
+diff --git a/apps/api/src/services/account.service.ts b/apps/api/src/services/account.service.ts
+index c17efe7..32352a3 100644
+--- a/apps/api/src/services/account.service.ts
++++ b/apps/api/src/services/account.service.ts
+@@ -164,0 +165,3 @@ export async function exportAccount(actor: Actor, res: Response): Promise<void>
++  // Record access before sending any data: an audit failure must not result in
++  // a successful unaudited export. A disconnected transfer is still an attempt.
++  await audit({ actorId: user.id, action: "user.export", entityType: "user", entityId: user.id });
+@@ -187 +189,0 @@ export async function exportAccount(actor: Actor, res: Response): Promise<void>
+-  await audit({ actorId: user.id, action: "user.export", entityType: "user", entityId: user.id });
 diff --git a/apps/web/package.json b/apps/web/package.json
 index 3b55839..94267cf 100644
 --- a/apps/web/package.json
