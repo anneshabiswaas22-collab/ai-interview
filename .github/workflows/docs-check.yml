@@ -1,0 +1,24 @@
+name: Documentation links
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.md"
+      - "scripts/check_docs.py"
+      - ".github/workflows/docs-check.yml"
+  pull_request:
+    paths:
+      - "**/*.md"
+      - "scripts/check_docs.py"
+      - ".github/workflows/docs-check.yml"
+
+jobs:
+  check-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check repository-local Markdown links
+        run: python3 scripts/check_docs.py

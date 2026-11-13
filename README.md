@@ -8,6 +8,8 @@
 
 ## Start here
 
+**Quick handoff:** [Complete project context](docs/PROJECT_CONTEXT.md) · [Codex kickoff prompt](docs/CODEX_KICKOFF.md) · [First task: issue #1](https://github.com/anneshabiswaas22-collab/ai-interview/issues/1) · [All issues](https://github.com/anneshabiswaas22-collab/ai-interview/issues)
+
 | You are… | Read these first |
 | --- | --- |
 | A new developer | [Vision](docs/VISION.md) → [Requirements](docs/PRODUCT_REQUIREMENTS.md) → [Architecture](docs/ARCHITECTURE.md) → [Developer setup](docs/DEVELOPER_SETUP.md) |
@@ -57,7 +59,7 @@ See [feature inventory](docs/FEATURE_MATRIX.md) and [technical architecture](doc
 
 | Phase | Goal | Status |
 | --- | --- | --- |
-| 0 | Document vision, architecture and contributing workflow | Documentation underway |
+| 0 | Document vision, architecture and contributing workflow | Initial documentation published |
 | 1 | Audit Euron and alternatives; verify licensing, tests and actual working features | Not started |
 | 2 | Ship end-to-end text-based candidate practice and feedback | Not started |
 | 3 | Production-oriented voice, coding, whiteboard and replay | Not started |
@@ -84,7 +86,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [developer setup guide](docs/DEV
 - **Product:** [Vision](docs/VISION.md), [Requirements](docs/PRODUCT_REQUIREMENTS.md), [Competitor benchmarks](docs/COMPETITOR_BENCHMARKS.md), [Feature matrix](docs/FEATURE_MATRIX.md)
 - **Engineering:** [Architecture](docs/ARCHITECTURE.md), [Interview engine](docs/INTERVIEW_ENGINE.md), [API contracts](docs/API_CONTRACTS.md), [Data model](docs/DATA_MODEL.md), [Voice/coding/whiteboard](docs/VOICE_CODING_WHITEBOARD.md)
 - **AI/quality:** [Model & fine-tuning](docs/MODEL_AND_FINETUNING.md), [Testing & evaluation](docs/QUALITY_AND_TESTING.md)
-- **Execution:** [Roadmap](docs/ROADMAP.md), [Reuse vs build](docs/REUSE_VS_BUILD.md), [Credit efficiency](docs/CREDIT_OPTIMIZATION.md), [Developer setup](docs/DEVELOPER_SETUP.md), [AI agent instructions](AGENTS.md)
+- **Execution:** [Project context](docs/PROJECT_CONTEXT.md), [Codex kickoff](docs/CODEX_KICKOFF.md), [Pinned upstream refs](docs/UPSTREAM_SOURCES.md), [Operations](docs/OPERATIONS_DEPLOYMENT.md), [Roadmap](docs/ROADMAP.md), [Reuse vs build](docs/REUSE_VS_BUILD.md), [Credit efficiency](docs/CREDIT_OPTIMIZATION.md), [Developer setup](docs/DEVELOPER_SETUP.md), [AI agent instructions](AGENTS.md)
 - **Governance:** [Security & privacy](docs/SECURITY_AND_PRIVACY.md), [License audit](docs/LICENSE_AUDIT.md), [Architecture decisions](docs/decisions/0001-monorepo-reuse-first.md)
 
 _This is a project blueprint, not a claim of an already deployed product. Last reviewed: 2026-11-13._
