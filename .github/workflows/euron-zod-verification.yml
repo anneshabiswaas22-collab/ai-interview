@@ -1,0 +1,112 @@
+name: Verify candidate Euron Zod upgrade
+
+on:
+  pull_request:
+    paths:
+      - patches/euron/**
+      - scripts/diagnose_euron_signup.py
+      - scripts/prepare_candidate_demo.sh
+      - .github/workflows/euron-zod-verification.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: euron
+
+jobs:
+  checks:
+    name: Advisory, unit, build and database tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16.12-alpine
+        env:
+          POSTGRES_USER: conv
+          POSTGRES_PASSWORD: conv
+          POSTGRES_DB: conv
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U conv -d conv"
+          --health-interval 3s --health-timeout 3s --health-retries 30
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 3s --health-timeout 3s --health-retries 30
+    env:
+      TEST_DATABASE_URL: postgres://conv:conv@localhost:5432/conv_test
+      TEST_REDIS_URL: redis://localhost:6379/1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: project
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: euron-sde-team/euron-open-real-time-ai-conversation-system
+          ref: 216a8fc52a055587f436f2446f1a80b6868bd14a
+          path: euron
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Exercise candidate checkout helper
+        working-directory: project
+        run: bash scripts/prepare_candidate_demo.sh "$RUNNER_TEMP/euron-candidate"
+      - run: git apply --unidiff-zero --check ../project/patches/euron/0001-zod4.patch && git apply --unidiff-zero ../project/patches/euron/0001-zod4.patch
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --prod
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm test:integration
+      - run: pnpm build
+      - run: pnpm openapi --check
+
+  browser:
+    name: Patched offline browser demo
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: project
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: euron-sde-team/euron-open-real-time-ai-conversation-system
+          ref: 216a8fc52a055587f436f2446f1a80b6868bd14a
+          path: euron
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: docker/setup-buildx-action@v3
+      - run: git apply --unidiff-zero --check ../project/patches/euron/0001-zod4.patch && git apply --unidiff-zero ../project/patches/euron/0001-zod4.patch
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: make up
+      - run: make demo
+      - name: Run browser suite with verification-aware signup test
+        run: |
+          python3 ../project/scripts/diagnose_euron_signup.py
+          pnpm e2e
+      - name: Collect browser error context
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patched-euron-browser-errors
+          path: euron/e2e/.results/**/error-context.md
+          if-no-files-found: warn
