@@ -1,12 +1,14 @@
 # AI Interview — Product and Engineering Handbook
 
-> **Status (13 November 2026): Planning and architecture documentation only. No application code has been imported or implemented in this repository.**
+> **Status (13 November 2026): Specifications plus an experimental, dependency-free interview-session core with passing unit tests. No full application has been imported or deployed.**
 >
 > **Mission:** Build an independently branded, self-hostable, commercial-grade AI interviewing platform that can compete with leading interview-preparation products in experience, technical depth, feedback quality, and cost efficiency. Later, support carefully governed employer assessment workflows.
 
 **This repository is the source of truth. A developer or AI coding agent should be able to start here without reading any previous chat.**
 
 ## Start here
+
+**Begin implementing:** [29-step ordered checklist](docs/IMPLEMENTATION_CHECKLIST.md) · [Verified implementation status](docs/IMPLEMENTATION_STATUS.md) · [First working code](packages/interview-core/README.md) · [Codex blocker handoff](docs/CODEX_BLOCKERS.md)
 
 **Quick handoff:** [Complete project context](docs/PROJECT_CONTEXT.md) · [Codex kickoff prompt](docs/CODEX_KICKOFF.md) · [First task: issue #1](https://github.com/anneshabiswaas22-collab/ai-interview/issues/1) · [All issues](https://github.com/anneshabiswaas22-collab/ai-interview/issues)
 
@@ -55,11 +57,15 @@ The solution should eventually provide:
 
 See [feature inventory](docs/FEATURE_MATRIX.md) and [technical architecture](docs/ARCHITECTURE.md).
 
+## First executable engineering slice
+
+The dependency-free [interview-core package](packages/interview-core/README.md) implements a small interview-session policy (bounded questions, probes, idempotent answer events, timeouts and evidence validation). Its [unit-test workflow](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43469480724) passed. It is **not** the candidate-facing application and has no authentication, LLM, database or voice service. Reconcile this core with the Euron foundation after its runtime audit rather than creating two competing engines.
+
 ## Development phases and truthful status
 
 | Phase | Goal | Status |
 | --- | --- | --- |
-| 0 | Document vision, architecture and contributing workflow | Initial documentation published |
+| 0 | Document vision, architecture and contributing workflow | Complete (documentation) |
 | 1 | Audit Euron and alternatives; verify licensing, tests and actual working features | Not started |
 | 2 | Ship end-to-end text-based candidate practice and feedback | Not started |
 | 3 | Production-oriented voice, coding, whiteboard and replay | Not started |

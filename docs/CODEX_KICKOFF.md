@@ -10,7 +10,7 @@ This prompt is optional convenience text. The **source of truth** is the checked
 >
 > **FIRST: Read** README.md, AGENTS.md, docs/PROJECT_CONTEXT.md, docs/VISION.md, docs/ROADMAP.md, docs/ARCHITECTURE.md, docs/REUSE_VS_BUILD.md, docs/LICENSE_AUDIT.md, docs/FEATURE_MATRIX.md and CONTRIBUTING.md. Do not ask me to repeat the history of this project; it is documented here.
 >
-> **Your immediate task is GitHub issue #1 — audit the Euron foundation.** Our own repository is initially only documentation, not a running product. Inspect the public Euron code at a pinned SHA, run its tests and offline demo as resources allow, distinguish real provider execution from mocks and check architecture, security and commercial licensing. Inspect DeepInterview and GrillKit only as needed for the compare/reuse recommendation.
+> **Your immediate task is GitHub issue #1 — audit the Euron foundation.** Our repository contains documentation plus a small tested interview-core module, not a running candidate product. Inspect the public Euron code at a pinned SHA, run its tests and offline demo as resources allow, distinguish real provider execution from mocks and check architecture, security and commercial licensing. Inspect DeepInterview and GrillKit only as needed for the compare/reuse recommendation.
 >
 > Propose whether to adopt Euron as the foundation or build a smaller clean architecture with precise evidence. Update the upstream source audit, feature matrix and ADR. Avoid copying the entire upstream repository until the audit proves a safe, maintainable path.
 >

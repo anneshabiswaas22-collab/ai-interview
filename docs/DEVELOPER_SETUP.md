@@ -1,6 +1,6 @@
 # Developer Onboarding and Local Setup
 
-**CURRENT STATE:** This repository is documentation-only. There is no application package to install, no running server, no model checkpoint, no database migrations and no completed tests in this repository yet. Commands for Euron below are upstream audit instructions, not proof they work here.
+**CURRENT STATE:** This repository includes documentation plus a dependency-free interview-core module. No candidate-facing application, model checkpoint, database migrations or production deployment exists. The core unit suite has passed on GitHub Actions. Commands for Euron below are upstream audit instructions, not proof they work here.
 
 ## Step 1 — Obtain the source
 
@@ -11,6 +11,16 @@ git status
 ```
 
 Read `README.md`, `AGENTS.md`, `docs/VISION.md`, `docs/ROADMAP.md`, `docs/REUSE_VS_BUILD.md`, `docs/LICENSE_AUDIT.md`.
+
+## Run the first executable unit suite
+
+Requires Node.js 22 or newer, no install or API keys:
+
+```bash
+node --test packages/interview-core/test/*.test.mjs
+```
+
+This verifies session policy only, not an application or AI provider.
 
 ## Step 2 — Review the first milestone
 

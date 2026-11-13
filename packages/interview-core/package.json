@@ -1,0 +1,14 @@
+{
+  "name": "@ai-interview/interview-core",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dependency-free interview session policy and transcript evidence prototype",
+  "exports": "./index.mjs",
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
