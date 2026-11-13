@@ -54,7 +54,8 @@
 - [x] Initial requirements, architecture, license/reuse documents, developer instructions and 10 issues published.
 - [x] Upstream repository sources inspected through GitHub API; initial source files and stub voice behavior found.
 - [x] Standalone dependency-free interview-core prototype passed [GitHub Actions unit tests](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43469480724); **not** completion of product milestones.
-- [ ] Euron full runtime evaluation (blocked in this terminal: GitHub DNS and Docker; see [Codex handoff](CODEX_BLOCKERS.md)).
+- [x] Pinned Euron and DeepInterview source checkouts and deterministic stub smoke; see the [runtime audit](audits/euron-runtime.md).
+- [ ] Euron full runtime evaluation and adoption gate (Docker/database unavailable locally; inspect pinned CI results and the remaining security/licensing findings).
 
 ## Development gate rules
 
