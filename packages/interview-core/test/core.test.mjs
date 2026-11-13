@@ -58,9 +58,10 @@ test("moves to next question and completes only after final answer", () => {
 
 test("duplicate request id does not duplicate an answer or consume another probe", () => {
   const once = probe(start(), "Database fallback", "req-1");
-  const twice = probe(once, "different content should be ignored", "req-1");
+  const twice = probe(once, "Database fallback", "req-1");
   assert.strictEqual(twice, once);
   assert.equal(twice.events.length, 3);
+  fails(() => probe(once, "Different content", "req-1"), "IDEMPOTENCY_CONFLICT");
 });
 
 test("rejects unauthorized mutation even on an idempotent retry", () => {
@@ -97,6 +98,23 @@ test("expired interview closes and does not record a late answer", () => {
   assert.equal(s.status, "COMPLETED");
   assert.equal(s.events.length, 2);
   assert.equal(s.events.at(-1).reason, "time_expired");
+  const retry = submitAnswer(s, { actorId: "alice", requestId: "late", text: "Answer", now: t0 + 301_000, choice: { kind: "next" } });
+  assert.strictEqual(retry, s);
+  fails(() => submitAnswer(s, { actorId: "alice", requestId: "late", text: "Different", now: t0 + 301_000, choice: { kind: "next" } }), "IDEMPOTENCY_CONFLICT");
+});
+
+test("expired skip retries are idempotent and another operation with the same ID conflicts", () => {
+  const expired = skipQuestion(start(), { actorId: "alice", requestId: "late-skip", now: t0 + 300_000 });
+  assert.equal(expired.status, "COMPLETED");
+  assert.strictEqual(skipQuestion(expired, { actorId: "alice", requestId: "late-skip", now: t0 + 301_000 }), expired);
+  fails(() => submitAnswer(expired, { actorId: "alice", requestId: "late-skip", text: "answer", now: t0 + 301_000, choice: { kind: "next" } }), "IDEMPOTENCY_CONFLICT");
+});
+
+test("an old snapshot without fingerprints fails closed on an unverifiable retry", () => {
+  const old = { ...start(), processedRequestIds: ["legacy"], processedRequests: undefined };
+  fails(() => skipQuestion(old, { actorId: "alice", requestId: "legacy", now: t0 + 1000 }), "IDEMPOTENCY_UNVERIFIABLE");
+  const moved = skipQuestion(old, { actorId: "alice", requestId: "new", now: t0 + 1000 });
+  assert.equal(moved.currentIndex, 1);
 });
 
 test("rejects time going backwards, supports candidate finish and prevents duplicate completion", () => {
