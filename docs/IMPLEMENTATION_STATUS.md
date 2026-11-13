@@ -1,5 +1,7 @@
 # Implementation Status — 2026-11-13
 
+**2026-11-14 update:** The previously blocked pinned upstream checkouts now work. The [Euron runtime audit](audits/euron-runtime.md) records source findings, a deterministic stub smoke and remaining runtime/security gates. A separate pinned-source CI workflow can test the upstream build, database integration and offline browser demo; inspect its actual results before marking those gates complete. No application foundation has been imported or approved yet.
+
 **main** initially held documentation and project issues only. First executable change is on branch `feat/bootstrap-interview-core`.
 
 ## Source inspection completed

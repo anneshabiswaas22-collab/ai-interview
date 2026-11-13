@@ -1,5 +1,7 @@
 # Codex Handoff — Immediate Blockers
 
+> Update 2026-11-14: Git checkout now succeeds, and the Euron stub HTTP smoke passes. Docker and local database services are still absent. See [the current runtime audit](audits/euron-runtime.md) and inspect the pinned CI workflow results; the historical DNS error below no longer describes the current checkout.
+
 ## B1: Euron checkout and runtime tests
 
 **Observed:** GitHub connector can read source and write to this repository. Terminal command `git ls-remote https://github.com/euron-sde-team/euron-open-real-time-ai-conversation-system.git HEAD` failed with `Could not resolve host: github.com`. The execution sandbox has Node 22 and TypeScript but no Docker executable.
