@@ -1,0 +1,49 @@
+# Secrets (commit only sample placeholders)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# Dependencies and builds
+node_modules/
+.pnpm-store/
+dist/
+build/
+.next/
+coverage/
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+*.pyc
+
+# Local DB, generated models, training outputs
+*.db
+*.sqlite
+*.sqlite3
+checkpoints/
+models/
+outputs/
+wandb/
+ml/runs/
+*.safetensors
+*.gguf
+*.pt
+*.pth
+
+# Candidate/private data and recordings
+data/private/
+uploads/
+recordings/
+transcripts/private/
+*.wav
+*.mp3
+*.mp4
+
+# Misc
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/settings.json
