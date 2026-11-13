@@ -7,7 +7,7 @@ Owner priority: **stop using Codex credits to reimplement functionality already 
 1. Name one **user-visible outcome** and one reproducible acceptance test.
 2. Check this repository's [feature matrix](FEATURE_MATRIX.md) and recent commits/PRs.
 3. Inspect relevant upstream feature, license, dependencies and concrete integration examples.
-4. Choose: \`keep existing\`, \`install package\`, \`integrate separate service\`, \`adapt a small licensed module\`, or \`build original\`.
+4. Choose: `keep existing`, `install package`, `integrate separate service`, `adapt a small licensed module`, or `build original`.
 5. Estimate change radius, model/cloud service cost and risk of duplicated infrastructure.
 6. Ask the agent to produce a short plan, then a **small working PR**, not a complete rebuild.
 7. Stop and measure before a new provider or fine-tuning stage.
@@ -42,7 +42,7 @@ Owner priority: **stop using Codex credits to reimplement functionality already 
 
 Copy into an issue before coding:
 
-\`\`\`text
+```text
 Feature:
 Existing implementation / tests:
 User benefit:
@@ -54,7 +54,7 @@ Acceptance steps:
 What not to change:
 Estimated external cost (if any):
 Rollback and metrics:
-\`\`\`
+```
 
 ## Agent task example
 

@@ -4,13 +4,13 @@
 
 ## Step 1 — Obtain the source
 
-\`\`\`bash
+```bash
 git clone https://github.com/anneshabiswaas22-collab/ai-interview.git
 cd ai-interview
 git status
-\`\`\`
+```
 
-Read \`README.md\`, \`AGENTS.md\`, \`docs/VISION.md\`, \`docs/ROADMAP.md\`, \`docs/REUSE_VS_BUILD.md\`, \`docs/LICENSE_AUDIT.md\`.
+Read `README.md`, `AGENTS.md`, `docs/VISION.md`, `docs/ROADMAP.md`, `docs/REUSE_VS_BUILD.md`, `docs/LICENSE_AUDIT.md`.
 
 ## Step 2 — Review the first milestone
 
@@ -23,20 +23,20 @@ Pin their commit SHAs, read README/license, inspect whether the claimed feature 
 
 ## Step 3 — Upstream audit sample (not our app setup)
 
-\`\`\`bash
+```bash
 git clone https://github.com/euron-sde-team/euron-open-real-time-ai-conversation-system.git
 cd euron-open-real-time-ai-conversation-system
 git rev-parse HEAD
 git status
 # Read upstream README and Makefile before executing install/demo commands.
 # Run its documented tests in an isolated container or local environment.
-\`\`\`
+```
 
 Do not copy the Euron repository into this GitHub repo until the PR documents licensing, actual runtime results, dependencies, security risks and a proposed migration plan.
 
 ## Step 4 — Future local environment, after foundation accepted
 
-Expected tools (confirm versions with chosen upstream): Node.js/pnpm, Python for ML/voice services, Docker Compose, PostgreSQL, Redis and suitable editor. Training GPU is **not** required for everyday app development. Establish \`.env.example\` with fake/sample placeholders only.
+Expected tools (confirm versions with chosen upstream): Node.js/pnpm, Python for ML/voice services, Docker Compose, PostgreSQL, Redis and suitable editor. Training GPU is **not** required for everyday app development. Establish `.env.example` with fake/sample placeholders only.
 
 Once runnable code is imported, this guide must be updated with:
 1. Pinned versions and prerequisites.
@@ -47,7 +47,7 @@ Once runnable code is imported, this guide must be updated with:
 6. Troubleshooting and observability.
 7. Exact launch and production deploy limitations.
 
-Until those are present, **do not claim \`npm run dev\`, \`pnpm dev\` or \`docker compose up\` works in this repository.**
+Until those are present, **do not claim `npm run dev`, `pnpm dev` or `docker compose up` works in this repository.**
 
 ## Contributing safely
 
