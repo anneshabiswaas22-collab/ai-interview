@@ -1,6 +1,6 @@
 # Implementation Status — 2026-11-13
 
-**2026-11-14 update:** The previously blocked pinned upstream checkouts now work. The [Euron runtime audit](audits/euron-runtime.md) records source findings, a deterministic stub smoke and remaining runtime/security gates. A separate pinned-source CI workflow can test the upstream build, database integration and offline browser demo; inspect its actual results before marking those gates complete. No application foundation has been imported or approved yet.
+**2026-11-14 update:** The pinned Euron checkout built successfully and passed 232 unit and 150 Postgres/Redis integration tests on GitHub Actions. Its offline browser suite passed seven tests and failed the signup test; its dependency audit reported one high Zod advisory. The [runtime audit](audits/euron-runtime.md) records details, a separate diagnostic and remaining security gates. No application foundation has been imported or approved yet.
 
 **main** initially held documentation and project issues only. First executable change is on branch `feat/bootstrap-interview-core`.
 
