@@ -4,10 +4,10 @@
 
 ## Authentication, ownership and conventions
 
-- Every candidate endpoint requires authenticated identity; never trust a client-supplied \`user_id\`.
-- Use \`/api/v1\` prefix, UUID/ULID identifiers, ISO-8601 UTC timestamps, pagination and explicit schema versioning.
-- Send \`Idempotency-Key\` on session creation, event append, end and billing-sensitive calls.
-- Standard errors: \`{ "error": { "code": "VALIDATION_ERROR", "message": "...", "request_id": "..." } }\`.
+- Every candidate endpoint requires authenticated identity; never trust a client-supplied `user_id`.
+- Use `/api/v1` prefix, UUID/ULID identifiers, ISO-8601 UTC timestamps, pagination and explicit schema versioning.
+- Send `Idempotency-Key` on session creation, event append, end and billing-sensitive calls.
+- Standard errors: `{ "error": { "code": "VALIDATION_ERROR", "message": "...", "request_id": "..." } }`.
 - Typed status codes: 400 invalid, 401 unauthenticated, 403 unauthorized, 404 not found (without leaking existence), 409 state conflict, 429 quota, 503 provider unavailable.
 
 ## Candidate endpoints — proposed
@@ -33,7 +33,7 @@
 
 ## Example session creation
 
-\`\`\`json
+```json
 {
   "role": "Backend Software Engineer",
   "seniority": "mid",
@@ -48,11 +48,11 @@
     "model_training": false
   }
 }
-\`\`\`
+```
 
 ## Example event envelope
 
-\`\`\`json
+```json
 {
   "event_id": "evt-uuid",
   "session_id": "session-uuid",
@@ -64,22 +64,22 @@
     "question_id": "q-003"
   }
 }
-\`\`\`
+```
 
-Server assigns canonical \`sequence\` and \`occurred_at\`; the client sends an idempotency token, not authoritative ordering, timestamps or scoring.
+Server assigns canonical `sequence` and `occurred_at`; the client sends an idempotency token, not authoritative ordering, timestamps or scoring.
 
 ## Interview event kinds
 
-- \`interview.started\`, \`interview.paused\`, \`interview.resumed\`, \`interview.completed\`
-- \`interviewer.question\`, \`interviewer.follow_up\`
-- \`candidate.answer.partial\` (transient), \`candidate.answer.final\`, \`candidate.skip\`
-- \`code.run.requested\`, \`code.run.completed\`
-- \`whiteboard.snapshot.saved\`, \`voice.connection.changed\`
-- \`evaluation.started\`, \`evaluation.completed\`, \`evaluation.failed\`
+- `interview.started`, `interview.paused`, `interview.resumed`, `interview.completed`
+- `interviewer.question`, `interviewer.follow_up`
+- `candidate.answer.partial` (transient), `candidate.answer.final`, `candidate.skip`
+- `code.run.requested`, `code.run.completed`
+- `whiteboard.snapshot.saved`, `voice.connection.changed`
+- `evaluation.started`, `evaluation.completed`, `evaluation.failed`
 
 ## Report contract (conceptual)
 
-\`\`\`json
+```json
 {
   "session_id": "session-uuid",
   "rubric_version": "backend-mid-v1",
@@ -97,7 +97,7 @@ Server assigns canonical \`sequence\` and \`occurred_at\`; the client sends an i
   ],
   "disclaimer": "Practice feedback; not a validated hiring decision."
 }
-\`\`\`
+```
 
 Only evaluator service may write canonical scores. The endpoint enforces user ownership and redacts hidden rubrics and provider credentials.
 
@@ -105,5 +105,5 @@ Only evaluator service may write canonical scores. The endpoint enforces user ow
 
 - WebSocket/SSE for stream updates, heartbeat, backpressure and resume token; design with real voice provider.
 - Avoid storing every interim STT token indefinitely; retain final segments by policy.
-- Use optimistic concurrency \`version\` for whiteboard and session state.
+- Use optimistic concurrency `version` for whiteboard and session state.
 - All API changes require versioned docs, contract tests and updated typed clients.

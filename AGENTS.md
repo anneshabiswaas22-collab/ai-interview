@@ -58,6 +58,6 @@ Before spending meaningful reasoning or coding time:
 
 **Milestone 1: Source & runtime audit.** Confirm repo is docs-only; check upstream Euron at a pinned commit, license/test/build/demo; evaluate DeepInterview/GrillKit/components for selective reuse; record real feature statuses and produce an architecture decision. No big rewrite until gate passes.
 
-Document results and PR summary with: \`What changed\`, \`Commands executed\`, \`Passed/failed/skipped\`, \`Real vs mock\`, \`Licensing\`, \`Costs\`, \`Remaining issues\`.
+Document results and PR summary with: `What changed`, `Commands executed`, `Passed/failed/skipped`, `Real vs mock`, `Licensing`, `Costs`, `Remaining issues`.
 
 This is the owner's vision and continuity document. Never ask a developer to locate an old ChatGPT discussion before proceeding.

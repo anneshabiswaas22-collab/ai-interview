@@ -23,7 +23,7 @@ Good early contributions:
 ## 3. Development workflow
 
 1. Discuss large changes in an issue and architecture decision record (ADR).
-2. Create a branch named \`feat/<short-scope>\`, \`fix/<short-scope>\`, \`docs/<short-scope>\`, or \`audit/<short-scope>\`.
+2. Create a branch named `feat/<short-scope>`, `fix/<short-scope>`, `docs/<short-scope>`, or `audit/<short-scope>`.
 3. Make one coherent, reviewable change; avoid unrelated rewrites.
 4. Add tests and documentation; update the feature matrix truthfully.
 5. Use the PR template; include **commands actually run** and the observed results.

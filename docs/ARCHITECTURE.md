@@ -12,7 +12,7 @@
 
 ## High-level target
 
-\`\`\`mermaid
+```mermaid
 flowchart TB
   C[Candidate web app] --> API[Authenticated API / BFF]
   A[Admin web UX] --> API
@@ -33,7 +33,7 @@ flowchart TB
   API --> OBS[Redacted traces, logs & metrics]
   ORCH --> OBS
   EVA --> OBS
-\`\`\`
+```
 
 Diagram shows a target architecture, **not deployed services**.
 
@@ -41,7 +41,7 @@ Diagram shows a target architecture, **not deployed services**.
 
 Maintain/reshape after Euron audit; do not delete working upstream code simply to match folder names:
 
-\`\`\`text
+```text
 ai-interview/
   apps/
     web/                 # candidate and admin UI, Next.js or chosen framework
@@ -63,7 +63,7 @@ ai-interview/
   docs/                  # engineering source of truth
   tests/                 # E2E, integration, performance, adversarial
   AGENTS.md
-\`\`\`
+```
 
 Actual directories do not yet exist. Contributors should not claim they do.
 
@@ -75,7 +75,7 @@ Actual directories do not yet exist. Contributors should not claim they do.
 
 **Interview orchestrator:** pinned interview plan; choose next question/probe; max follow-ups and time budget; detect repetition; transition using typed state; retain explicit provenance for context. Candidate text is *untrusted content*, not a system instruction.
 
-**Model adapter:** providers exposed through versioned \`generateStructured\` / \`stream\` contracts; retries bounded; explicit timeout, tokens and unit costs; fail closed when provider unavailable. Do not introduce multiple orchestration frameworks without measured need.
+**Model adapter:** providers exposed through versioned `generateStructured` / `stream` contracts; retries bounded; explicit timeout, tokens and unit costs; fail closed when provider unavailable. Do not introduce multiple orchestration frameworks without measured need.
 
 **Evaluator:** operates outside the live interview turn loop, reads immutable events, scores competency rubrics and links evidence. Code correctness comes from sandbox tests, not AI opinion alone.
 
@@ -89,7 +89,7 @@ Actual directories do not yet exist. Contributors should not claim they do.
 
 ## Interview lifecycle
 
-\`\`\`mermaid
+```mermaid
 sequenceDiagram
   actor User as Candidate
   participant Web
@@ -114,7 +114,7 @@ sequenceDiagram
   API->>Score: Evaluate immutable transcript
   Score-->>API: Rubric scores and cited evidence
   API-->>Web: Report, coaching and history
-\`\`\`
+```
 
 ## Security boundaries
 

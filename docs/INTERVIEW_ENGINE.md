@@ -8,7 +8,7 @@ A successful interviewer does not merely ask a static list of questions. It prep
 
 ## Finite state machine
 
-\`\`\`mermaid
+```mermaid
 stateDiagram-v2
   [*] --> DRAFT
   DRAFT --> PLANNED: validate setup + build plan
@@ -28,17 +28,17 @@ stateDiagram-v2
   PAUSED --> WAIT: valid resume
   PAUSED --> CANCELED: expired / canceled
   COMPLETED --> [*]
-\`\`\`
+```
 
 Implementation must handle edge cases: duplicate events, late STT revisions, aborted streams, explicit skip, silence, user asks for clarification, out-of-time and provider errors. State transitions are server-authoritative.
 
 ## Plan object (conceptual)
 
-- \`interview_id\`, \`user_id\`, \`rubric_version\`, \`plan_version\`
-- \`role\`, \`seniority\`, \`focus_areas\`, \`duration_seconds\`
-- \`language\`, \`modality\` (text/voice), \`consent_scope\`
-- \`questions[]\`: competency, source/provenance, prompt, maximum probes, time allocation, difficulty, private rubric
-- \`requirements\`: accessibility settings, max token/voice budgets, prohibited disclosures
+- `interview_id`, `user_id`, `rubric_version`, `plan_version`
+- `role`, `seniority`, `focus_areas`, `duration_seconds`
+- `language`, `modality` (text/voice), `consent_scope`
+- `questions[]`: competency, source/provenance, prompt, maximum probes, time allocation, difficulty, private rubric
+- `requirements`: accessibility settings, max token/voice budgets, prohibited disclosures
 
 Do not place private rubric or system prompts in browser responses.
 

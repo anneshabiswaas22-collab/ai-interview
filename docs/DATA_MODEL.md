@@ -25,7 +25,7 @@
 
 ## Conceptual relationships
 
-\`\`\`mermaid
+```mermaid
 erDiagram
   USERS ||--o{ INTERVIEWS : starts
   USERS ||--o{ SOURCE_DOCUMENTS : owns
@@ -37,7 +37,7 @@ erDiagram
   INTERVIEWS ||--o{ REPORTS : produces
   INTERVIEWS ||--o{ PROVIDER_USAGE : meters
   USERS ||--o{ CONSENT_RECORDS : grants
-\`\`\`
+```
 
 ## Retention policy — proposed and requiring review
 
@@ -53,8 +53,8 @@ Do not hardcode numeric retention durations before policy/legal review; build pe
 
 ## Database integrity constraints
 
-- \`interviews.user_id\` foreign key and indexed authorized lookup.
-- Unique \`(interview_id, sequence)\` and \`event_id\`; idempotent writes.
+- `interviews.user_id` foreign key and indexed authorized lookup.
+- Unique `(interview_id, sequence)` and `event_id`; idempotent writes.
 - Optimistic version control for session and whiteboard state.
 - References to immutable rubric/model/prompt versions in score and report.
 - Restrict delete cascades to proper user ownership and legal retention rules.

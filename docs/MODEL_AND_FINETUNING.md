@@ -23,7 +23,7 @@
 
 Store a structured scenario in JSONL; use model-specific chat templates at training time:
 
-\`\`\`json
+```json
 {
   "id": "backend-cache-001",
   "role": "backend_engineer",
@@ -37,7 +37,7 @@ Store a structured scenario in JSONL; use model-specific chat templates at train
   "skill": "adaptive_follow_up",
   "source": "original"
 }
-\`\`\`
+```
 
 Include strong, weak, partial, silent, adversarial, multilingual and clarification examples. Training targets should respect interviewer role, boundaries, latency and session budget.
 
@@ -73,9 +73,9 @@ Include strong, weak, partial, silent, adversarial, multilingual and clarificati
 
 ## Artifact targets
 
-\`ml/datasets/\`: samples, provenance and quality manifest (non-sensitive only).
-\`ml/training/\`: training configuration, reproducible script and Colab notebook.
-\`ml/evaluation/\`: fixture set, automatic checks, blinded human rating guide, model-comparison report.
-\`docs/model_cards/\`: checkpoint, intended uses, limits, hardware, license and results.
+`ml/datasets/`: samples, provenance and quality manifest (non-sensitive only).
+`ml/training/`: training configuration, reproducible script and Colab notebook.
+`ml/evaluation/`: fixture set, automatic checks, blinded human rating guide, model-comparison report.
+`docs/model_cards/`: checkpoint, intended uses, limits, hardware, license and results.
 
 See [quality and tests](QUALITY_AND_TESTING.md), [license audit](LICENSE_AUDIT.md).

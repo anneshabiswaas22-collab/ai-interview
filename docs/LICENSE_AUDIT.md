@@ -11,7 +11,7 @@
 | [Excalidraw](https://github.com/excalidraw/excalidraw) | MIT (metadata) | Embedded assets and any dependencies must also be reviewed |
 | [LiveKit Agents](https://github.com/livekit/agents) | Apache-2.0 (metadata) | Hosted LiveKit may have service fees |
 | [Promptfoo](https://github.com/promptfoo/promptfoo) | MIT (metadata) | Review dependencies and any separately distributed packages |
-| [Langfuse](https://github.com/langfuse/langfuse) | MIT core with separately licensed enterprise directories (**LICENSE file verified**) | Exclude/review enterprise paths such as \`ee/\`; core may be embedded/self-hosted under its license |
+| [Langfuse](https://github.com/langfuse/langfuse) | MIT core with separately licensed enterprise directories (**LICENSE file verified**) | Exclude/review enterprise paths such as `ee/`; core may be embedded/self-hosted under its license |
 | [Unsloth](https://github.com/unslothai/unsloth) | Apache-2.0 core (metadata) | Optional Studio UI/packages may have separate licenses; audit exact installs |
 | [vLLM](https://github.com/vllm-project/vllm) | Apache-2.0 (metadata) | Model **weights** have independent license terms |
 | [faster-whisper](https://github.com/SYSTRAN/faster-whisper) | Pending pinned-source verification | Speech checkpoint licenses and redistribution rights may differ |
@@ -23,7 +23,7 @@
 
 1. **Public GitHub != public domain.** Read each LICENSE and copyright/NOTICE.
 2. **MIT/Apache ≠ exclusive ownership.** We may own *new original contributions* subject to arrangements, not relicense upstream source as if authored by us.
-3. Keep a \`THIRD_PARTY_NOTICES.md\` when third-party code is actually imported. Do **not** invent attributions for components not yet present.
+3. Keep a `THIRD_PARTY_NOTICES.md` when third-party code is actually imported. Do **not** invent attributions for components not yet present.
 4. Record pinned commit SHA/tag, package source, license text, transitive dependency licenses and any generated assets.
 5. Do not import premium interview questions, private resumes, production API keys or scraped proprietary products.
 6. Vet model weights, datasets, voices and generated synthetic-data provenance independently.
