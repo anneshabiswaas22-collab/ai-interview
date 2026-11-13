@@ -53,7 +53,7 @@
 
 - [x] Initial requirements, architecture, license/reuse documents, developer instructions and 10 issues published.
 - [x] Upstream repository sources inspected through GitHub API; initial source files and stub voice behavior found.
-- [ ] Standalone interview-core tests to be verified in CI after initial branch push.
+- [x] Standalone dependency-free interview-core prototype passed [GitHub Actions unit tests](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43469480724); **not** completion of product milestones.
 - [ ] Euron full runtime evaluation (blocked in this terminal: GitHub DNS and Docker; see [Codex handoff](CODEX_BLOCKERS.md)).
 
 ## Development gate rules

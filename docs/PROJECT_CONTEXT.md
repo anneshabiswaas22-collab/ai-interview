@@ -29,7 +29,7 @@ The owner wants:
 
 ## Important truth as of 2026-11-13
 
-This GitHub repository was empty before the documentation and task tracker were initialized. **No Euron or other application source has been imported**, no production service is running, no live speech integration has been proven, and no model has been fine-tuned in this repository. Documents describe proposed behavior and upstream *claims* (not tested product features).
+This GitHub repository was empty before the documentation and task tracker were initialized. **No Euron or other application source has been imported**, no production service is running, no live speech integration has been proven, and no model has been fine-tuned in this repository. Documents describe proposed behavior and upstream *claims* (not tested product features). An experimental dependency-free [interview-core module](../packages/interview-core/README.md) with verified unit tests has since been committed on an implementation branch; it is not an application and does not replace the upstream audit.
 
 ## Technical vision
 

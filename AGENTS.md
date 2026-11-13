@@ -16,7 +16,7 @@ Build the repository owner's independently branded, commercial-grade AI intervie
 
 ## Non-negotiable workflow
 
-1. **Audit before implementation.** This repository is initially documentation only. Inspect Euron, DeepInterview and other proposed components; verify actual features, tests, license and dependency quality.
+1. **Audit before implementation.** This repository originally contained documentation only; it now includes an experimental standalone interview-core module. The actual candidate application is still unimplemented. Inspect Euron, DeepInterview and other proposed components; verify actual features, tests, license and dependency quality.
 2. **Do not blindly concatenate multiple repos.** Adopt one foundation only if audit justifies it. Reuse libraries via approved adapters/services, not extra whole apps.
 3. **One scoped issue → one small PR.** Write intended changes, acceptance tests, security impacts and a rollback path. Avoid all-in-one enormous tasks.
 4. **Prefer working components.** Inspect existing auth, parsing, editor, reports, queues and dashboards before rebuilding.
@@ -56,7 +56,9 @@ Before spending meaningful reasoning or coding time:
 
 ## First assigned action
 
-**Milestone 1: Source & runtime audit.** Confirm repo is docs-only; check upstream Euron at a pinned commit, license/test/build/demo; evaluate DeepInterview/GrillKit/components for selective reuse; record real feature statuses and produce an architecture decision. No big rewrite until gate passes.
+**Milestone 1: Source & runtime audit.** Confirm the repo currently has only specs plus a small interview policy core; check upstream Euron at a pinned commit, license/test/build/demo; evaluate DeepInterview/GrillKit/components for selective reuse; record real feature statuses and produce an architecture decision. No big rewrite until gate passes.
+
+Read [docs/IMPLEMENTATION_CHECKLIST.md](docs/IMPLEMENTATION_CHECKLIST.md) and [docs/CODEX_BLOCKERS.md](docs/CODEX_BLOCKERS.md). Run the core unit tests and avoid duplicating policy engines when selecting Euron.
 
 Document results and PR summary with: `What changed`, `Commands executed`, `Passed/failed/skipped`, `Real vs mock`, `Licensing`, `Costs`, `Remaining issues`.
 

@@ -1,6 +1,6 @@
 # Feature Inventory and Reuse Matrix
 
-> **CRITICAL STATUS:** This repository currently contains project documentation, not the listed applications. All product capabilities below are **planned**, regardless of what an upstream README claims. Review this table after importing or implementing real code.
+> **CRITICAL STATUS:** This repository contains documentation and a dependency-free **interview-core policy prototype**, not the end-user application. All product capabilities below remain **planned**, regardless of what an upstream README claims. Review this table after importing or implementing real code.
 
 Legend: P0 = first working interview; P1 = competitive candidate product; P2 = commercial/enterprise. Source statuses are **upstream claims pending audit**. Change this table only after tests/inspection.
 
@@ -28,6 +28,10 @@ Legend: P0 = first working interview; P1 = competitive candidate product; P2 = c
 | Subscription/payment | P2 | Approved payment provider SDK | Not implemented | Webhook/idempotency tests |
 | Recruiter/org accounts | P2 | New tenant/reviewer layer | Not implemented | Tenant isolation & access checks |
 | Human-reviewed hiring assessments | P2 | New validated assessment system | Not implemented | Assessment validity/fairness study |
+
+## Working policy prototype (not an application feature)
+
+The [interview-core module](../packages/interview-core/README.md) supplies a bounded, owner-scoped interview state policy and evidence-linked coaching report input validation, with passing Node tests. It does **not** provide real adaptive AI, user authentication, persistence, voice or product reports. After the Euron source audit, reuse whichever session state model is sound and avoid maintaining redundant engines.
 
 ## Avoid duplicate effort
 

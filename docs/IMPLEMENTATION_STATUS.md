@@ -15,7 +15,7 @@
 
 Local test command: `node --test packages/interview-core/test/*.test.mjs`.
 
-**Test status:** Pending first GitHub Actions result when this branch's workflow runs. Do not mark verified until that output is inspected.
+**Test status:** GitHub Actions [Interview core unit tests, run #1](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43469480724) completed successfully at commit `1bc284629403deb183f62171991592d9c3ff43f8`. This verifies pure-core tests, not production readiness.
 
 ## Current highest priority
 
