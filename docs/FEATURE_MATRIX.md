@@ -12,7 +12,7 @@ Legend: P0 = first working interview; P1 = competitive candidate product; P2 = c
 | Interview plan | P0 | Euron or DeepInterview concepts | Not implemented | Typed schema + fixtures |
 | Adaptive questioning | P0 | Own state machine; review DeepInterview | Not implemented | Follow-up scenario suite |
 | Text interview and transcript | P0 | Own API and event persistence | Not implemented | End-to-end saved interview |
-| Evidence-backed evaluator | P0 | Own rubric service and structured output | Not implemented | Expert-reviewed scoring samples |
+| Evidence-backed evaluator | P0 | Own rubric service and structured output | Partial prototype: evidence contract only; no evaluator service or app integration | Expert-reviewed scoring samples and integration |
 | Voice STT / TTS | P1 | LiveKit + configurable speech adapters | Not implemented | Real device + reconnection tests |
 | Streaming speech interruption | P1 | LiveKit Agents | Not implemented | Barge-in latency test |
 | Coding editor | P1 | Existing Euron editor or Monaco | Not implemented | Editor + autosave E2E |
