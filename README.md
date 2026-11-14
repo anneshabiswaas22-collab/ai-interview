@@ -1,6 +1,6 @@
 # AI Interview — Product and Engineering Handbook
 
-> **Status (13 November 2026): Specifications plus an experimental, dependency-free interview-session core with passing unit tests. No full application has been imported or deployed.**
+> **Status (14 November 2026): A candidate application foundation is included for local development and testing. It is not production-ready or deployed; its default demo uses simulated model responses and scores.**
 >
 > **Mission:** Build an independently branded, self-hostable, commercial-grade AI interviewing platform that can compete with leading interview-preparation products in experience, technical depth, feedback quality, and cost efficiency. Later, support carefully governed employer assessment workflows.
 
@@ -9,6 +9,8 @@
 ## Start here
 
 **Begin implementing:** [29-step ordered checklist](docs/IMPLEMENTATION_CHECKLIST.md) · [Verified implementation status](docs/IMPLEMENTATION_STATUS.md) · [First working code](packages/interview-core/README.md) · [Codex blocker handoff](docs/CODEX_BLOCKERS.md)
+
+**Run the development candidate:** [Setup and limitations](foundation/euron/README.md) · [Foundation decision](docs/decisions/0003-candidate-foundation.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 **Quick handoff:** [Complete project context](docs/PROJECT_CONTEXT.md) · [Codex kickoff prompt](docs/CODEX_KICKOFF.md) · [First task: issue #1](https://github.com/anneshabiswaas22-collab/ai-interview/issues/1) · [All issues](https://github.com/anneshabiswaas22-collab/ai-interview/issues)
 
@@ -41,9 +43,9 @@ See [benchmarks](docs/COMPETITOR_BENCHMARKS.md) for what to research and how to 
 
 **One modular monorepo; selective integration of mature open-source components.** Do not copy/merge all upstream applications wholesale.
 
-**Starting application candidate:** [Euron Open Conversation](https://github.com/euron-sde-team/euron-open-real-time-ai-conversation-system) (MIT), **pending a source/security/runtime audit before adoption**. Study [DeepInterview](https://github.com/ngoanpv/DeepInterview) for its interview-agent architecture. Use standard libraries/services only where justified: LiveKit Agents, Piston, Excalidraw, Unsloth, vLLM, Promptfoo and Langfuse.
+**Development foundation:** an adapted, pinned copy of [Euron Open Conversation](https://github.com/euron-sde-team/euron-open-real-time-ai-conversation-system) (MIT) is in [foundation/euron](foundation/euron/README.md). Its use is provisional and limited to development until the [release gates](docs/decisions/0003-candidate-foundation.md) pass. Study [DeepInterview](https://github.com/ngoanpv/DeepInterview) for its interview-agent architecture; integrate other components only where justified.
 
-Important: upstream READMEs describe capabilities, but *we have not yet verified them running in this repository*. Distinguish **verified**, **upstream claimed**, **planned**, **in progress**, and **implemented + tested** in every update.
+Important: a test of the upstream candidate is not automatically a test of the imported copy or real providers. Distinguish **verified**, **upstream claimed**, **planned**, **in progress**, and **implemented + tested** in every update.
 
 The solution should eventually provide:
 - Candidate web UX, secure accounts, interview scheduling/setup and history
@@ -66,14 +68,14 @@ The dependency-free [interview-core package](packages/interview-core/README.md) 
 | Phase | Goal | Status |
 | --- | --- | --- |
 | 0 | Document vision, architecture and contributing workflow | Complete (documentation) |
-| 1 | Audit Euron and alternatives; verify licensing, tests and actual working features | Not started |
-| 2 | Ship end-to-end text-based candidate practice and feedback | Not started |
+| 1 | Audit Euron and alternatives; verify licensing, tests and actual working features | In progress; candidate imported for development |
+| 2 | Ship end-to-end text-based candidate practice and feedback | In progress; real evaluation and authoritative transcripts remain |
 | 3 | Production-oriented voice, coding, whiteboard and replay | Not started |
 | 4 | LLM evaluations, custom dataset, QLoRA fine-tuning, self-hosted model | Not started |
 | 5 | Security, billing, operations and public beta | Not started |
 | 6 | Validated employer assessment capabilities | Future; gated |
 
-**Immediate next step:** [Milestone 1: repository audit](docs/ROADMAP.md). Do not write a new interview platform before auditing the foundation.
+**Immediate next step:** finish the imported foundation's clean-checkout checks, then implement server-authoritative session events and evidence-backed feedback using the existing app's auth and database.
 
 ## Contribution workflow
 
@@ -95,4 +97,4 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [developer setup guide](docs/DEV
 - **Execution:** [Project context](docs/PROJECT_CONTEXT.md), [Codex kickoff](docs/CODEX_KICKOFF.md), [Pinned upstream refs](docs/UPSTREAM_SOURCES.md), [Operations](docs/OPERATIONS_DEPLOYMENT.md), [Roadmap](docs/ROADMAP.md), [Reuse vs build](docs/REUSE_VS_BUILD.md), [Credit efficiency](docs/CREDIT_OPTIMIZATION.md), [Developer setup](docs/DEVELOPER_SETUP.md), [AI agent instructions](AGENTS.md)
 - **Governance:** [Security & privacy](docs/SECURITY_AND_PRIVACY.md), [License audit](docs/LICENSE_AUDIT.md), [Architecture decisions](docs/decisions/0001-monorepo-reuse-first.md)
 
-_This is a project blueprint, not a claim of an already deployed product. Last reviewed: 2026-11-13._
+_This development candidate is not a deployed product. Last reviewed: 2026-11-14._
