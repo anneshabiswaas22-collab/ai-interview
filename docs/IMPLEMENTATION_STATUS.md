@@ -10,7 +10,7 @@ The pinned patched upstream candidate previously passed [232 unit tests, 150 Pos
 
 A consent-based written practice mode is implemented on the existing application database and authentication. The server chooses questions from the frozen plan, stores the conversation, and serializes retries and concurrent answers. It exports and deletes its own records with the interview. The separate voice mode still uses browser-authored transcript data. Its [clean-checkout PostgreSQL/Redis integration and offline browser workflow](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43584618534) passed with simulated providers.
 
-Feedback still uses the existing model scorer; its quality, evidence links, and real-provider behavior have not been validated. The default local provider is simulated. A transactional score-dispatch outbox has been added for development; its clean database and browser checks must pass in the feature pull request. Planning and other jobs still use best-effort dispatch.
+Feedback still uses the existing model scorer; its quality, evidence links, and real-provider behavior have not been validated. New scores record their provider kind, and reports distinguish simulated demo feedback from configured-provider or unknown sources. The default local provider is simulated. A transactional score-dispatch outbox has been added for development; its clean database and browser checks must pass in the feature pull request. Planning and other jobs still use best-effort dispatch.
 
 ## Experimental policy core
 

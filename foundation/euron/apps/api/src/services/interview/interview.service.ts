@@ -299,6 +299,7 @@ export async function submitAnswer(actor: Actor, id: string, input: AnswerInput)
           status: "SCORING",
           domain_rating: null,
           communication_rating: null,
+          evaluator_kind: null,
           feedback: null,
           scored_at: null,
           // Versions must be distinct even if a candidate revises an answer in the same millisecond.

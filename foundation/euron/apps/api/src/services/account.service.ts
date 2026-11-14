@@ -131,7 +131,7 @@ function sections(userId: string): Section[] {
           db
             .selectFrom("answers as a")
             .innerJoin("interviews as i", "i.id", "a.interview_id")
-            .select(["a.id", "a.interview_id", "a.round_index", "a.question_index", "a.kind", "a.transcript", "a.code", "a.language", "a.status", "a.domain_rating", "a.communication_rating", "a.feedback", "a.created_at", "a.updated_at"])
+            .select(["a.id", "a.interview_id", "a.round_index", "a.question_index", "a.kind", "a.transcript", "a.code", "a.language", "a.status", "a.evaluator_kind", "a.domain_rating", "a.communication_rating", "a.feedback", "a.created_at", "a.updated_at"])
             .where("i.user_id", "=", userId),
           "a.id",
           c,

@@ -49,7 +49,8 @@ export function renderReportPdf(report: InterviewReport, appName: string): Promi
     doc.fillColor(INK).font("Helvetica-Bold").fontSize(11).text("Overall");
     doc.font("Helvetica").fontSize(10).fillColor(INK);
     doc.text(`Overall ${rating(report.overallRating)}    Domain knowledge ${rating(report.domainRating)}    Communication ${rating(report.communicationRating)}`);
-    doc.fillColor(MUTED).text(`${report.interview.answeredCount} of ${report.interview.questionCount} questions answered, ${Math.round(report.voiceSeconds / 60)} min of live voice`);
+    doc.fillColor(MUTED).text("Practice feedback can be inaccurate and is not a validated hiring decision.");
+    doc.text(`${report.interview.answeredCount} of ${report.interview.questionCount} questions answered, ${Math.round(report.voiceSeconds / 60)} min of live voice`);
     rule();
 
     doc.fillColor(INK).font("Helvetica-Bold").fontSize(11).text("Rounds");
@@ -75,6 +76,7 @@ export function renderReportPdf(report: InterviewReport, appName: string): Promi
       else if (a.status !== "SCORED") doc.text(a.status === "FAILED" ? "Could not be scored." : "Being scored.");
       else {
         doc.text(`Domain ${rating(a.domainRating)}, communication ${rating(a.communicationRating)}`);
+        doc.text(a.evaluationSource === "simulated" ? "Simulated demo feedback, not an assessment of ability." : a.evaluationSource === "configured_provider" ? "Provider-generated feedback." : "Feedback source unknown.");
         const f = a.feedback;
         if (f) {
           doc.fillColor(INK);

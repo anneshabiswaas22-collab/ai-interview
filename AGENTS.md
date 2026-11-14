@@ -56,7 +56,7 @@ Before spending meaningful reasoning or coding time:
 
 ## First assigned action
 
-**Current action:** verify the imported candidate on a clean checkout, then build server-authoritative session events and evidence-backed feedback using its existing auth and database. Continue the license, security and real-provider reviews before any public use.
+**Current action:** extend the development candidate with evidence-backed feedback and real-provider evaluation using its existing auth and database. A text-practice slice has server-owned events and passed offline checks; voice still needs authoritative handling. Continue the license, security and real-provider reviews before any public use.
 
 Read [docs/IMPLEMENTATION_CHECKLIST.md](docs/IMPLEMENTATION_CHECKLIST.md) and [docs/CODEX_BLOCKERS.md](docs/CODEX_BLOCKERS.md). Run the core unit tests and avoid duplicating policy engines when selecting Euron.
 
