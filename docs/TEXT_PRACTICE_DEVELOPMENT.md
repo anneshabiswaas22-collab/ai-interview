@@ -1,6 +1,6 @@
 # Text practice: development slice
 
-This slice adds written mock interviews to the existing development candidate. It reuses its accounts, stored interview plan, PostgreSQL database, scoring worker and reports. A consent checkbox is required before the first question; the candidate's answers are saved and may be sent to the configured text model. No audio, camera or code execution is involved. A code question is answered as a written explanation.
+This slice adds written mock interviews to the existing development candidate. It reuses its accounts, stored interview plan, PostgreSQL database, scoring worker and reports. A consent checkbox is required before the first question; the candidate's answers are saved and may be sent to the configured text model. No audio, camera or code execution is involved. Starting text practice disables the interview-specific proctoring flag, including when it was selected during planning. A code question is answered as a written explanation.
 
 ## Contract and security
 

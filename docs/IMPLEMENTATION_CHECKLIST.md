@@ -55,7 +55,7 @@
 - [x] Upstream repository sources inspected through GitHub API; initial source files and stub voice behavior found.
 - [x] Standalone dependency-free interview-core prototype passed [GitHub Actions unit tests](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43469480724); **not** completion of product milestones.
 - [x] Imported a development-only candidate application with upstream attribution; its [clean-checkout workflow](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43583803264) passed using simulated providers. Release gates remain separate requirements.
-- [ ] Consent-based text practice with server-owned question history and safe retries: implementation added; independent integration and browser checks remain required.
+- [x] Consent-based text practice with server-owned question history and safe retries passed [database and offline browser checks](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43584618534), using simulated providers. Full session-persistence and evaluation gates remain open.
 - [ ] Euron real-provider evaluation and production security/license review; local Docker is unavailable, so clean-checkout CI supplies offline runtime evidence.
 
 ## Development gate rules

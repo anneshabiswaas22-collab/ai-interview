@@ -106,7 +106,7 @@ export function ReportBody({ report }: { report: InterviewReport }) {
               ))}
             </ul>
           ) : (
-            <p className="mt-2 text-[14px] text-muted-foreground">Nothing was flagged: in view of the camera and on the tab throughout.</p>
+            <p className="mt-2 text-[14px] text-muted-foreground">No proctoring events were recorded. This does not establish what happened during the interview.</p>
           )}
         </section>
       ) : null}
