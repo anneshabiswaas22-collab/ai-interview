@@ -9,6 +9,7 @@ import { newId } from "../../core/ids";
 import { db } from "../../db/kysely";
 import type { DB } from "../../db/types";
 import { planOf } from "../../presenters/interview.presenter";
+import { dispatchScore, recordScoreDispatch } from "../../jobs/score-outbox";
 import { ownedInterview } from "./interview.service";
 import { nextPosition, questionAt } from "./plan";
 
@@ -89,7 +90,8 @@ export async function answerTextPractice(actor: Actor, interviewId: string, inpu
     await trx.updateTable("interviews").set(next ? { current_round: next.round, current_question: next.question, updated_at: now } : { status: "COMPLETED", completed_at: now, updated_at: now }).where("id", "=", interviewId).execute();
     await trx.updateTable("text_practice_sessions").set({ version: session.version + 1 }).where("interview_id", "=", interviewId).execute();
     await trx.insertInto("text_practice_requests").values({ interview_id: interviewId, request_id: input.requestId, fingerprint }).execute();
-    fx.job("interview.score", { answerId: answer.id, version: answer.updated_at.toISOString() });
+    await recordScoreDispatch(trx, answer.id, answer.updated_at);
+    fx.after(() => dispatchScore(answer.id));
     return state(trx, interviewId);
   });
 }

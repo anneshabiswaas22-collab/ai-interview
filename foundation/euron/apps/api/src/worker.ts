@@ -14,6 +14,7 @@ import { getHandler, QUEUES, closeQueues, enqueue, type JobName } from "./jobs/r
 
 const SCHEDULES: { name: JobName; everyMs: number }[] = [
   { name: "interview.sweep", everyMs: 60_000 },
+  { name: "interview.dispatch-scores", everyMs: 60_000 },
   { name: "maintenance.lift-suspensions", everyMs: 5 * 60_000 },
   { name: "maintenance.purge-accounts", everyMs: 6 * 3600_000 },
   { name: "maintenance.retention", everyMs: 6 * 3600_000 },

@@ -23,6 +23,12 @@ export function redisConnection(): Redis {
   return conn;
 }
 
+/** Queue producers fail fast so committed work can remain in the database outbox. */
+export function redisProducerConnection(url = config.REDIS_URL): Redis {
+  // The queue registry owns and closes this connection.
+  return new Redis(url, { ...base, maxRetriesPerRequest: 1, enableOfflineQueue: false, retryStrategy: (n) => (n <= 2 ? n * 100 : null) });
+}
+
 /** A fresh client owned by the caller (a BullMQ queue or worker). */
 export function newRedisClient(): Redis {
   const conn = new Redis(config.REDIS_URL, base);

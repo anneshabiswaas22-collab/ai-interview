@@ -36,6 +36,7 @@ Database integration tests need isolated PostgreSQL and Redis services and must 
 - The browser signup test follows email verification when required.
 - Default product name is `AI Interview`; the demo user's proctoring preference is off.
 - The sanitization scanner handles loopback and documentation IP ranges correctly across awk implementations, with a regression check.
+- Added a transactional dispatch outbox for answer scoring, with scheduled retry after queue outages. Planning and other job types are not covered.
 - Added a separate consent-based text-practice mode with server-selected questions, transactional history, safe answer retries and account export. Existing voice behavior remains a separate preview.
 - Documentation and marketing assets not needed by the application were excluded from this copy.
 

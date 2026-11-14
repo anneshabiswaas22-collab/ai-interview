@@ -9,7 +9,7 @@
 import { Queue, type JobsOptions } from "bullmq";
 import { config } from "../core/config";
 import { captureError, logger } from "../core/logger";
-import { redisConnection } from "../integrations/redis";
+import { redisProducerConnection } from "../integrations/redis";
 
 export const QUEUES = ["interview", "maintenance"] as const;
 export type QueueName = (typeof QUEUES)[number];
@@ -24,6 +24,8 @@ export interface JobDefinitions {
   "interview.score": { answerId: string; version: string };
   /** Hang up the OpenAI call of a closed live session. */
   "interview.hangup": { sessionId: string };
+  /** Recover committed scoring work not yet accepted by the queue. */
+  "interview.dispatch-scores": Record<string, never>;
   /** Expire live sessions the browser never ended. */
   "interview.sweep": Record<string, never>;
   "maintenance.lift-suspensions": Record<string, never>;
@@ -49,17 +51,20 @@ export function queueFor(name: JobName): QueueName {
   return name.split(".")[0] as QueueName;
 }
 
-const queues = new Map<QueueName, Queue>();
+const queues = new Map<QueueName, { queue: Queue; connection: ReturnType<typeof redisProducerConnection> }>();
 function queue(name: QueueName): Queue {
-  let q = queues.get(name);
-  if (!q) {
-    q = new Queue(name, {
-      connection: redisConnection(),
+  let entry = queues.get(name);
+  if (!entry) {
+    const connection = redisProducerConnection();
+    const q = new Queue(name, {
+      connection,
       defaultJobOptions: { attempts: 5, backoff: { type: "exponential", delay: 5_000 }, removeOnComplete: 1000, removeOnFail: 5000 },
     });
-    queues.set(name, q);
+    q.on("error", (err) => captureError(err, { where: "queue.connection", queue: name }));
+    entry = { queue: q, connection };
+    queues.set(name, entry);
   }
-  return q;
+  return entry.queue;
 }
 
 /** Per-job queue options. Jobs that carry personal data leave Redis as soon as they finish. */
@@ -83,10 +88,25 @@ export async function enqueue<N extends JobName>(name: N, data: JobDefinitions[N
     }
     return;
   }
-  await queue(queueFor(name)).add(name, data, { ...JOB_OPTIONS[name], ...opts });
+  const key = queueFor(name);
+  const q = queue(key);
+  try {
+    await q.add(name, data, { ...JOB_OPTIONS[name], ...opts });
+  } catch (err) {
+    // A producer connection ends after bounded retries. Recreate it on the next attempt.
+    const entry = queues.get(key);
+    if (entry?.queue === q) {
+      queues.delete(key);
+      entry.connection.disconnect();
+      await q.close().catch(() => undefined);
+    }
+    throw err;
+  }
 }
 
 export async function closeQueues(): Promise<void> {
-  await Promise.all([...queues.values()].map((q) => q.close()));
+  const entries = [...queues.values()];
   queues.clear();
+  for (const entry of entries) entry.connection.disconnect();
+  await Promise.all(entries.map((entry) => entry.queue.close()));
 }

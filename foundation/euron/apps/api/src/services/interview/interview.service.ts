@@ -16,6 +16,7 @@ import { newId } from "../../core/ids";
 import { db, type Executor } from "../../db/kysely";
 import { extractResumeText, sniffResume } from "../../integrations/extract";
 import { config } from "../../core/config";
+import { dispatchScore, recordScoreDispatch } from "../../jobs/score-outbox";
 import { planOf, toAnswer, toInterview, toInterviewSummary, type InterviewRow, type InterviewStats } from "../../presenters/interview.presenter";
 import { atKey, decodeTime, olderThan, timePage } from "../../repositories/keyset";
 import { findModel, realtimeProviderOf, resolveTextModel } from "../models.service";
@@ -300,7 +301,8 @@ export async function submitAnswer(actor: Actor, id: string, input: AnswerInput)
           communication_rating: null,
           feedback: null,
           scored_at: null,
-          updated_at: now,
+          // Versions must be distinct even if a candidate revises an answer in the same millisecond.
+          updated_at: sql<Date>`greatest(${now}::timestamptz, answers.updated_at + interval '1 millisecond')`,
         }),
       )
       .returningAll()
@@ -313,7 +315,8 @@ export async function submitAnswer(actor: Actor, id: string, input: AnswerInput)
         .where("id", "=", row.id)
         .execute();
     }
-    fx.job("interview.score", { answerId: answer.id, version: answer.updated_at.toISOString() });
+    await recordScoreDispatch(trx, answer.id, answer.updated_at);
+    fx.after(() => dispatchScore(answer.id));
     return toAnswer(answer);
   });
 }
