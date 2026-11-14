@@ -5,7 +5,7 @@ test("text practice asks for consent, survives a reload, and opens the report", 
   const user = await newUser(request);
   const iv = await jdInterview(request, user);
   const questions = ["Tell me about a project you built.", "How did you measure the result?"];
-  await as(request, user, "PATCH", `/interviews/${iv.id}`, { plan: [{ name: "Practice", focus: "", description: "", questions: questions.map((text) => ({ text, code: false, language: null })) }] });
+  await as(request, user, "PATCH", `/interviews/${iv.id}`, { proctoring: true, plan: [{ name: "Practice", focus: "", description: "", questions: questions.map((text) => ({ text, code: false, language: null })) }] });
   const page = await pageFor(browser, user, `/i/${iv.id}`);
   await page.getByRole("button", { name: "Practice by typing" }).click();
   await expect(page.getByRole("button", { name: "Start text practice" })).toBeDisabled();
@@ -23,5 +23,6 @@ test("text practice asks for consent, survives a reload, and opens the report", 
   await expect(page).toHaveURL(new RegExp(`/i/${iv.id}/report$`));
   await waitForScores(page);
   await expect(page.getByText(/^2 of 2 questions answered/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Proctoring" })).toHaveCount(0);
   await page.context().close();
 });

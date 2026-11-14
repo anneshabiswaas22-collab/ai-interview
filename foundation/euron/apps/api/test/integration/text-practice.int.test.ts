@@ -73,6 +73,17 @@ describe("text practice", () => {
     expect(current.body.events.filter((e: { kind: string }) => e.kind === "ANSWER")).toHaveLength(1);
   });
 
+  it("does not claim camera monitoring for text practice even when it was selected on the plan", async () => {
+    const user = await createUser();
+    const iv = await jdInterview(user, { proctoring: true });
+    expect(iv.proctoring).toBe(true);
+    await as(user).post(`/api/interviews/${iv.id}/text/start`).send({ consent: true }).expect(200);
+    const after = await as(user).get(`/api/interviews/${iv.id}`).expect(200);
+    expect(after.body.proctoring).toBe(false);
+    const report = await as(user).get(`/api/interviews/${iv.id}/report`).expect(200);
+    expect(report.body.proctoring).toBeNull();
+  });
+
   it("does not allow a voice interview to be converted to text", async () => {
     const { user, id } = await practice();
     await startLive(user, id);

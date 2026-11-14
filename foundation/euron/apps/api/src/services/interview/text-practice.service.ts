@@ -48,7 +48,7 @@ export async function startTextPractice(actor: Actor, interviewId: string): Prom
     if (!first) throw conflict("The interview plan is not ready", "PLAN_NOT_READY");
     await trx.insertInto("text_practice_sessions").values({ interview_id: interviewId }).execute();
     await trx.insertInto("text_practice_events").values({ id: newId(), interview_id: interviewId, sequence: 1, kind: "QUESTION", round_index: 0, question_index: 0, text: first.text }).execute();
-    await trx.updateTable("interviews").set({ status: "IN_PROGRESS", started_at: new Date(), updated_at: new Date(), current_round: 0, current_question: 0 }).where("id", "=", interviewId).execute();
+    await trx.updateTable("interviews").set({ status: "IN_PROGRESS", started_at: new Date(), updated_at: new Date(), current_round: 0, current_question: 0, proctoring: false }).where("id", "=", interviewId).execute();
     return state(trx, interviewId);
   });
 }
