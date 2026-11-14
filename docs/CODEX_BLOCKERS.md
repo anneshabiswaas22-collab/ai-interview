@@ -1,5 +1,7 @@
 # Codex Handoff — Immediate Blockers
 
+> Update 2026-11-14: The pinned candidate application is now available in `foundation/euron` for development. See [implementation status](IMPLEMENTATION_STATUS.md), [the foundation decision](decisions/0003-candidate-foundation.md) and [the runtime audit](audits/euron-runtime.md). The earlier checkout blocker below is historical; production security, authoritative transcripts and real-provider validation remain open.
+
 ## B1: Euron checkout and runtime tests
 
 **Observed:** GitHub connector can read source and write to this repository. Terminal command `git ls-remote https://github.com/euron-sde-team/euron-open-real-time-ai-conversation-system.git HEAD` failed with `Could not resolve host: github.com`. The execution sandbox has Node 22 and TypeScript but no Docker executable.

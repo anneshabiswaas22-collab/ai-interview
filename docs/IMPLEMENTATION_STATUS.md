@@ -1,26 +1,20 @@
-# Implementation Status — 2026-11-13
+# Implementation Status — 2026-11-14
 
-**main** initially held documentation and project issues only. First executable change is on branch `feat/bootstrap-interview-core`.
+## Development candidate
 
-## Source inspection completed
+An adapted Euron application is included in [foundation/euron](../foundation/euron/README.md). It contains the candidate UI, API, database migrations, job worker, provider adapters and local demo infrastructure. It is a development preview and has not been approved for production or deployed. See [ADR 0003](decisions/0003-candidate-foundation.md) and [third-party notices](../THIRD_PARTY_NOTICES.md).
 
-- GitHub API tree for pinned Euron source has 640 entries; Next.js frontend, Express API, provider adapters, test suites, migrations and demo infrastructure are present.
-- Euron package.json uses Node >=22 and pnpm 9; source includes a dedicated `apps/api/src/integrations/realtime/stub.ts` for offline browser speech/testing, separate from real-provider implementations.
-- Source inspection is **not the same as a complete runtime audit**.
-- Terminal network command `git ls-remote` failed resolving `github.com`; Docker unavailable in this sandbox.
+The pinned patched upstream candidate previously passed [232 unit tests, 150 PostgreSQL/Redis integration tests and 8 browser tests](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43519071316). The browser tests used a verification-aware signup test. The imported copy has its own CI workflow; record the actual results for its commit rather than treating the upstream run as proof.
 
-## New executable slice
+## Experimental policy core
 
-`packages/interview-core`: dependency-free interview session policy, including bounded plans/probes, immutable event transitions, owner checks, idempotency, timeout/skip/finish and evidence-validated coaching report assembly. Includes pure unit tests and a GitHub Action. This **does not provide** web login, live AI, database, voice, coding editor or deployment.
+`packages/interview-core` is a standalone session-policy prototype with its own Node tests. It is not connected to the imported application's authentication, database or model adapters. Do not present it as a second production session engine.
 
-Local test command: `node --test packages/interview-core/test/*.test.mjs`.
+## Highest priorities
 
-**Test status:** GitHub Actions [Interview core unit tests, run #1](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43469480724) completed successfully at commit `1bc284629403deb183f62171991592d9c3ff43f8`. This verifies pure-core tests, not production readiness.
+1. Verify the imported app with clean-checkout build, database and browser checks.
+2. Make session position, interviewer events, retries and transcripts server-authoritative with transactional persistence.
+3. Integrate evidence-backed evaluator validation into the selected application, and run real-provider and expert quality evaluations.
+4. Complete privacy, accessibility, security and dependency-license reviews before a public release.
 
-## Current highest priority
-
-1. Confirm pure-core CI.
-2. Use [Codex blocker handoff](CODEX_BLOCKERS.md) to complete Euron runtime audit; see [issue #1](https://github.com/anneshabiswaas22-collab/ai-interview/issues/1).
-3. Choose and integrate a single application foundation; then ship the first end-to-end real text session.
-
-No fine-tuning or hosted services have been deployed or verified for this project.
+The default local demo uses simulated model responses and scores. Real voice, real model quality, fine-tuning and production deployment have not been verified.

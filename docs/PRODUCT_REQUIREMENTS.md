@@ -1,6 +1,6 @@
 # Product Requirements (PRD)
 
-**Status:** Proposed, no implementation in this repository as of 2026-11-13. Priorities: P0 essential, P1 competitive depth, P2 expansion. "Done" requires real integration and tests, not mocks.
+**Status:** Product requirements remain proposed. A development candidate is present, but feature completion requires real integration and tests, not mocks. Priorities: P0 essential, P1 competitive depth, P2 expansion.
 
 ## Personas and user stories
 
