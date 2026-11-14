@@ -10,7 +10,7 @@ The pinned patched upstream candidate previously passed [232 unit tests, 150 Pos
 
 A consent-based written practice mode is implemented on the existing application database and authentication. The server chooses questions from the frozen plan, stores the conversation, and serializes retries and concurrent answers. It exports and deletes its own records with the interview. The separate voice mode still uses browser-authored transcript data. Integration and browser tests for this change must pass in its pull request before the slice is accepted.
 
-Feedback still uses the existing model scorer; its quality, evidence links, and real-provider behavior have not been validated. The default local provider is simulated. A best-effort post-commit queue can lose scoring work if Redis is unavailable; a transactional outbox remains required.
+Feedback still uses the existing model scorer; its quality, evidence links, and real-provider behavior have not been validated. The default local provider is simulated. A transactional score-dispatch outbox has been added for development; its clean database and browser checks must pass in the feature pull request. Planning and other jobs still use best-effort dispatch.
 
 ## Experimental policy core
 

@@ -14,7 +14,7 @@ This slice adds written mock interviews to the existing development candidate. I
 
 Check the feature PR's clean database and offline browser workflow. Its integration suite checks owner isolation, consent, untrusted extra fields, replay, concurrent answers, mode isolation, export and deletion. Its browser test covers consent, submit, reload and report. These tests use a simulated model, not a real provider.
 
-Scoring is inherited from the preview application and is not evidence-backed or independently validated. A failed after-commit queue enqueue can leave an answer unscored; a durable outbox and recovery mechanism remain necessary. Voice transcript handling is separate and remains browser-authored. Adaptive follow-ups, safe code execution, real-provider verification, and security/accessibility review are not included here. Use synthetic test data.
+Scoring is inherited from the preview application and is not evidence-backed or independently validated. A transactional outbox records score dispatch with each answer and retries queue delivery after temporary failures. Queue acceptance is not proof of scoring; failed models, Redis durability, worker operations and other job types still need review. Voice transcript handling is separate and remains browser-authored. Adaptive follow-ups, safe code execution, real-provider verification, and security/accessibility review are not included here. Use synthetic test data.
 
 ## Rollback
 

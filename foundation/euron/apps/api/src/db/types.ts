@@ -300,6 +300,12 @@ export interface TextPracticeRequests {
   fingerprint: string;
 }
 
+export interface ScoreDispatchOutbox {
+  answer_id: string;
+  answer_version: Timestamp;
+  created_at: Generated<Timestamp>;
+}
+
 export interface DB {
   answers: Answers;
   audit_log: AuditLog;
@@ -311,6 +317,7 @@ export interface DB {
   providers: Providers;
   quota_tiers: QuotaTiers;
   schema_migrations: SchemaMigrations;
+  score_dispatch_outbox: ScoreDispatchOutbox;
   sessions: Sessions;
   settings: Settings;
   text_practice_sessions: TextPracticeSessions;

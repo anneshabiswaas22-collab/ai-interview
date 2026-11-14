@@ -23,6 +23,7 @@ import { recordUsage } from "../services/quota.service";
 import { getSettings } from "../services/settings.service";
 import { planOf } from "../presenters/interview.presenter";
 import { registerJob } from "./registry";
+import { dispatchPendingScores } from "./score-outbox";
 
 export async function planInterview(interviewId: string, resumeText?: string): Promise<void> {
   const row = await db.selectFrom("interviews").selectAll().where("id", "=", interviewId).executeTakeFirst();
@@ -122,6 +123,10 @@ export function registerInterviewJobs(): void {
   registerJob("interview.plan", (d) => planInterview(d.interviewId, d.resumeText));
   registerJob("interview.score", (d) => scoreAnswer(d.answerId, d.version));
   registerJob("interview.hangup", (d) => hangup(d.sessionId));
+  registerJob("interview.dispatch-scores", async () => {
+    const n = await dispatchPendingScores();
+    if (n) logger.info({ dispatched: n }, "recovered score dispatches");
+  });
   registerJob("interview.sweep", async () => {
     const n = await sweepLiveSessions();
     if (n) logger.info({ expired: n }, "expired abandoned live sessions");
