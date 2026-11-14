@@ -118,7 +118,7 @@ describe("export", () => {
     await as(other).post(`/api/interviews/${theirIv.id}/answers`).send({ round: 0, question: 0, transcript: [{ role: "candidate", text: `Their answer about ${theirs}.` }] }).expect(202);
 
     const data = await exportOf(u);
-    expect(Object.keys(data)).toEqual(["exportedAt", "account", "preferences", "interviews", "answers", "proctorEvents", "liveSessions", "sharedLinks"]);
+    expect(Object.keys(data)).toEqual(["exportedAt", "account", "preferences", "interviews", "answers", "textPracticeSessions", "textPracticeEvents", "proctorEvents", "liveSessions", "sharedLinks"]);
     expect(data.account).toMatchObject({ id: u.id, email: u.email });
     expect(data.preferences).toMatchObject({ voice: "nova", transcription_language: "en" });
     expect(data.interviews).toEqual([expect.objectContaining({ id: iv.id, company: `Acme ${mine}`, source: "JOB_DESCRIPTION" })]);

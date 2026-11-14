@@ -1,0 +1,27 @@
+import { expect, test } from "@playwright/test";
+import { as, jdInterview, newUser, pageFor, waitForScores } from "../helpers";
+
+test("text practice asks for consent, survives a reload, and opens the report", async ({ browser, request }) => {
+  const user = await newUser(request);
+  const iv = await jdInterview(request, user);
+  const questions = ["Tell me about a project you built.", "How did you measure the result?"];
+  await as(request, user, "PATCH", `/interviews/${iv.id}`, { plan: [{ name: "Practice", focus: "", description: "", questions: questions.map((text) => ({ text, code: false, language: null })) }] });
+  const page = await pageFor(browser, user, `/i/${iv.id}`);
+  await page.getByRole("button", { name: "Practice by typing" }).click();
+  await expect(page.getByRole("button", { name: "Start text practice" })).toBeDisabled();
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Start text practice" }).click();
+  await expect(page.getByText(questions[0]!)).toBeVisible();
+  await page.getByLabel("Your answer").fill("I built a service for tracking orders.");
+  await page.getByRole("button", { name: "Submit answer" }).click();
+  await expect(page.getByText(questions[1]!)).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("I built a service for tracking orders.")).toBeVisible();
+  await page.getByLabel("Your answer").fill("We measured processing time and error rates.");
+  await page.getByRole("button", { name: "Submit answer" }).click();
+  await page.getByRole("link", { name: "View report" }).click();
+  await expect(page).toHaveURL(new RegExp(`/i/${iv.id}/report$`));
+  await waitForScores(page);
+  await expect(page.getByText(/^2 of 2 questions answered/)).toBeVisible();
+  await page.context().close();
+});

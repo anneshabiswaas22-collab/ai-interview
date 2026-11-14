@@ -264,6 +264,8 @@ export async function submitAnswer(actor: Actor, id: string, input: AnswerInput)
   const a = requireActive(actor);
   return withTransaction(async (trx, fx) => {
     const row = await ownedInterview(a.id, id, trx, true);
+    const textSession = await trx.selectFrom("text_practice_sessions").select("interview_id").where("interview_id", "=", id).executeTakeFirst();
+    if (textSession) throw conflict("Use the text practice endpoint for this interview", "INTERVIEW_MODE_CONFLICT");
     if (row.status !== "IN_PROGRESS") throw conflict(row.status === "COMPLETED" ? "This interview is finished" : "Start the interview first", "INTERVIEW_NOT_IN_PROGRESS");
     const plan = planOf(row) ?? [];
     const asked = questionAt(plan, input.round, input.question);

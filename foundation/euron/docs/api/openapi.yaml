@@ -354,6 +354,39 @@ paths:
       responses:
         "2XX": { description: Success }
         "4XX": { description: Client error, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  "/api/interviews/{id}/text":
+    get:
+      tags: ["interviews"]
+      operationId: "interviews_getTextPractice"
+      summary: "Text practice requires explicit consent and uses server-selected questions."
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "2XX": { description: Success }
+        "4XX": { description: Client error, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  "/api/interviews/{id}/text/start":
+    post:
+      tags: ["interviews"]
+      operationId: "interviews_startTextPractice"
+      summary: "Start text practice"
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "2XX": { description: Success }
+        "4XX": { description: Client error, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  "/api/interviews/{id}/text/answers":
+    post:
+      tags: ["interviews"]
+      operationId: "interviews_answerTextPractice"
+      summary: "Answer text practice"
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "2XX": { description: Success }
+        "4XX": { description: Client error, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
   "/api/interviews/{id}/live":
     post:
       tags: ["interviews"]
