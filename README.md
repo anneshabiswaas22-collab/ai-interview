@@ -10,7 +10,7 @@
 
 **Begin implementing:** [29-step ordered checklist](docs/IMPLEMENTATION_CHECKLIST.md) · [Verified implementation status](docs/IMPLEMENTATION_STATUS.md) · [First working code](packages/interview-core/README.md) · [Codex blocker handoff](docs/CODEX_BLOCKERS.md)
 
-**Run the development candidate:** [Setup and limitations](foundation/euron/README.md) · [Foundation decision](docs/decisions/0003-candidate-foundation.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+**Run the development candidate:** [Setup and limitations](foundation/euron/README.md) · [Text-practice contract](docs/TEXT_PRACTICE_DEVELOPMENT.md) · [Foundation decision](docs/decisions/0003-candidate-foundation.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 **Quick handoff:** [Complete project context](docs/PROJECT_CONTEXT.md) · [Codex kickoff prompt](docs/CODEX_KICKOFF.md) · [First task: issue #1](https://github.com/anneshabiswaas22-collab/ai-interview/issues/1) · [All issues](https://github.com/anneshabiswaas22-collab/ai-interview/issues)
 
@@ -68,14 +68,14 @@ The dependency-free [interview-core package](packages/interview-core/README.md) 
 | Phase | Goal | Status |
 | --- | --- | --- |
 | 0 | Document vision, architecture and contributing workflow | Complete (documentation) |
-| 1 | Audit Euron and alternatives; verify licensing, tests and actual working features | In progress; candidate imported for development |
-| 2 | Ship end-to-end text-based candidate practice and feedback | In progress; real evaluation and authoritative transcripts remain |
+| 1 | Audit Euron and alternatives; verify licensing, tests and actual working features | In progress; clean offline runtime checks passed, production review remains |
+| 2 | Ship end-to-end text-based candidate practice and feedback | In progress; typed practice passes offline checks, real evaluation and voice transcripts remain |
 | 3 | Production-oriented voice, coding, whiteboard and replay | Not started |
 | 4 | LLM evaluations, custom dataset, QLoRA fine-tuning, self-hosted model | Not started |
 | 5 | Security, billing, operations and public beta | Not started |
 | 6 | Validated employer assessment capabilities | Future; gated |
 
-**Immediate next step:** finish the imported foundation's clean-checkout checks, then implement server-authoritative session events and evidence-backed feedback using the existing app's auth and database.
+**Immediate next step:** implement and validate evidence-backed feedback in the existing app, then verify configured AI and voice providers. Continue the security, licensing and production-readiness work; the tested local demo is not a finished commercial product.
 
 ## Contribution workflow
 
