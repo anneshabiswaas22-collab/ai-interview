@@ -23,6 +23,8 @@ test("text practice asks for consent, survives a reload, and opens the report", 
   await expect(page).toHaveURL(new RegExp(`/i/${iv.id}/report$`));
   await waitForScores(page);
   await expect(page.getByText(/^2 of 2 questions answered/)).toBeVisible();
+  await expect(page.getByText(/feedback is simulated for the demo/)).toBeVisible();
+  await expect(page.getByTestId("report-question-0-0")).toContainText("Simulated demo feedback");
   await expect(page.getByRole("heading", { name: "Proctoring" })).toHaveCount(0);
   await page.context().close();
 });

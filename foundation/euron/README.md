@@ -2,7 +2,7 @@
 
 This directory contains an adapted development copy of Euron Open Conversation at commit `216a8fc52a055587f436f2446f1a80b6868bd14a`. Its MIT license is in [LICENSE](LICENSE); see [third-party notices](../../THIRD_PARTY_NOTICES.md). It is a provisional foundation for this project, not an approved production service.
 
-The application includes a Next.js web app, Express API, PostgreSQL data store, Redis-backed jobs and provider adapters. The local demo uses deterministic stand-ins for the model and realtime interviewer. Its scores are scripted demonstrations, not evidence of candidate ability. Account controls, uploaded data, scoring and provider usage still need project-specific security and quality review before public use.
+The application includes a Next.js web app, Express API, PostgreSQL data store, Redis-backed jobs and provider adapters. The local demo uses deterministic stand-ins for the model and realtime interviewer. Its scores are scripted demonstrations, not evidence of candidate ability. New reports label simulated feedback; older scores without recorded provider information are labelled unknown. Account controls, uploaded data, scoring and provider usage still need project-specific security and quality review before public use.
 
 ## Run the local demo
 

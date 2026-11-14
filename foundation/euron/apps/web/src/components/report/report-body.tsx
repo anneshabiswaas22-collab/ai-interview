@@ -37,6 +37,10 @@ export function ReportBody({ report }: { report: InterviewReport }) {
           {minutes(report.voiceSeconds)} of live voice
         </p>
       </div>
+      <p className="mt-4 text-[14px] text-muted-foreground">Practice feedback can be inaccurate and is not a validated hiring decision.</p>
+      {report.questions.some((q) => q.answer?.status === "SCORED" && q.answer.evaluationSource === "simulated") ? (
+        <p className="mt-2 rounded-md border border-border p-3 text-[14px]" role="status">Some feedback is simulated for the demo and is not an assessment of your ability.</p>
+      ) : null}
       {scoring ? (
         <p className="mt-4 text-[14px] text-muted-foreground" role="status">
           Scoring {scoring === 1 ? "one answer" : `${scoring} answers`}. This page updates by itself.
@@ -128,7 +132,7 @@ function QuestionRow({ q }: { q: QuestionReport }) {
         <span className="min-w-0 flex-1">
           <span className="line-clamp-2 text-[15px] font-medium leading-snug">{q.code ? q.text.split(/(?=Hints?:)/)[0] : q.text}</span>
           <span className="mt-0.5 block text-[12.5px] text-subtle-foreground">
-            {!a ? "Not answered" : a.status === "SCORING" ? "Being scored" : a.status === "FAILED" ? "Could not be scored" : `Domain ${a.domainRating} · Communication ${a.communicationRating}${q.code ? " · Code" : ""}`}
+            {!a ? "Not answered" : a.status === "SCORING" ? "Being scored" : a.status === "FAILED" ? "Could not be scored" : `Domain ${a.domainRating} · Communication ${a.communicationRating}${q.code ? " · Code" : ""} · ${a.evaluationSource === "simulated" ? "Simulated demo feedback" : a.evaluationSource === "configured_provider" ? "Provider-generated feedback" : "Feedback source unknown"}`}
           </span>
         </span>
         <span className={cn("w-10 shrink-0 text-right font-display text-[20px] font-semibold tabular-nums", scoreTone(score))}>{score ?? ""}</span>

@@ -146,6 +146,8 @@ export interface AnswerResult {
   question: number;
   kind: AnswerKind;
   status: AnswerStatus;
+  /** Simulated demo, configured provider, or unknown for older/unscored records. */
+  evaluationSource: "simulated" | "configured_provider" | "unknown";
   domainRating: number | null;
   communicationRating: number | null;
   feedback: AnswerFeedback | null;

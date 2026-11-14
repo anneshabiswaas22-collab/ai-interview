@@ -99,6 +99,7 @@ export async function scoreAnswer(answerId: string, version: string): Promise<vo
       .updateTable("answers")
       .set({
         status: "SCORED",
+        evaluator_kind: model.kind,
         domain_rating: said ? clampRating(out.domainRating) : 1,
         communication_rating: said ? clampRating(out.communicationRating) : 1,
         feedback: JSON.stringify({

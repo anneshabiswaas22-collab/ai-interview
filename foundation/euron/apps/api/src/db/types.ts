@@ -54,6 +54,7 @@ export interface Answers {
   communication_rating: number | null;
   created_at: Generated<Timestamp>;
   domain_rating: number | null;
+  evaluator_kind: ProviderKind | null;
   feedback: Json | null;
   id: string;
   interview_id: string;

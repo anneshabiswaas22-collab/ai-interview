@@ -43,6 +43,7 @@ export function toAnswer(a: AnswerRow): AnswerResult {
     question: a.question_index,
     kind: a.kind,
     status: a.status,
+    evaluationSource: a.evaluator_kind === "STUB" ? "simulated" : a.evaluator_kind ? "configured_provider" : "unknown",
     domainRating: a.domain_rating,
     communicationRating: a.communication_rating,
     feedback: (a.feedback as AnswerFeedback | null) ?? null,

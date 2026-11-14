@@ -53,6 +53,11 @@ describe("text practice", () => {
     const rows = await db.selectFrom("answers").selectAll().where("interview_id", "=", id).orderBy("question_index").execute();
     expect(rows).toHaveLength(2);
     expect(rows[0]!.kind).toBe("TEXT");
+    const report = await as(user).get(`/api/interviews/${id}/report`).expect(200);
+    expect(report.body.questions[0].answer.evaluationSource).toBe("simulated");
+    await db.updateTable("answers").set({ evaluator_kind: null }).where("id", "=", rows[0]!.id).execute();
+    const legacy = await as(user).get(`/api/interviews/${id}/report`).expect(200);
+    expect(legacy.body.questions[0].answer.evaluationSource).toBe("unknown");
     expect(rows[0]!.transcript).toEqual([{ role: "interviewer", text: plan[0]!.questions[0]!.text }, { role: "candidate", text: request.text }]);
     // A retry after completion is still safe.
     expect((await as(user).post(`/api/interviews/${id}/text/answers`).send(request).expect(200)).body.status).toBe("COMPLETED");
