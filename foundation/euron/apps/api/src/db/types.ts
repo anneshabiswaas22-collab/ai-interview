@@ -5,7 +5,7 @@
 
 import type { ColumnType } from "kysely";
 
-export type AnswerKind = "CODE" | "VOICE";
+export type AnswerKind = "CODE" | "TEXT" | "VOICE";
 
 export type AnswerStatus = "FAILED" | "SCORED" | "SCORING";
 
@@ -276,6 +276,30 @@ export interface Users {
   username: string;
 }
 
+// New tables from 0002_text_practice.sql; regenerate with db:types when a database is available.
+export interface TextPracticeSessions {
+  interview_id: string;
+  version: Generated<number>;
+  consented_at: Generated<Timestamp>;
+}
+
+export interface TextPracticeEvents {
+  id: string;
+  interview_id: string;
+  sequence: number;
+  kind: "QUESTION" | "ANSWER" | "COMPLETED";
+  round_index: number;
+  question_index: number;
+  text: string;
+  created_at: Generated<Timestamp>;
+}
+
+export interface TextPracticeRequests {
+  interview_id: string;
+  request_id: string;
+  fingerprint: string;
+}
+
 export interface DB {
   answers: Answers;
   audit_log: AuditLog;
@@ -289,6 +313,9 @@ export interface DB {
   schema_migrations: SchemaMigrations;
   sessions: Sessions;
   settings: Settings;
+  text_practice_sessions: TextPracticeSessions;
+  text_practice_events: TextPracticeEvents;
+  text_practice_requests: TextPracticeRequests;
   shares: Shares;
   totp_recovery_codes: TotpRecoveryCodes;
   usage_daily: UsageDaily;

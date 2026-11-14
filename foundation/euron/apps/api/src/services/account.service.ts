@@ -141,6 +141,20 @@ function sections(userId: string): Section[] {
           .execute(),
     },
     {
+      name: "textPracticeSessions",
+      query: (c) => after(
+        db.selectFrom("text_practice_sessions as s").innerJoin("interviews as i", "i.id", "s.interview_id")
+          .select(["s.interview_id as id", "s.version", "s.consented_at"]).where("i.user_id", "=", userId), "s.interview_id", c,
+      ).orderBy("s.interview_id").limit(EXPORT_PAGE).execute(),
+    },
+    {
+      name: "textPracticeEvents",
+      query: (c) => after(
+        db.selectFrom("text_practice_events as e").innerJoin("interviews as i", "i.id", "e.interview_id")
+          .select(["e.id", "e.interview_id", "e.sequence", "e.kind", "e.round_index", "e.question_index", "e.text", "e.created_at"]).where("i.user_id", "=", userId), "e.id", c,
+      ).orderBy("e.id").limit(EXPORT_PAGE).execute(),
+    },
+    {
       name: "proctorEvents",
       query: (c) =>
         after(db.selectFrom("proctor_events as p").innerJoin("interviews as i", "i.id", "p.interview_id").select(["p.id", "p.interview_id", "p.kind", "p.round_index", "p.question_index", "p.occurred_at"]).where("i.user_id", "=", userId), "p.id", c)

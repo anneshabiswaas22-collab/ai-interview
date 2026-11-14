@@ -17,6 +17,8 @@ import type {
   ShareSummary,
   SharedReport,
   Usage,
+  TextPracticeState,
+  TextPracticeAnswer,
 } from "@open-conversation/types";
 import { enc, type Helpers, type PageQuery } from "./helpers";
 
@@ -45,6 +47,9 @@ export function interviewEndpoints(h: Helpers) {
     /** Plan again from the same job description (not available for resumes, which are not kept). */
     replan: (id: string) => post<Interview>(`/interviews/${enc(id)}/replan`),
     remove: (id: string) => del(`/interviews/${enc(id)}`),
+    textPractice: (id: string) => get<TextPracticeState>(`/interviews/${enc(id)}/text`),
+    startTextPractice: (id: string) => post<TextPracticeState>(`/interviews/${enc(id)}/text/start`, { consent: true }),
+    answerTextPractice: (id: string, body: TextPracticeAnswer) => post<TextPracticeState>(`/interviews/${enc(id)}/text/answers`, body),
     /** Mint a locked realtime credential for the current question (closes any other open session of yours). 409 PLAN_NOT_READY, 429 QUOTA_EXCEEDED, 503 NO_REALTIME_MODEL. */
     startLive: (id: string, body: { round?: number; question?: number } = {}) => post<LiveSessionGrant>(`/interviews/${enc(id)}/live`, body),
     endLive: (id: string, sessionId: string) => post<LiveSessionEnd>(`/interviews/${enc(id)}/live/${enc(sessionId)}/end`),

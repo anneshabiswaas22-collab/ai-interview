@@ -2,7 +2,7 @@
 
 export type InterviewSource = "RESUME" | "JOB_DESCRIPTION";
 export type InterviewStatus = "PLANNING" | "PLAN_FAILED" | "READY" | "IN_PROGRESS" | "COMPLETED";
-export type AnswerKind = "VOICE" | "CODE";
+export type AnswerKind = "VOICE" | "TEXT" | "CODE";
 export type AnswerStatus = "SCORING" | "SCORED" | "FAILED";
 /** The realtime transport the browser opens. `stub` runs locally with no provider key. */
 export type RealtimeProvider = "openai" | "gemini" | "stub";
@@ -250,4 +250,29 @@ export interface Preferences {
   transcriptionLanguage: string;
   proctoringDefault: boolean;
   defaultRealtimeModelId: string | null;
+}
+
+/** Server-authored text practice history. A question comes from the saved interview plan. */
+export interface TextPracticeEvent {
+  id: string;
+  sequence: number;
+  kind: "QUESTION" | "ANSWER" | "COMPLETED";
+  round: number;
+  question: number;
+  text: string;
+  createdAt: string;
+}
+
+export interface TextPracticeState {
+  interviewId: string;
+  status: InterviewStatus;
+  version: number;
+  consentedAt: string;
+  events: TextPracticeEvent[];
+}
+
+export interface TextPracticeAnswer {
+  requestId: string;
+  expectedVersion: number;
+  text: string;
 }
