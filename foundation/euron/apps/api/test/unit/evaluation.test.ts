@@ -80,10 +80,17 @@ describe("written evidence evaluation", () => {
     expect(feedback.strengths).toEqual([]);
   });
 
-  test("duplicate or contradictory criterion records fail the contract", () => {
+  test("duplicate criterion records fail the contract", () => {
     const candidate = output();
     candidate.criteria[1]!.criterionId = candidate.criteria[0]!.criterionId;
     expect(() => validateTextEvaluation({ answerEvent, output: candidate, provenance })).toThrow(EvaluationContractError);
+  });
+
+  test("the same claim cannot be both a strength and a gap", () => {
+    const candidate = output();
+    const claim = candidate.criteria[0]!.observations[0]!.text;
+    candidate.criteria[0]!.observations.push({ kind: "gap", text: claim, evidenceIndexes: [0] });
+    expect(() => validateTextEvaluation({ answerEvent, output: candidate, provenance })).toThrow(/same claim as both/i);
   });
 
   test("low-confidence findings stay visible but are excluded from aggregate scores", () => {
