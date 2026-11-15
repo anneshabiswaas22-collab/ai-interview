@@ -8,6 +8,8 @@
 
 ## Start here
 
+**Public source-study inventory:** [REFERENCE_REPOSITORIES.txt](REFERENCE_REPOSITORIES.txt) (public repos, model weights, licenses and competitor benchmarks).
+
 **Begin implementing:** [29-step ordered checklist](docs/IMPLEMENTATION_CHECKLIST.md) · [Verified implementation status](docs/IMPLEMENTATION_STATUS.md) · [First working code](packages/interview-core/README.md) · [Codex blocker handoff](docs/CODEX_BLOCKERS.md)
 
 **Run the development candidate:** [Setup and limitations](foundation/euron/README.md) · [Text-practice contract](docs/TEXT_PRACTICE_DEVELOPMENT.md) · [Foundation decision](docs/decisions/0003-candidate-foundation.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
