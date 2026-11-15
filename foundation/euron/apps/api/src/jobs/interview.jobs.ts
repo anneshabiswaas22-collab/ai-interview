@@ -87,15 +87,8 @@ export async function scoreAnswer(answerId: string, version: string): Promise<vo
   const row = await db.selectFrom("interviews").selectAll().where("id", "=", a.interview_id).executeTakeFirst();
   const q = row ? questionAt(planOf(row) ?? [], a.round_index, a.question_index) : null;
   const markFailed = () => db.updateTable("answers").set({ status: "FAILED" }).where("id", "=", a.id).where("updated_at", "=", a.updated_at).execute();
-  if (!row || !q) return void (await markFailed());
-
-  const transcript = (a.transcript as { role: "interviewer" | "candidate"; text: string }[]) ?? [];
-  const candidateTranscript = transcript.filter((line) => line.role === "candidate").map((line) => line.text).join("\n").trim();
-  const submittedCode = (a.code ?? "").trim();
-
-  // A missing response is absence of evidence, not proof of poor performance.
-  if ((a.kind === "CODE" && !hasCandidateResponse(submittedCode)) || (a.kind !== "CODE" && !hasCandidateResponse(candidateTranscript))) {
-    await db
+  const markUnanswered = () =>
+    db
       .updateTable("answers")
       .set({
         status: "SCORED",
@@ -108,7 +101,37 @@ export async function scoreAnswer(answerId: string, version: string): Promise<vo
       .where("id", "=", a.id)
       .where("updated_at", "=", a.updated_at)
       .execute();
+  if (!row || !q) return void (await markFailed());
+
+  const transcript = (a.transcript as { role: "interviewer" | "candidate"; text: string }[]) ?? [];
+  const candidateTranscript = transcript.filter((line) => line.role === "candidate").map((line) => line.text).join("\n").trim();
+  const submittedCode = (a.code ?? "").trim();
+
+  // A missing response is absence of evidence, not proof of poor performance. Code
+  // questions may be answered with code, a spoken explanation, or both.
+  if (a.kind !== "TEXT" && !hasCandidateResponse(candidateTranscript) && !hasCandidateResponse(submittedCode)) {
+    await markUnanswered();
     return;
+  }
+
+  let textAnswerEvent: { id: string; text: string } | null = null;
+  if (a.kind === "TEXT") {
+    // The text-practice event is the authoritative response record. Do not decide
+    // whether a response exists from the duplicated transcript JSON.
+    textAnswerEvent =
+      (await db
+        .selectFrom("text_practice_events")
+        .select(["id", "text"])
+        .where("interview_id", "=", a.interview_id)
+        .where("kind", "=", "ANSWER")
+        .where("round_index", "=", a.round_index)
+        .where("question_index", "=", a.question_index)
+        .executeTakeFirst()) ?? null;
+    if (!textAnswerEvent) return void (await markFailed());
+    if (!hasCandidateResponse(textAnswerEvent.text)) {
+      await markUnanswered();
+      return;
+    }
   }
 
   const model = await resolveTextModel(row.text_model_id);
@@ -116,17 +139,7 @@ export async function scoreAnswer(answerId: string, version: string): Promise<vo
 
   try {
     if (a.kind === "TEXT") {
-      // The text-practice event is the authoritative response record. Do not validate
-      // model evidence against browser-authored or model-authored transcript content.
-      const answerEvent = await db
-        .selectFrom("text_practice_events")
-        .select(["id", "text"])
-        .where("interview_id", "=", a.interview_id)
-        .where("kind", "=", "ANSWER")
-        .where("round_index", "=", a.round_index)
-        .where("question_index", "=", a.question_index)
-        .executeTakeFirst();
-      if (!answerEvent || !hasCandidateResponse(answerEvent.text)) return void (await markFailed());
+      const answerEvent = textAnswerEvent!;
 
       const prompt = buildTextEvidencePrompt({ question: q.text, answer: answerEvent.text, role: row.role });
       const output = await generateJson({
