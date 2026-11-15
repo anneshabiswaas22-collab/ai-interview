@@ -1,6 +1,6 @@
 # Contributing to AI Interview
 
-Welcome! This repository is the single source of truth for a commercial-grade AI interviewing project. **Initially it contains only plans/specifications** and no runnable application. Developers and AI agents must not assume the planned features already work.
+Welcome! This repository is the source of truth for an AI interviewing project. It contains a development-only candidate application and specifications; do not assume planned capabilities are production-ready.
 
 ## 1. Learn the project in 15 minutes
 
@@ -11,7 +11,7 @@ Welcome! This repository is the single source of truth for a commercial-grade AI
 
 ## 2. Find your first task
 
-Prefer issues marked as audit/onboarding (or review [milestone 1](docs/ROADMAP.md)). If none exist, propose a scoped issue. Never assume Euron/DeepInterview have already been imported.
+Review [implementation status](docs/IMPLEMENTATION_STATUS.md) and choose a scoped issue. The Euron development candidate is in `foundation/euron`; DeepInterview has not been imported.
 
 Good early contributions:
 - Verify upstream packages and test/demo instructions.

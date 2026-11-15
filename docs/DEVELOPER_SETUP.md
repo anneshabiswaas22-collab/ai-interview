@@ -1,70 +1,51 @@
 # Developer Onboarding and Local Setup
 
-**CURRENT STATE:** This repository includes documentation plus a dependency-free interview-core module. No candidate-facing application, model checkpoint, database migrations or production deployment exists. The core unit suite has passed on GitHub Actions. Commands for Euron below are upstream audit instructions, not proof they work here.
+The repository contains a development-only candidate application under [foundation/euron](../foundation/euron/README.md), plus a separate experimental interview-core package. The candidate is not production-ready; its default demo uses simulated model responses and scores. See [implementation status](IMPLEMENTATION_STATUS.md) and [the foundation decision](decisions/0003-candidate-foundation.md).
 
-## Step 1 — Obtain the source
+## Obtain the source
 
 ```bash
 git clone https://github.com/anneshabiswaas22-collab/ai-interview.git
 cd ai-interview
-git status
 ```
 
-Read `README.md`, `AGENTS.md`, `docs/VISION.md`, `docs/ROADMAP.md`, `docs/REUSE_VS_BUILD.md`, `docs/LICENSE_AUDIT.md`.
+Read `README.md`, `AGENTS.md`, the foundation README and [third-party notices](../THIRD_PARTY_NOTICES.md).
 
-## Run the first executable unit suite
+## Run the candidate demo
 
-Requires Node.js 22 or newer, no install or API keys:
+Install Git, Docker with Compose v2, `make`, Bash and OpenSSL. Then:
+
+```bash
+cd foundation/euron
+make up
+make demo
+```
+
+Open `http://localhost:3550` and use the demo credentials printed by `make demo`. The first build downloads container images. Use synthetic information: the default provider is a deterministic stub, not a real AI evaluator. Camera proctoring is off in the demo user's default preferences.
+
+`make ps` shows the stack. `make down` deletes the local demo volumes and their data; export anything needed first. Do not use these development settings for production.
+
+## Run tests
+
+For the standalone prototype, Node 22 or newer is sufficient:
 
 ```bash
 node --test packages/interview-core/test/*.test.mjs
 ```
 
-This verifies session policy only, not an application or AI provider.
-
-## Step 2 — Review the first milestone
-
-Start by auditing the candidate foundation rather than writing a new UI:
-- [Euron main application](https://github.com/euron-sde-team/euron-open-real-time-ai-conversation-system)
-- [DeepInterview agent patterns](https://github.com/ngoanpv/DeepInterview)
-- [GrillKit technical training](https://github.com/Forkfield/grillkit)
-
-Pin their commit SHAs, read README/license, inspect whether the claimed feature uses a real provider or a mock, and run their documented build/test commands in disposable folders. Use no real candidate data or secrets.
-
-## Step 3 — Upstream audit sample (not our app setup)
+For the candidate application, install Node 22 and pnpm 9.15.0 through Corepack:
 
 ```bash
-git clone https://github.com/euron-sde-team/euron-open-real-time-ai-conversation-system.git
-cd euron-open-real-time-ai-conversation-system
-git rev-parse HEAD
-git status
-# Read upstream README and Makefile before executing install/demo commands.
-# Run its documented tests in an isolated container or local environment.
+cd foundation/euron
+corepack enable
+pnpm install --frozen-lockfile
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm openapi --check
 ```
 
-Do not copy the Euron repository into this GitHub repo until the PR documents licensing, actual runtime results, dependencies, security risks and a proposed migration plan.
+The [candidate foundation workflow](../.github/workflows/candidate-foundation.yml) also starts isolated PostgreSQL and Redis services for integration tests and runs the offline browser suite. Do not point tests at a real database: the integration guard requires a database name ending in `_test` and recreates it.
 
-## Step 4 — Future local environment, after foundation accepted
-
-Expected tools (confirm versions with chosen upstream): Node.js/pnpm, Python for ML/voice services, Docker Compose, PostgreSQL, Redis and suitable editor. Training GPU is **not** required for everyday app development. Establish `.env.example` with fake/sample placeholders only.
-
-Once runnable code is imported, this guide must be updated with:
-1. Pinned versions and prerequisites.
-2. Exact install/migration/test commands.
-3. How to launch web, API, worker and safe mock providers.
-4. How to configure real providers without storing secrets.
-5. Test fixtures and reset/seed instructions.
-6. Troubleshooting and observability.
-7. Exact launch and production deploy limitations.
-
-Until those are present, **do not claim `npm run dev`, `pnpm dev` or `docker compose up` works in this repository.**
-
-## Contributing safely
-
-Use a feature branch and create a scoped PR with the [template](../.github/PULL_REQUEST_TEMPLATE.md). For architecture-changing imports, write an ADR. Follow the security/privacy guide and do not upload user resumes or confidential interview recordings. Review is required before high-risk code merges.
-
-## Suggested first contributor deliverable
-
-An audit PR with a pinned Euron SHA; documented test and demo results; inventory of real vs stubbed capabilities; license/SBOM notes; comparison with DeepInterview; a suggested stack and the first code PR acceptance tests.
-
-This is enough for contributors to proceed without access to any prior chat.
+Real model and voice providers require separate configuration, consent, cost limits and testing. Do not commit keys, real resumes or recordings. The full application still needs the release gates in [ADR 0003](decisions/0003-candidate-foundation.md).

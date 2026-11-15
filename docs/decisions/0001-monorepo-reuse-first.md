@@ -1,6 +1,6 @@
 # ADR 0001 — Modular Monorepo, Reuse-First Architecture
 
-- **Status:** Proposed — pending source/runtime audit
+- **Status:** Superseded for development use by [ADR 0003](0003-candidate-foundation.md); production review remains pending
 - **Date:** 2026-11-13
 
 ## Context

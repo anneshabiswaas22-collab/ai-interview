@@ -1,0 +1,98 @@
+name: Candidate foundation checks
+
+on:
+  pull_request:
+    paths:
+      - "foundation/euron/**"
+      - ".github/workflows/candidate-foundation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "foundation/euron/**"
+      - ".github/workflows/candidate-foundation.yml"
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: foundation/euron
+
+jobs:
+  checks:
+    name: Unit, build and database integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16.12-alpine
+        env:
+          POSTGRES_USER: conv
+          POSTGRES_PASSWORD: conv
+          POSTGRES_DB: conv
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U conv -d conv"
+          --health-interval 3s --health-timeout 3s --health-retries 30
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 3s --health-timeout 3s --health-retries 30
+    env:
+      TEST_DATABASE_URL: postgres://conv:conv@localhost:5432/conv_test
+      TEST_REDIS_URL: redis://localhost:6379/1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: foundation/euron/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --prod
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: bash scripts/test-sanitization.sh
+      - run: bash scripts/check-sanitization.sh
+      - run: pnpm test:integration
+      - run: pnpm build
+      - run: pnpm openapi --check
+
+  browser:
+    name: Offline candidate browser flow
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: foundation/euron/pnpm-lock.yaml
+      - uses: docker/setup-buildx-action@v3
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: make up
+      - run: make demo
+      - run: pnpm e2e
+      - name: Collect browser error context
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-browser-errors
+          path: foundation/euron/e2e/.results/**/error-context.md
+          if-no-files-found: warn

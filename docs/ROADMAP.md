@@ -1,5 +1,7 @@
 # Delivery Roadmap and Milestone Gates
 
+**Development update:** A pinned candidate application has been imported for evaluation; see [implementation status](IMPLEMENTATION_STATUS.md). The milestones below remain gated until their acceptance evidence exists.
+
 _No time estimates are guaranteed. Every milestone closes only after artifacts and acceptance criteria are satisfied._
 
 ## Milestone 0 — Documentation and contributor onboarding

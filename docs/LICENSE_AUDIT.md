@@ -1,5 +1,7 @@
 # Third-Party License and Ownership Audit
 
+**Development import update (2026-11-14):** A pinned Euron development candidate has been imported with its MIT license. See [third-party notices](../THIRD_PARTY_NOTICES.md) for modifications, the included MediaPipe model, and preliminary dependency-license findings. Transitive and commercial distribution reviews remain open.
+
 **Snapshot verified against GitHub metadata and selected repository LICENSE files on 2026-11-13.** Licenses and transitive dependencies can change; inspect the pinned revision of any imported code before shipping. This document is a tracking aid, **not legal advice**.
 
 | Upstream | License observed | Note before copying |
