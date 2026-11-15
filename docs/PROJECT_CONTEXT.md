@@ -27,9 +27,9 @@ The owner wants:
 7. **Do not spend on large-scale infra before product validation.** Keep a working basic text session first, then add voice/coding/whiteboard, then model optimization and commercial infrastructure.
 8. Engineering work goes via small documented commits/PRs and tests. Preserve unmodified upstream license notices.
 
-## Important truth as of 2026-11-13
+## Important truth as of 2026-11-15
 
-This GitHub repository was empty before the documentation and task tracker were initialized. **No Euron or other application source has been imported**, no production service is running, no live speech integration has been proven, and no model has been fine-tuned in this repository. Documents describe proposed behavior and upstream *claims* (not tested product features). An experimental dependency-free [interview-core module](../packages/interview-core/README.md) with verified unit tests has since been committed on an implementation branch; it is not an application and does not replace the upstream audit.
+The repository now contains an adapted, pinned Euron development foundation under [foundation/euron](../foundation/euron/README.md), plus the earlier dependency-free [interview-core](../packages/interview-core/README.md) prototype. The imported application has working authentication/database/UI/job infrastructure and a consent-based server-authoritative **text-practice** path with clean-checkout CI evidence using simulated providers. It is still a development preview: real-provider model quality, production voice, secure code execution, public deployment, fine-tuning and release security/compliance have not been validated. The experimental core is not a second production session engine.
 
 ## Technical vision
 
@@ -41,19 +41,19 @@ This GitHub repository was empty before the documentation and task tracker were 
 - ML: tested original dataset, baselines, QLoRA training, model cards, rollback and external GPU execution.
 - Ops: security/privacy, secrets, backups, observability, unit economics and CI.
 
-The proposed architecture is modular; the final stack is a **decision after the foundation audit**.
+The selected development direction is the existing **Next.js + Express + PostgreSQL + Redis Euron foundation**, extended in place. Major stack changes still require evidence and an ADR; do not create a parallel application stack.
 
 ## Priority and handoff
 
-1. Start with [issue #1 — Euron source/runtime audit](https://github.com/anneshabiswaas22-collab/ai-interview/issues/1).
+1. Start with [implementation status](IMPLEMENTATION_STATUS.md) and the next open gate; the original Euron foundation-selection audit has already produced ADR 0003 and an imported development candidate.
 2. Follow [AGENTS.md](../AGENTS.md) for Codex and [CONTRIBUTING.md](../CONTRIBUTING.md) for human contributors.
 3. Read [Feature Matrix](FEATURE_MATRIX.md), [Roadmap](ROADMAP.md), [Architecture](ARCHITECTURE.md), [Reuse vs Build](REUSE_VS_BUILD.md), [License Audit](LICENSE_AUDIT.md).
 4. Contribute one real, testable vertical slice at a time, recording exact failures/skips and remaining limitations.
 
 ## Open decisions
 
-- Whether to import Euron or implement a smaller base after audit.
-- Actual frontend/backend package versions and schema migration strategy.
+- How and when the provisional Euron development foundation graduates to a production-approved base.
+- Schema evolution for authoritative adaptive sessions, evidence-backed evaluation, voice and later organization tenancy.
 - Model checkpoint, providers and measured serving costs.
 - Product name, visual brand, business incorporation and original-code licensing/contribution terms.
 - Jurisdiction-specific privacy, payments and employer assessment obligations.
