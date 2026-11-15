@@ -55,6 +55,23 @@ describe("text practice", () => {
     expect(rows[0]!.kind).toBe("TEXT");
     const report = await as(user).get(`/api/interviews/${id}/report`).expect(200);
     expect(report.body.questions[0].answer.evaluationSource).toBe("simulated");
+    const firstEvaluation = report.body.questions[0].answer.feedback.evaluation;
+    expect(firstEvaluation).toMatchObject({
+      evaluatorVersion: "text-evidence-v1",
+      rubricVersion: "written-practice-v1",
+      evidenceSource: "server_text_practice_event",
+      simulated: true,
+      provider: { providerKind: "STUB" },
+    });
+    const firstAnswerEvent = await db
+      .selectFrom("text_practice_events")
+      .select(["id", "text"])
+      .where("interview_id", "=", id)
+      .where("kind", "=", "ANSWER")
+      .where("question_index", "=", 0)
+      .executeTakeFirstOrThrow();
+    expect(firstEvaluation.criteria.every((criterion: { support: string }) => criterion.support === "supported")).toBe(true);
+    expect(firstEvaluation.criteria[0].evidence[0]).toEqual({ eventId: firstAnswerEvent.id, quote: firstAnswerEvent.text });
     await db.updateTable("answers").set({ evaluator_kind: null }).where("id", "=", rows[0]!.id).execute();
     const legacy = await as(user).get(`/api/interviews/${id}/report`).expect(200);
     expect(legacy.body.questions[0].answer.evaluationSource).toBe("unknown");
