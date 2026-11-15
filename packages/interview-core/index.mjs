@@ -8,6 +8,8 @@
  * returned snapshot atomically with optimistic locking before acknowledging success.
  */
 
+import { createHash } from "node:crypto";
+
 export class InterviewError extends Error {
   constructor(code, message) {
     super(message);
@@ -36,6 +38,32 @@ function authorized(session, actorId) {
   if (!session || !actorId || session.ownerId !== actorId) {
     invalid("NOT_FOUND", "Interview not found");
   }
+}
+
+// Store a content fingerprint rather than a second copy of each answer. This is
+// not encryption; snapshots and their transcript still need normal data protection.
+function fingerprint(kind, text = null) {
+  return createHash("sha256").update(JSON.stringify([kind, text])).digest("hex");
+}
+
+function isReplay(session, requestId, digest) {
+  const previous = (session.processedRequests ?? []).find((item) => item.id === requestId);
+  if (previous) {
+    if (previous.digest !== digest) invalid("IDEMPOTENCY_CONFLICT", "Request id was already used for a different operation or answer");
+    return true;
+  }
+  // Old prototype snapshots had IDs but no payload fingerprint. A replay cannot
+  // be compared safely; do not silently treat an unrelated action as a retry.
+  if (session.processedRequestIds.includes(requestId)) invalid("IDEMPOTENCY_UNVERIFIABLE", "Cannot verify a request recorded by an older snapshot");
+  return false;
+}
+
+function markProcessed(session, requestId, digest) {
+  return {
+    ...session,
+    processedRequestIds: [...session.processedRequestIds, requestId],
+    processedRequests: [...(session.processedRequests ?? []), { id: requestId, digest }],
+  };
 }
 
 function append(session, event) {
@@ -112,6 +140,7 @@ export function createSession({ id, ownerId, role, seniority, questions, now, du
     completedAt: null,
     version: 1,
     processedRequestIds: [],
+    processedRequests: [],
     events: [],
   };
   const first = append(session, questionEvent(plan[0], startedAt));
@@ -139,11 +168,12 @@ function checkDeadline(session, now) {
 export function submitAnswer(session, { actorId, requestId, text, now, choice }) {
   authorized(session, actorId);
   const request = requiredString(requestId, "request id", 128);
-  if (session.processedRequestIds.includes(request)) return session; // idempotent retry
+  const answer = requiredString(text, "candidate answer", 10_000);
+  const digest = fingerprint("answer", answer);
+  if (isReplay(session, request, digest)) return session;
   if (session.status !== "ACTIVE") invalid("SESSION_CLOSED", "Interview is not active");
   timestamp(now);
-  if (checkDeadline(session, now)) return finishActive(session, now, "time_expired");
-  const answer = requiredString(text, "candidate answer", 10_000);
+  if (checkDeadline(session, now)) return markProcessed(finishActive(session, now, "time_expired"), request, digest);
   if (!choice || !["probe", "next"].includes(choice.kind)) {
     invalid("INVALID_CHOICE", "Trusted policy must choose probe or next");
   }
@@ -159,21 +189,22 @@ export function submitAnswer(session, { actorId, requestId, text, now, choice })
   } else {
     state = nextQuestion(state, now);
   }
-  return { ...state, processedRequestIds: [...session.processedRequestIds, request] };
+  return markProcessed(state, request, digest);
 }
 
 /** Candidate skip is not a scored answer. */
 export function skipQuestion(session, { actorId, requestId, now }) {
   authorized(session, actorId);
   const request = requiredString(requestId, "request id", 128);
-  if (session.processedRequestIds.includes(request)) return session;
+  const digest = fingerprint("skip");
+  if (isReplay(session, request, digest)) return session;
   if (session.status !== "ACTIVE") invalid("SESSION_CLOSED", "Interview is not active");
   timestamp(now);
-  if (checkDeadline(session, now)) return finishActive(session, now, "time_expired");
+  if (checkDeadline(session, now)) return markProcessed(finishActive(session, now, "time_expired"), request, digest);
   const question = session.plan[session.currentIndex];
   let state = append(session, { kind: "candidate.skipped", questionId: question.id, at: now });
   state = nextQuestion(state, now);
-  return { ...state, processedRequestIds: [...session.processedRequestIds, request] };
+  return markProcessed(state, request, digest);
 }
 
 export function finishSession(session, { actorId, now }) {
