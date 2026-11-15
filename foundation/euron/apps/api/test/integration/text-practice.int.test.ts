@@ -85,6 +85,23 @@ describe("text practice", () => {
     expect(await db.selectFrom("text_practice_events").select("id").where("interview_id", "=", id).execute()).toHaveLength(0);
   });
 
+  it.each([
+    ["malformed model output", "STUB_GARBAGE"],
+    ["provider failure", "STUB_FAIL"],
+  ])("fails scoring safely on %s", async (_case, answerText) => {
+    const { user, id } = await practice();
+    await as(user).post(`/api/interviews/${id}/text/start`).send({ consent: true }).expect(200);
+    await as(user)
+      .post(`/api/interviews/${id}/text/answers`)
+      .send({ requestId: randomUUID(), expectedVersion: 1, text: answerText })
+      .expect(200);
+    const answer = await db.selectFrom("answers").select(["status", "domain_rating", "communication_rating", "feedback"]).where("interview_id", "=", id).executeTakeFirstOrThrow();
+    expect(answer.status).toBe("FAILED");
+    expect(answer.domain_rating).toBeNull();
+    expect(answer.communication_rating).toBeNull();
+    expect(answer.feedback).toBeNull();
+  });
+
   it("serializes competing answers so only one advances the interview", async () => {
     const { user, id } = await practice();
     await as(user).post(`/api/interviews/${id}/text/start`).send({ consent: true }).expect(200);
