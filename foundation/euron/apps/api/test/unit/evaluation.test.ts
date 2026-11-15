@@ -64,6 +64,12 @@ describe("written evidence evaluation", () => {
     expect(evaluated.domainRating).toBe(72);
   });
 
+  test("the model cannot choose or fabricate a server event reference", () => {
+    const candidate = output() as unknown as { criteria: Array<{ evidence: Array<Record<string, unknown>> }> };
+    candidate.criteria[0]!.evidence[0]!.eventId = "made-up-event";
+    expect(TEXT_EVALUATION_OUTPUT.safeParse(candidate).success).toBe(false);
+  });
+
   test("text copied from the question is not evidence unless it also exists in the stored answer", () => {
     const candidate = output();
     candidate.criteria[2]!.evidence[0]!.quote = "How would you make payment retries safe?";
