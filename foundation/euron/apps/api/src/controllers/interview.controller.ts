@@ -9,6 +9,7 @@ import { id, idParam, pageQuery, parse, text } from "../core/validate";
 import { actorOf } from "../middleware/http";
 import * as interviews from "../services/interview/interview.service";
 import * as live from "../services/interview/live.service";
+import * as textPractice from "../services/interview/text-practice.service";
 import { CODE_LANGUAGES, MAX_JOB_DESCRIPTION_CHARS, MAX_QUESTION_CHARS, MAX_QUESTIONS_PER_ROUND, MAX_ROUNDS } from "../services/interview/plan";
 import { renderReportPdf } from "../services/interview/pdf";
 import { getReport } from "../services/interview/report.service";
@@ -76,6 +77,24 @@ export async function remove(req: Request, res: Response) {
 
 export async function complete(req: Request, res: Response) {
   res.json(await interviews.completeInterview(actorOf(req), parse(idParam, req.params).id));
+}
+
+/** Text practice stores responses and may send them to the configured text model for feedback. */
+export async function getTextPractice(req: Request, res: Response) {
+  res.setHeader("Cache-Control", "no-store");
+  res.json(await textPractice.getTextPractice(actorOf(req), parse(idParam, req.params).id));
+}
+
+export async function startTextPractice(req: Request, res: Response) {
+  parse(z.object({ consent: z.literal(true) }).strict(), req.body);
+  res.setHeader("Cache-Control", "no-store");
+  res.json(await textPractice.startTextPractice(actorOf(req), parse(idParam, req.params).id));
+}
+
+export async function answerTextPractice(req: Request, res: Response) {
+  const body = parse(z.object({ requestId: z.string().uuid(), expectedVersion: z.number().int().positive(), text: text(8000, 1).refine((s) => !s.includes("\u0000"), "must not contain a null character") }).strict(), req.body);
+  res.setHeader("Cache-Control", "no-store");
+  res.json(await textPractice.answerTextPractice(actorOf(req), parse(idParam, req.params).id, body));
 }
 
 export async function startLive(req: Request, res: Response) {

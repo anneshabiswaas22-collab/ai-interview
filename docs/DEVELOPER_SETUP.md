@@ -9,7 +9,7 @@ git clone https://github.com/anneshabiswaas22-collab/ai-interview.git
 cd ai-interview
 ```
 
-Read `README.md`, `AGENTS.md`, the foundation README and [third-party notices](../THIRD_PARTY_NOTICES.md).
+Read `README.md`, `AGENTS.md`, the foundation README and [third-party notices](../THIRD_PARTY_NOTICES.md). If the change you want is still in a pull request, check out its branch before running these commands.
 
 ## Run the candidate demo
 
@@ -21,7 +21,7 @@ make up
 make demo
 ```
 
-Open `http://localhost:3550` and use the demo credentials printed by `make demo`. The first build downloads container images. Use synthetic information: the default provider is a deterministic stub, not a real AI evaluator. Camera proctoring is off in the demo user's default preferences.
+Open `http://localhost:3550` and use the demo credentials printed by `make demo`. The first build downloads container images. Use synthetic information: the default provider is a deterministic stub, not a real AI evaluator. Camera proctoring is off in the demo user's default preferences. Choose **Practice by typing** on a ready interview to try the consent-based written flow; the resulting demo feedback is simulated.
 
 `make ps` shows the stack. `make down` deletes the local demo volumes and their data; export anything needed first. Do not use these development settings for production.
 

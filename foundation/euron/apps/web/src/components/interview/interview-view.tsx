@@ -282,13 +282,16 @@ function PlanReview({ iv }: { iv: Interview }) {
 
       {!editing ? (
         <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur">
-          <div className="mx-auto flex max-w-[780px] items-center gap-3 px-4 py-3 sm:px-6">
+          <div className="mx-auto flex max-w-[780px] flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
             <p className="min-w-0 flex-1 truncate text-[13px] text-subtle-foreground">{started ? `Question ${countBefore(plan, iv.position) + 1} of ${total} next` : `${total} questions in ${plan.length} rounds`}</p>
             {started ? (
               <Button variant="ghost" onClick={() => setConfirmFinish(true)}>
                 Finish now
               </Button>
             ) : null}
+            <Button variant="outline" onClick={() => router.push(`/i/${iv.id}/text`)} disabled={!total}>
+              {started ? "Continue text practice" : "Practice by typing"}
+            </Button>
             <Button size="lg" data-testid="start-interview" onClick={() => router.push(`/room/${iv.id}`)} disabled={!total}>
               {started ? "Continue interview" : "Start interview"}
             </Button>

@@ -131,7 +131,7 @@ function sections(userId: string): Section[] {
           db
             .selectFrom("answers as a")
             .innerJoin("interviews as i", "i.id", "a.interview_id")
-            .select(["a.id", "a.interview_id", "a.round_index", "a.question_index", "a.kind", "a.transcript", "a.code", "a.language", "a.status", "a.domain_rating", "a.communication_rating", "a.feedback", "a.created_at", "a.updated_at"])
+            .select(["a.id", "a.interview_id", "a.round_index", "a.question_index", "a.kind", "a.transcript", "a.code", "a.language", "a.status", "a.evaluator_kind", "a.domain_rating", "a.communication_rating", "a.feedback", "a.created_at", "a.updated_at"])
             .where("i.user_id", "=", userId),
           "a.id",
           c,
@@ -139,6 +139,20 @@ function sections(userId: string): Section[] {
           .orderBy("a.id")
           .limit(EXPORT_PAGE)
           .execute(),
+    },
+    {
+      name: "textPracticeSessions",
+      query: (c) => after(
+        db.selectFrom("text_practice_sessions as s").innerJoin("interviews as i", "i.id", "s.interview_id")
+          .select(["s.interview_id as id", "s.version", "s.consented_at"]).where("i.user_id", "=", userId), "s.interview_id", c,
+      ).orderBy("s.interview_id").limit(EXPORT_PAGE).execute(),
+    },
+    {
+      name: "textPracticeEvents",
+      query: (c) => after(
+        db.selectFrom("text_practice_events as e").innerJoin("interviews as i", "i.id", "e.interview_id")
+          .select(["e.id", "e.interview_id", "e.sequence", "e.kind", "e.round_index", "e.question_index", "e.text", "e.created_at"]).where("i.user_id", "=", userId), "e.id", c,
+      ).orderBy("e.id").limit(EXPORT_PAGE).execute(),
     },
     {
       name: "proctorEvents",

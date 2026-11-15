@@ -24,6 +24,10 @@ router.patch("/:id", authenticate, ctrl.update);
 router.post("/:id/replan", authenticate, rateLimit("interview-replan", 5, 3600), ctrl.replan);
 /** Delete the interview, its answers, transcripts and share links. Does not give quota back. 204. */
 router.delete("/:id", authenticate, ctrl.remove);
+/** Text practice requires explicit consent and uses server-selected questions. */
+router.get("/:id/text", authenticate, ctrl.getTextPractice);
+router.post("/:id/text/start", authenticate, rateLimit("text-practice-start", 40, 3600), ctrl.startTextPractice);
+router.post("/:id/text/answers", authenticate, rateLimit("text-practice-answer", 120, 3600), ctrl.answerTextPractice);
 /**
  * Open a live voice session for the current question (or `{ round, question }`): returns a `LiveSessionGrant` with a
  * short-lived credential that has the interviewer's instructions locked inside. Closes any other open session of yours.

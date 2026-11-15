@@ -76,6 +76,11 @@ export async function startLive(actor: Actor, interviewId: string, at: { round?:
   const fx = new Effects();
   const session = await db.transaction().execute(async (trx) => {
     await lockUserQuota(a.id, trx);
+    // Take the same interview lock as text-start, preventing simultaneous mode changes.
+    const locked = await ownedInterview(a.id, interviewId, trx, true);
+    const textSession = await trx.selectFrom("text_practice_sessions").select("interview_id").where("interview_id", "=", interviewId).executeTakeFirst();
+    if (textSession) throw conflict("This interview is in text practice mode", "INTERVIEW_MODE_CONFLICT");
+    if (locked.status !== "READY" && locked.status !== "IN_PROGRESS") throw conflict("The interview is not available", "INTERVIEW_NOT_IN_PROGRESS");
     await closeOpenSessions(trx, a.id, fx);
     const maxSeconds = await voiceSecondsAllowed(a.id, trx);
     const now = new Date();

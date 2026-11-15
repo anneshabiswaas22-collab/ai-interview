@@ -17,12 +17,13 @@ import { db } from "../db/kysely";
 import { generateJson, ModelOutputError } from "../services/interview/ai";
 import { hangup, sweepLiveSessions } from "../services/interview/live.service";
 import { normalisePlan, plannerOutput, questionAt } from "../services/interview/plan";
-import { codeScorer, plannerFromJobDescription, plannerFromResume, voiceScorer } from "../services/interview/prompts";
+import { codeScorer, textScorer, plannerFromJobDescription, plannerFromResume, voiceScorer } from "../services/interview/prompts";
 import { resolveTextModel } from "../services/models.service";
 import { recordUsage } from "../services/quota.service";
 import { getSettings } from "../services/settings.service";
 import { planOf } from "../presenters/interview.presenter";
 import { registerJob } from "./registry";
+import { dispatchPendingScores } from "./score-outbox";
 
 export async function planInterview(interviewId: string, resumeText?: string): Promise<void> {
   const row = await db.selectFrom("interviews").selectAll().where("id", "=", interviewId).executeTakeFirst();
@@ -89,7 +90,7 @@ export async function scoreAnswer(answerId: string, version: string): Promise<vo
   const model = await resolveTextModel(row.text_model_id);
   if (!model) return void (await markFailed());
   const transcript = (a.transcript as { role: "interviewer" | "candidate"; text: string }[]) ?? [];
-  const prompt = a.kind === "CODE" ? codeScorer({ question: q.text, code: a.code ?? "", language: a.language, role: row.role }) : voiceScorer({ question: q.text, transcript, role: row.role });
+  const prompt = a.kind === "CODE" ? codeScorer({ question: q.text, code: a.code ?? "", language: a.language, role: row.role }) : a.kind === "TEXT" ? textScorer({ question: q.text, transcript, role: row.role }) : voiceScorer({ question: q.text, transcript, role: row.role });
   try {
     const out = await generateJson({ model, userId: row.user_id, system: prompt.system, user: prompt.user, schema: scoreOutput, maxOutputTokens: 3000, temperature: 0.2 });
     // A candidate who never spoke gets the floor, whatever the model thought.
@@ -98,6 +99,7 @@ export async function scoreAnswer(answerId: string, version: string): Promise<vo
       .updateTable("answers")
       .set({
         status: "SCORED",
+        evaluator_kind: model.kind,
         domain_rating: said ? clampRating(out.domainRating) : 1,
         communication_rating: said ? clampRating(out.communicationRating) : 1,
         feedback: JSON.stringify({
@@ -122,6 +124,10 @@ export function registerInterviewJobs(): void {
   registerJob("interview.plan", (d) => planInterview(d.interviewId, d.resumeText));
   registerJob("interview.score", (d) => scoreAnswer(d.answerId, d.version));
   registerJob("interview.hangup", (d) => hangup(d.sessionId));
+  registerJob("interview.dispatch-scores", async () => {
+    const n = await dispatchPendingScores();
+    if (n) logger.info({ dispatched: n }, "recovered score dispatches");
+  });
   registerJob("interview.sweep", async () => {
     const n = await sweepLiveSessions();
     if (n) logger.info({ expired: n }, "expired abandoned live sessions");

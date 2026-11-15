@@ -16,6 +16,7 @@ import { newId } from "../../core/ids";
 import { db, type Executor } from "../../db/kysely";
 import { extractResumeText, sniffResume } from "../../integrations/extract";
 import { config } from "../../core/config";
+import { dispatchScore, recordScoreDispatch } from "../../jobs/score-outbox";
 import { planOf, toAnswer, toInterview, toInterviewSummary, type InterviewRow, type InterviewStats } from "../../presenters/interview.presenter";
 import { atKey, decodeTime, olderThan, timePage } from "../../repositories/keyset";
 import { findModel, realtimeProviderOf, resolveTextModel } from "../models.service";
@@ -264,6 +265,8 @@ export async function submitAnswer(actor: Actor, id: string, input: AnswerInput)
   const a = requireActive(actor);
   return withTransaction(async (trx, fx) => {
     const row = await ownedInterview(a.id, id, trx, true);
+    const textSession = await trx.selectFrom("text_practice_sessions").select("interview_id").where("interview_id", "=", id).executeTakeFirst();
+    if (textSession) throw conflict("Use the text practice endpoint for this interview", "INTERVIEW_MODE_CONFLICT");
     if (row.status !== "IN_PROGRESS") throw conflict(row.status === "COMPLETED" ? "This interview is finished" : "Start the interview first", "INTERVIEW_NOT_IN_PROGRESS");
     const plan = planOf(row) ?? [];
     const asked = questionAt(plan, input.round, input.question);
@@ -296,9 +299,11 @@ export async function submitAnswer(actor: Actor, id: string, input: AnswerInput)
           status: "SCORING",
           domain_rating: null,
           communication_rating: null,
+          evaluator_kind: null,
           feedback: null,
           scored_at: null,
-          updated_at: now,
+          // Versions must be distinct even if a candidate revises an answer in the same millisecond.
+          updated_at: sql<Date>`greatest(${now}::timestamptz, answers.updated_at + interval '1 millisecond')`,
         }),
       )
       .returningAll()
@@ -311,7 +316,8 @@ export async function submitAnswer(actor: Actor, id: string, input: AnswerInput)
         .where("id", "=", row.id)
         .execute();
     }
-    fx.job("interview.score", { answerId: answer.id, version: answer.updated_at.toISOString() });
+    await recordScoreDispatch(trx, answer.id, answer.updated_at);
+    fx.after(() => dispatchScore(answer.id));
     return toAnswer(answer);
   });
 }
