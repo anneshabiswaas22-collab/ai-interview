@@ -55,6 +55,23 @@ describe("text practice", () => {
     expect(rows[0]!.kind).toBe("TEXT");
     const report = await as(user).get(`/api/interviews/${id}/report`).expect(200);
     expect(report.body.questions[0].answer.evaluationSource).toBe("simulated");
+    const firstEvaluation = report.body.questions[0].answer.feedback.evaluation;
+    expect(firstEvaluation).toMatchObject({
+      evaluatorVersion: "text-evidence-v1",
+      rubricVersion: "written-practice-v1",
+      evidenceSource: "server_text_practice_event",
+      simulated: true,
+      provider: { providerKind: "STUB" },
+    });
+    const firstAnswerEvent = await db
+      .selectFrom("text_practice_events")
+      .select(["id", "text"])
+      .where("interview_id", "=", id)
+      .where("kind", "=", "ANSWER")
+      .where("question_index", "=", 0)
+      .executeTakeFirstOrThrow();
+    expect(firstEvaluation.criteria.every((criterion: { support: string }) => criterion.support === "supported")).toBe(true);
+    expect(firstEvaluation.criteria[0].evidence[0]).toEqual({ eventId: firstAnswerEvent.id, quote: firstAnswerEvent.text });
     await db.updateTable("answers").set({ evaluator_kind: null }).where("id", "=", rows[0]!.id).execute();
     const legacy = await as(user).get(`/api/interviews/${id}/report`).expect(200);
     expect(legacy.body.questions[0].answer.evaluationSource).toBe("unknown");
@@ -66,6 +83,23 @@ describe("text practice", () => {
     expect(exported.textPracticeSessions).toHaveLength(1);
     await as(user).delete(`/api/interviews/${id}`).expect(204);
     expect(await db.selectFrom("text_practice_events").select("id").where("interview_id", "=", id).execute()).toHaveLength(0);
+  });
+
+  it.each([
+    ["malformed model output", "STUB_GARBAGE"],
+    ["provider failure", "STUB_FAIL"],
+  ])("fails scoring safely on %s", async (_case, answerText) => {
+    const { user, id } = await practice();
+    await as(user).post(`/api/interviews/${id}/text/start`).send({ consent: true }).expect(200);
+    await as(user)
+      .post(`/api/interviews/${id}/text/answers`)
+      .send({ requestId: randomUUID(), expectedVersion: 1, text: answerText })
+      .expect(200);
+    const answer = await db.selectFrom("answers").select(["status", "domain_rating", "communication_rating", "feedback"]).where("interview_id", "=", id).executeTakeFirstOrThrow();
+    expect(answer.status).toBe("FAILED");
+    expect(answer.domain_rating).toBeNull();
+    expect(answer.communication_rating).toBeNull();
+    expect(answer.feedback).toBeNull();
   });
 
   it("serializes competing answers so only one advances the interview", async () => {

@@ -235,13 +235,34 @@ describe("answers and scoring", () => {
     expect(after.position).toEqual({ round: 0, question: 1 });
   });
 
-  it("an empty answer gets the floor whatever the model says", async () => {
+  it("an empty answer is recorded as unscored instead of an automatic failure", async () => {
     const ada = await createUser();
     const iv = await jdInterview(ada);
     await startLive(ada, iv.id);
     await as(ada).post(`/api/interviews/${iv.id}/answers`).send({ round: 0, question: 0, transcript: [{ role: "interviewer", text: "Hello?" }] });
     const a = ((await as(ada).get(`/api/interviews/${iv.id}`)).body as Interview).answers[0]!;
-    expect(a).toMatchObject({ status: "SCORED", domainRating: 1, communicationRating: 1 });
+    expect(a).toMatchObject({ status: "SCORED", domainRating: null, communicationRating: null });
+    expect(a.feedback?.analysis).toMatch(/not scored/i);
+  });
+
+  it("does not treat a spoken response to a coding question as unanswered", async () => {
+    const ada = await createUser();
+    const iv = await jdInterview(ada);
+    const r = iv.plan!.findIndex((x) => x.questions.some((q) => q.code));
+    await startLive(ada, iv.id, { round: r, question: 0 });
+    await as(ada)
+      .post(`/api/interviews/${iv.id}/answers`)
+      .send({
+        round: r,
+        question: 0,
+        transcript: [{ role: "candidate", text: "I would use a hash map for complements and explain the O(n) trade-off." }],
+        code: "",
+        language: "python",
+      });
+    const a = ((await as(ada).get(`/api/interviews/${iv.id}`)).body as Interview).answers.find((x) => x.round === r)!;
+    expect(a.status).toBe("SCORED");
+    expect(a.domainRating).not.toBeNull();
+    expect(a.feedback?.analysis).not.toMatch(/not scored/i);
   });
 
   it("reviews code answers and returns a corrected snippet when the code is incomplete", async () => {

@@ -7,7 +7,7 @@
  */
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import type { InterviewReport, QuestionReport } from "@open-conversation/types";
+import type { AnswerFeedback, InterviewReport, QuestionReport } from "@open-conversation/types";
 import { cn } from "@open-conversation/ui";
 import { minutes, proctorWord, scoreTone, scoreWord } from "@/components/interview/format";
 
@@ -132,7 +132,15 @@ function QuestionRow({ q }: { q: QuestionReport }) {
         <span className="min-w-0 flex-1">
           <span className="line-clamp-2 text-[15px] font-medium leading-snug">{q.code ? q.text.split(/(?=Hints?:)/)[0] : q.text}</span>
           <span className="mt-0.5 block text-[12.5px] text-subtle-foreground">
-            {!a ? "Not answered" : a.status === "SCORING" ? "Being scored" : a.status === "FAILED" ? "Could not be scored" : `Domain ${a.domainRating} · Communication ${a.communicationRating}${q.code ? " · Code" : ""} · ${a.evaluationSource === "simulated" ? "Simulated demo feedback" : a.evaluationSource === "configured_provider" ? "Provider-generated feedback" : "Feedback source unknown"}`}
+            {!a
+              ? "Not answered"
+              : a.status === "SCORING"
+                ? "Being scored"
+                : a.status === "FAILED"
+                  ? "Could not be scored"
+                  : a.domainRating === null && a.communicationRating === null
+                    ? "Not scored · insufficient supported evidence"
+                    : `Domain ${a.domainRating ?? "n/a"} · Communication ${a.communicationRating ?? "n/a"}${q.code ? " · Code" : ""} · ${a.evaluationSource === "simulated" ? "Simulated demo feedback" : a.evaluationSource === "configured_provider" ? "Provider-generated feedback" : "Feedback source unknown"}`}
           </span>
         </span>
         <span className={cn("w-10 shrink-0 text-right font-display text-[20px] font-semibold tabular-nums", scoreTone(score))}>{score ?? ""}</span>
@@ -142,6 +150,7 @@ function QuestionRow({ q }: { q: QuestionReport }) {
         <div className="ml-12 mt-4 space-y-5 text-[14.5px] leading-relaxed">
           {q.code ? <p className="whitespace-pre-line text-muted-foreground">{q.text}</p> : null}
           {f?.analysis ? <p className="whitespace-pre-line">{f.analysis}</p> : null}
+          {f?.evaluation ? <EvidenceEvaluation evaluation={f.evaluation} /> : null}
           {f ? (
             <div className="grid gap-5 sm:grid-cols-3">
               <List title="Strengths" items={f.strengths} />
@@ -177,6 +186,68 @@ function QuestionRow({ q }: { q: QuestionReport }) {
         </div>
       ) : null}
     </li>
+  );
+}
+
+function EvidenceEvaluation({ evaluation }: { evaluation: NonNullable<AnswerFeedback["evaluation"]> }) {
+  return (
+    <section className="rounded-[10px] border border-border p-4" aria-label="Evidence-backed evaluation">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-subtle-foreground">Evidence-backed rubric</p>
+        <p className="text-[12px] text-subtle-foreground">
+          {evaluation.simulated ? "Simulated provider" : "Configured provider"} · {evaluation.provider.modelRef} · {evaluation.rubricVersion}
+        </p>
+      </div>
+      <p className="mt-2 text-[13px] text-muted-foreground">
+        Evidence confirms that a quotation came from your stored answer; it does not by itself prove that the evaluator&apos;s technical judgment is correct.
+      </p>
+      <div className="mt-4 space-y-4">
+        {evaluation.criteria.map((criterion) => (
+          <div key={criterion.id} className="border-t border-border pt-4 first:border-t-0 first:pt-0">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="font-medium">{criterion.label}</p>
+              <p className="text-[12.5px] text-subtle-foreground">
+                {criterion.support === "supported" ? "Supported" : criterion.support === "uncertain" ? "Uncertain" : "Unsupported"}
+                {criterion.score !== null ? ` · proposed ${criterion.score}/100` : ""}
+                {criterion.confidence !== "insufficient" ? ` · ${criterion.confidence} confidence` : ""}
+              </p>
+            </div>
+            {criterion.observations.length ? (
+              <ul className="mt-2 space-y-2">
+                {criterion.observations.map((observation, index) => (
+                  <li key={index}>
+                    <span className="text-[12px] font-semibold uppercase tracking-[0.04em] text-subtle-foreground">
+                      {observation.kind === "strength" ? "Strength" : observation.kind === "gap" ? "Gap" : "Next step"}
+                    </span>
+                    <span className="ml-2">{observation.text}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {criterion.evidence.length ? (
+              <div className="mt-2 space-y-2">
+                {criterion.evidence.map((evidence, index) => (
+                  <blockquote key={index} className="border-l border-border pl-3 text-[13.5px] text-muted-foreground">
+                    “{evidence.quote}”
+                  </blockquote>
+                ))}
+              </div>
+            ) : null}
+            {criterion.limitation ? <p className="mt-2 text-[13px] text-muted-foreground">{criterion.limitation}</p> : null}
+          </div>
+        ))}
+      </div>
+      {evaluation.limitations.length ? (
+        <div className="mt-4 rounded-md bg-muted p-3">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.04em] text-subtle-foreground">Limitations</p>
+          <ul className="mt-1 list-disc space-y-1 pl-5 text-[13px] text-muted-foreground">
+            {evaluation.limitations.map((limitation, index) => (
+              <li key={index}>{limitation}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </section>
   );
 }
 
