@@ -1,6 +1,6 @@
 # Quality, Testing and AI Evaluation Plan
 
-**Status:** Tests are specified, not yet run for this project. The upstream applications' reported test counts are not this project's test results.
+**Status:** The imported development foundation and text-practice slice have clean-checkout unit, PostgreSQL/Redis integration and offline browser CI evidence using simulated providers; see `IMPLEMENTATION_STATUS.md`. Real-provider quality, real voice, expert grading validity, accessibility, load and release-security gates remain unverified. Upstream-reported results are never treated as project results unless reproduced in this repository.
 
 ## Test pyramid
 
