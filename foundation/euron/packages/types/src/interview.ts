@@ -132,11 +132,60 @@ export interface AnswerInput {
   advance?: boolean;
 }
 
+export type EvaluationConfidence = "low" | "medium" | "high" | "insufficient";
+export type EvaluationSupport = "supported" | "uncertain" | "unsupported";
+export type EvaluationObservationKind = "strength" | "gap" | "next_step";
+
+export interface AnswerEvidenceReference {
+  /** Server-owned text-practice event that contains this quotation. */
+  eventId: string;
+  /** Exact excerpt from the stored candidate answer. */
+  quote: string;
+}
+
+export interface EvidenceBackedObservation {
+  kind: EvaluationObservationKind;
+  text: string;
+  /** Indexes into this criterion's evidence array. */
+  evidenceIndexes: number[];
+}
+
+export interface EvidenceBackedCriterion {
+  id: string;
+  label: string;
+  category: "domain" | "communication";
+  /** A model-proposed score. Only supported criteria contribute to aggregate ratings. */
+  score: number | null;
+  confidence: EvaluationConfidence;
+  support: EvaluationSupport;
+  evidence: AnswerEvidenceReference[];
+  observations: EvidenceBackedObservation[];
+  /** Why the criterion was not treated as fully supported, when applicable. */
+  limitation: string | null;
+}
+
+export interface AnswerEvaluationDetails {
+  evaluatorVersion: string;
+  rubricVersion: string;
+  evidenceSource: "server_text_practice_event";
+  provider: {
+    providerId: string;
+    providerKind: string;
+    modelId: string;
+    modelRef: string;
+  };
+  simulated: boolean;
+  criteria: EvidenceBackedCriterion[];
+  limitations: string[];
+}
+
 export interface AnswerFeedback {
   strengths: string[];
   weaknesses: string[];
   suggestions: string[];
   analysis: string;
+  /** Evidence-backed details for evaluators that support the v1 contract. */
+  evaluation?: AnswerEvaluationDetails;
   /** Code answers: a short corrected or clearer version, when one helps. */
   correctedSnippet: string | null;
 }
