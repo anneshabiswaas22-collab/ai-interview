@@ -1,0 +1,246 @@
+AI INTERVIEW - PUBLIC REPOSITORIES AND MODEL REFERENCES
+====================================================
+Updated: 2026-11-15
+Project: https://github.com/anneshabiswaas22-collab/ai-interview
+
+PURPOSE
+-------
+Complete reference list of public source repositories and public model resources
+suggested during the AI Interview project discussion. This file is for Codex,
+reviewers and contributors studying, integrating and comparing components.
+
+IMPORTANT
+---------
+- This is NOT a list of dependencies already installed in our application.
+- ONE owned monorepo should be the product; DO NOT blindly merge every repo.
+- Prefer one existing feature/provider per concern; audit actual code and tests.
+- License notes are research snapshots, not legal clearance. Pin each version
+  and review its LICENSE, NOTICE, third-party assets, models and datasets.
+- Hosted API services, GPU training and paid provider accounts can incur cost.
+- Market-leading products listed at the end are proprietary benchmarks, not
+  open-source repositories to copy.
+
+A. FULL AI INTERVIEW / MOCK INTERVIEW APPLICATIONS
+--------------------------------------------------
+01. Euron Open Conversation (preferred application foundation candidate)
+    Repo: https://github.com/euron-sde-team/euron-open-real-time-ai-conversation-system
+    Use: candidate web app, backend, account/admin, interview workflow,
+         resume/JD plan, real-time provider adapters, reports, quotas.
+    License snapshot: MIT.
+    Decision: audit and use ONE application foundation if acceptable.
+    Caveat: offline voice/mock scoring != real AI; verify provider behavior.
+
+02. DeepInterview
+    Repo: https://github.com/ngoanpv/DeepInterview
+    Use: multi-agent preparation, adaptive questioning, voice, coaching,
+         local speech/model adapters and interview lifecycle.
+    License snapshot: Apache-2.0.
+    Decision: study/ selectively adapt compatible components.
+    Caveat: its own README labels parts as early/mock/provider-dependent.
+
+03. GrillKit (corrected working owner: Forkfield)
+    Repo: https://github.com/Forkfield/grillkit
+    Use: technical question tracks, interview timing, coding exercises,
+         grading interface, local voice patterns.
+    License snapshot: Apache-2.0 per repository LICENSE (GitHub metadata
+         may show NOASSERTION).
+    Decision: reference or selectively integrate with permission.
+    Caveat: existing coding integration relies on Judge0; check its terms.
+
+04. Interview GPT
+    Repo: https://github.com/daixinwang/interview-gpt
+    Use: smaller multi-agent interviewer, personalities, follow-up logic,
+         structured feedback.
+    License snapshot: MIT.
+    Decision: architecture/behavior reference; not another full base.
+
+05. Interviewa
+    Repo: https://github.com/sh78ba/Interviewa
+    Use: resume-aware technical interviews, voice and reports, optional
+         Colab-style provider experiments.
+    License snapshot: AGPL-3.0-or-later per LICENSE.
+    Decision: study features; do not copy into a proprietary platform
+         without resolving network-use source obligations.
+
+06. Local AI Interviewer
+    Repo: https://github.com/Yuvakunaal/local-ai-interviewer
+    Use: privacy-oriented on-device mock interviewing, Ollama backend,
+         local voice/report workflow.
+    License snapshot: MIT.
+    Decision: reference for private/offline product mode.
+
+B. REAL-TIME VOICE AND SPEECH
+-----------------------------
+07. LiveKit Agents
+    Repo: https://github.com/livekit/agents
+    Use: low-latency speech/turn handling, voice agent transport and tools.
+    License snapshot: Apache-2.0.
+    Decision: integrate SDK only if superior to foundation's voice system.
+
+08. faster-whisper
+    Repo: https://github.com/SYSTRAN/faster-whisper
+    Use: local speech-to-text, transcription processing.
+    License snapshot: MIT for source; model weights independently licensed.
+    Decision: optional self-hosted STT provider adapter.
+
+09. Kokoro 82M (public model resource, NOT a GitHub code repo entry)
+    Model: https://huggingface.co/hexgrad/Kokoro-82M
+    Use: low-cost text-to-speech voices.
+    License: verify checkpoint and individual voice asset terms.
+    Decision: optional TTS provider, not automatically bundled.
+
+C. OPEN LLM TRAINING, MODELS AND INFERENCE
+-----------------------------------------
+10. Unsloth
+    Repo: https://github.com/unslothai/unsloth
+    Use: QLoRA/SFT fine-tuning, efficient training workflows.
+    License snapshot: Apache-2.0 core; optional Studio pieces may differ.
+    Decision: preferred experiment framework for our model pipeline.
+
+11. Unsloth notebooks
+    Repo: https://github.com/unslothai/notebooks
+    Use: starter Colab/GPU scripts and example training recipes.
+    License snapshot: LGPL-3.0 (as of this check).
+    Decision: reference only or comply with exact terms before reuse.
+
+12. Hugging Face PEFT
+    Repo: https://github.com/huggingface/peft
+    Use: adapters/LoRA model fine-tuning.
+    License snapshot: Apache-2.0.
+    Decision: training dependency, potentially via Unsloth.
+
+13. Hugging Face TRL
+    Repo: https://github.com/huggingface/trl
+    Use: SFT and preference optimization/DPO experiments.
+    License snapshot: Apache-2.0.
+    Decision: training dependency if needed.
+
+14. vLLM
+    Repo: https://github.com/vllm-project/vllm
+    Use: scalable GPU model inference and serving.
+    License snapshot: Apache-2.0.
+    Decision: add after benchmarking actual inference costs and memory.
+
+15. Ollama
+    Repo: https://github.com/ollama/ollama
+    Use: easy local models and development/test inference.
+    License snapshot: MIT.
+    Decision: local development model provider, not mandatory in production.
+
+16. llama.cpp
+    Repo: https://github.com/ggml-org/llama.cpp
+    Use: efficient local/quantized CPU/GPU inference.
+    License snapshot: MIT.
+    Decision: alternative serving approach; avoid duplicating provider stacks.
+
+17. Qwen3-4B (model checkpoint, not a code repository)
+    Model: https://huggingface.co/Qwen/Qwen3-4B
+    Use: first open-weight LLM fine-tuning benchmark candidate.
+    License: verify exact checkpoint card, derivative/commercial rights
+         and architecture compatibility when training.
+
+18. Qwen3.5-9B (model checkpoint, not a code repository)
+    Model: https://huggingface.co/Qwen/Qwen3.5-9B
+    Use: larger benchmark/upgrade candidate if available and economical.
+    License: verify exact checkpoint/model card and current availability.
+
+D. CODING INTERVIEWS AND EXECUTION
+----------------------------------
+19. Piston
+    Repo: https://github.com/engineer-man/piston
+    Use: self-hosted isolated execution of candidate programs.
+    License snapshot: MIT.
+    Decision: preferred coding engine candidate after sandbox security audit.
+    Caveat: public hosted API is NOT a general free production backend.
+
+20. Monaco Editor
+    Repo: https://github.com/microsoft/monaco-editor
+    Use: rich browser coding editor, syntax, completions.
+    License snapshot: MIT.
+    Decision: use only if existing Euron editor is inadequate.
+
+21. Judge0
+    Repo: https://github.com/judge0/judge0
+    Use: alternate code execution/judging engine; GrillKit uses it.
+    License snapshot: GPL-3.0.
+    Decision: license/legal review required before any proprietary integration;
+         not our preferred default.
+
+E. SYSTEM DESIGN WHITEBOARDS
+----------------------------
+22. Excalidraw
+    Repo: https://github.com/excalidraw/excalidraw
+    Use: system-design drawing and candidate whiteboard UX.
+    License snapshot: MIT.
+    Decision: embed as an approved package; build interview-specific
+         persistence/evaluation rather than a drawing engine.
+
+23. tldraw
+    Repo: https://github.com/tldraw/tldraw
+    Use: alternate infinite canvas/whiteboard SDK.
+    License: repository-specific SDK/production licensing; do NOT assume MIT.
+    Decision: optional comparison; production may need paid/commercial key.
+
+F. AI QUALITY, TRACING AND COMMERCIAL INFRASTRUCTURE
+---------------------------------------------------
+24. Promptfoo
+    Repo: https://github.com/promptfoo/promptfoo
+    Use: prompt/agent evaluation, security red teaming, CI regressions.
+    License snapshot: MIT.
+    Decision: integrate into model and agent evaluation pipeline.
+
+25. Langfuse
+    Repo: https://github.com/langfuse/langfuse
+    Use: model traces, quality observation, prompt and cost monitoring.
+    License snapshot: MIT core; enterprise directories separately licensed.
+    Decision: integrate for redacted observability, avoid PII leakage.
+
+26. Stripe Node SDK
+    Repo: https://github.com/stripe/stripe-node
+    Use: payments/subscriptions if Stripe is eligible for our business.
+    License snapshot: MIT.
+    Decision: later; not an immediate engineering dependency. Verify local
+         payments availability and commercial requirements.
+
+G. PROPRIETARY MARKET BENCHMARKS - NOT OPEN SOURCE
+--------------------------------------------------
+These are products for research and feature/UX benchmarking, NOT repositories
+from which to copy code, private questions, recordings or brand assets.
+
+27. Hello Interview  https://www.hellointerview.com/
+    Benchmark: technical interviews and system design.
+28. Final Round AI  https://www.finalroundai.com/
+    Benchmark: candidate interview workflows and personalized prep.
+29. Huru            https://huru.ai/
+    Benchmark: general voice/video job interview practice.
+30. Yoodli          https://yoodli.ai/
+    Benchmark: speaking and communication coaching.
+31. CodeSignal      https://codesignal.com/
+    Benchmark: secure technical assessments and review workflows.
+32. HireVue         https://www.hirevue.com/
+    Benchmark: employer-facing assessment and governance.
+
+RECOMMENDED IMPLEMENTATION SEQUENCE
+-----------------------------------
+First:  audit Euron, our existing code and tests. Do not recreate built-ins.
+Then:   build the core candidate interview experience (auth, role, questions,
+        transcript, report) and harden server-owned scoring/session state.
+Next:   assess LiveKit/faster-whisper/Kokoro for voice, Piston for code,
+        Excalidraw for system design; integrate only necessary components.
+After:  establish Promptfoo + Langfuse benchmark/monitoring, collect permitted
+        training examples, use Qwen + Unsloth/PEFT/TRL to fine-tune only after
+        base-model quality benchmarks.
+Later:  add vLLM if economics justify GPU hosting and Stripe (or another
+        payment processor) after subscription demand has been established.
+
+MORE PROJECT CONTEXT
+--------------------
+docs/PROJECT_CONTEXT.md
+docs/UPSTREAM_SOURCES.md
+docs/REUSE_VS_BUILD.md
+docs/LICENSE_AUDIT.md
+docs/IMPLEMENTATION_CHECKLIST.md
+AGENTS.md
+
+WARNING: The legal, maintenance and compatibility status can change at any
+time. No source or weight should be imported solely because it appears here.
