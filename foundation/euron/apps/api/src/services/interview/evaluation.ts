@@ -241,6 +241,17 @@ export function validateTextEvaluation(input: {
           item.evidenceIndexes.every((index) => index >= 0 && index < evidence.length),
       );
 
+    const observationKinds = new Map<string, Set<string>>();
+    for (const item of assessment.observations) {
+      const key = item.text.trim().toLocaleLowerCase();
+      const kinds = observationKinds.get(key) ?? new Set<string>();
+      kinds.add(item.kind);
+      observationKinds.set(key, kinds);
+      if (kinds.has("strength") && kinds.has("gap")) {
+        throw new EvaluationContractError("Evaluator returned the same claim as both a strength and a gap");
+      }
+    }
+
     if (!evidenceValid || !observationsValid) {
       const limitation = !evidenceValid
         ? "The model cited evidence that does not exactly match the stored candidate answer; this criterion was not scored."
