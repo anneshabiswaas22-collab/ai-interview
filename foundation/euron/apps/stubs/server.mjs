@@ -162,12 +162,46 @@ export function stubScore(userText) {
   };
 }
 
+export function stubEvidenceScore(userText) {
+  const answer = fenced(userText, "candidate-answer");
+  if (!answer.trim()) {
+    return {
+      criteria: ["domain_correctness", "domain_depth", "role_relevance", "communication_clarity"].map((criterionId) => ({
+        criterionId,
+        score: null,
+        confidence: "insufficient",
+        evidence: [],
+        observations: [],
+      })),
+    };
+  }
+  const wordCount = answer.trim().split(/\s+/).filter(Boolean).length;
+  const base = Math.min(92, 45 + wordCount);
+  const quote = answer.slice(0, Math.min(120, answer.length));
+  const criterion = (criterionId, score, kind, text) => ({
+    criterionId,
+    score,
+    confidence: "medium",
+    evidence: [{ quote }],
+    observations: [{ kind, text, evidenceIndexes: [0] }],
+  });
+  return {
+    criteria: [
+      criterion("domain_correctness", base, "strength", "The response addresses the question with relevant content."),
+      criterion("domain_depth", Math.max(1, base - 5), "gap", "The reasoning could make one trade-off or constraint more explicit."),
+      criterion("role_relevance", base, "strength", "The response stays focused on the interview question."),
+      criterion("communication_clarity", Math.min(95, base + 4), "next_step", "Keep the same structure and make the outcome explicit."),
+    ],
+  };
+}
+
 /** What the model says, given the system prompt and the last user text. */
 export function decide(system, user) {
   if (/STUB_FAIL/.test(user)) return { status: 500 };
   if (/STUB_RATELIMIT/.test(user)) return { status: 429 };
   if (/STUB_GARBAGE/.test(user)) return { text: "I am not going to answer in JSON today." };
   if (/Output format: interview_plan/.test(system)) return { text: JSON.stringify(stubPlan(user)) };
+  if (/Output format: answer_score_evidence_v1/.test(system)) return { text: JSON.stringify(stubEvidenceScore(user)) };
   if (/Output format: answer_score/.test(system)) return { text: JSON.stringify(stubScore(user)) };
   if (/single word: ok/i.test(user)) return { text: "ok" };
   return { text: `This is a stub answer to: "${user.slice(0, 120)}".` };
