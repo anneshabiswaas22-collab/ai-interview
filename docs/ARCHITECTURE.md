@@ -1,6 +1,6 @@
-# System Architecture — Proposed, Not Yet Implemented
+# System Architecture — Development Foundation and Target
 
-**Architecture status: design target.** The Euron repository is a *candidate* application foundation, not yet imported. Its documented stack is Next.js + Express + PostgreSQL + Redis. Confirm it by source/runtime audit before adopting a different stack.
+**Architecture status:** a pinned, adapted Euron application is now the provisional development foundation under `foundation/euron`, using Next.js + Express + PostgreSQL + Redis. The diagram below remains the target for capabilities that are not implemented yet. Do not create a second auth/database/session application merely to match the diagram.
 
 ## Design goals
 
@@ -37,9 +37,9 @@ flowchart TB
 
 Diagram shows a target architecture, **not deployed services**.
 
-## Proposed monorepo layout
+## Repository layout and long-term module map
 
-Maintain/reshape after Euron audit; do not delete working upstream code simply to match folder names:
+The working application currently lives under `foundation/euron`; retain it and evolve boundaries incrementally. The following is a long-term responsibility map, not a request to move files:
 
 ```text
 ai-interview/
@@ -65,7 +65,7 @@ ai-interview/
   AGENTS.md
 ```
 
-Actual directories do not yet exist. Contributors should not claim they do.
+`foundation/euron/apps/web`, `foundation/euron/apps/api`, `foundation/euron/packages`, and `foundation/euron/db` are the current implementation. `packages/interview-core` is an experimental policy prototype only. Other directories in the map above remain future options and must not be claimed as implemented.
 
 ## Responsibilities
 
