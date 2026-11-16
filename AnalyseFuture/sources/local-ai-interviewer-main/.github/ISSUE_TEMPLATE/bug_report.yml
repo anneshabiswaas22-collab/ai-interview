@@ -1,0 +1,71 @@
+name: Bug report
+description: Something does not work as described
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. For usage questions, see SUPPORT.md or Discussions (if enabled). Security problems: please do **not** use this form; see SECURITY.md.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What did you do, step by step?
+      placeholder: |
+        1. Open ...
+        2. Click ...
+        3. See ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: What happened instead? Include any message shown on screen.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: "Output of `git rev-parse --short HEAD` (or the release you downloaded)."
+      placeholder: "e.g. a1b2c3d"
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Operating system and hardware
+      placeholder: "macOS 26 / Apple M2 / 8 GB, Windows 11, Ubuntu 24.04 ..."
+    validations:
+      required: true
+  - type: input
+    id: mode
+    attributes:
+      label: AI mode and model
+      placeholder: "local qwen3.5:4b / cloud gpt-oss:120b ..."
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: "Chrome 140"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log lines
+      description: |
+        A few lines from `logs/backend.log`. The app does not log answers or resume text, but please check and remove anything personal before pasting.
+      render: text
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I have not pasted API keys, resume contents, interview answers or other personal data.
+          required: true

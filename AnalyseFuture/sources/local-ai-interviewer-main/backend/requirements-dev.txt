@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest>=8.3,<9.0
+pypdf>=5.0,<7.0
+ruff==0.8.6              # lint (bug-finding rules only, see ruff.toml); pinned so CI and laptops agree
+pytest-cov>=5,<7         # coverage: python -m pytest backend --cov=backend/app
+pip-audit>=2.7,<3        # known-vulnerability check of the installed dependencies

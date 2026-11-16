@@ -1,0 +1,16 @@
+# Python lint configuration (backend/ and scripts/). Run: backend/.venv/bin/ruff check .
+#
+# Deliberately limited to rules that find bugs (pyflakes, syntax errors, bugbear), not style: the code base has a consistent
+# style already and a mass reformat would bury real changes in noise. Formatting is not enforced by a tool.
+target-version = "py310"
+line-length = 160
+extend-exclude = ["frontend", "data", "logs", "backend/.venv"]
+
+[lint]
+select = ["E9", "F", "B", "RUF100"]
+ignore = [
+  "B008",   # FastAPI's documented `File()` / `Query()` default-argument idiom
+]
+
+[lint.per-file-ignores]
+"backend/tests/**" = ["B011"]   # `assert False` style is fine in tests

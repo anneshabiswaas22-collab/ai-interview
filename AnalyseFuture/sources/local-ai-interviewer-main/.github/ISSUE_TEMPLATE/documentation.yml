@@ -1,0 +1,30 @@
+name: Documentation problem
+description: Something in the docs is wrong, unclear or missing
+labels: [documentation]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page or file
+      description: "Which page, section or URL? For example README section 9, or docs/development.md."
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong or missing?
+      description: What did you expect to find, or what did you try that did not match what the docs say?
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested fix
+      description: Optional. Proposed wording or the correct command, and your operating system if it matters.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I have not pasted API keys, resume contents, interview answers or other personal data.
+          required: true

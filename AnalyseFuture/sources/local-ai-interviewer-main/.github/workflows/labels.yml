@@ -1,0 +1,31 @@
+# Creates or updates the issue labels defined in .github/labels.yml. Run by a maintainer from the Actions tab
+# (Run workflow). It never deletes labels that are not in the file.
+name: Sync labels
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Create or update labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, re, subprocess
+          text = open(".github/labels.yml", encoding="utf-8").read()
+          for block in re.split(r"\n(?=- name:)", text):
+              m = {k: v.strip().strip('"') for k, v in re.findall(r"(name|color|description):\s*(.+)", block)}
+              if "name" in m:
+                  subprocess.run(["gh", "label", "create", m["name"], "--color", m["color"], "--description", m.get("description", ""), "--force"], check=True)
+                  print("synced", m["name"])
+          PY

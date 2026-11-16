@@ -1,0 +1,65 @@
+# Publishes a GitHub release when a maintainer pushes a version tag (v1.2.3). Runs the same checks as CI first, verifies that the
+# tag, the backend version and frontend/package.json agree, then attaches a source archive and the CHANGELOG section as notes.
+# Nothing is deployed anywhere: users run the app from source. See docs/maintainers/releasing.md.
+name: Release
+
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+*"]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write          # create the release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0                 # full history: the tag must be checked against main
+      - name: The tagged commit is on main
+        run: |
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || { echo "::error::$GITHUB_REF_NAME does not point to a commit on main"; exit 1; }
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Tag matches the application version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          backend=$(python -c "import re,pathlib; print(re.search(r'__version__ = \"(.+)\"', pathlib.Path('backend/app/__init__.py').read_text()).group(1))")
+          frontend=$(node -p "require('./frontend/package.json').version")
+          echo "tag=$tag backend=$backend frontend=$frontend"
+          [ "$tag" = "$backend" ] && [ "$tag" = "$frontend" ] || { echo "::error::Tag v$tag does not match backend $backend / frontend $frontend"; exit 1; }
+      - name: Backend tests
+        run: |
+          python -m pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+          python -m pytest backend -q
+      - name: Frontend checks
+        working-directory: frontend
+        run: npm ci && npm run lint && npm run typecheck && npm test && npm run build
+      - name: Release notes from CHANGELOG
+        run: |
+          ver="${GITHUB_REF_NAME#v}"
+          awk -v v="$ver" 'index($0, "## [" v "]") == 1 {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md > notes.md
+          [ -s notes.md ] || { echo "::error::CHANGELOG.md has no section '## [$ver]'"; exit 1; }
+          cat notes.md
+      - name: Source archive
+        run: git archive --format=zip --prefix="local-ai-interviewer-${GITHUB_REF_NAME}/" -o "local-ai-interviewer-${GITHUB_REF_NAME}.zip" HEAD
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pre=""; case "$GITHUB_REF_NAME" in *-*) pre="--prerelease";; esac
+          # CHANGELOG section first, then GitHub's generated list of merged PRs (grouped by label, see .github/release.yml)
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md --generate-notes --verify-tag $pre "local-ai-interviewer-${GITHUB_REF_NAME}.zip"

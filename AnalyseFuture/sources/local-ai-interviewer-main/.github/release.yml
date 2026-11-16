@@ -1,0 +1,18 @@
+# Categories for GitHub's generated release notes. release.yml's workflow passes --generate-notes, so each release shows the
+# CHANGELOG section followed by the merged pull requests grouped like this.
+changelog:
+  exclude:
+    labels: [dependencies]
+  categories:
+    - title: Breaking changes
+      labels: [breaking change]
+    - title: Security
+      labels: [security]
+    - title: New features
+      labels: [enhancement]
+    - title: Bug fixes
+      labels: [bug]
+    - title: Documentation
+      labels: [documentation]
+    - title: Other changes
+      labels: ["*"]

@@ -1,0 +1,32 @@
+# Optional local hooks that catch what CI would reject, before you push.
+#   pip install pre-commit && pre-commit install        (runs on every commit; `pre-commit run --all-files` to check everything)
+# Hooks are limited to fast checks with a clear benefit; formatting is not enforced.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.6                     # keep equal to the ruff pin in backend/requirements-dev.txt
+    hooks:
+      - id: ruff
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=800"]
+      - id: detect-private-key
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-json
+        exclude: ^frontend/tsconfig\.json$     # tsconfig allows comments
+  - repo: local
+    hooks:
+      - id: docs-links
+        name: Markdown links, images and anchors
+        entry: python scripts/check_docs.py      # `python` exists in pre-commit's own environment on every OS
+        language: python
+        pass_filenames: false
+        files: \.md$
+      - id: eslint
+        name: ESLint (frontend)
+        entry: npm --prefix frontend run lint     # no shell needed, so it also runs on Windows
+        language: system
+        pass_filenames: false
+        files: ^frontend/src/.*\.(ts|tsx)$

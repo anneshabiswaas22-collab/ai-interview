@@ -1,0 +1,52 @@
+# Issue labels (synced by .github/workflows/labels.yml). Kept small on purpose: type, area, and contributor signals.
+- name: bug
+  color: d73a4a
+  description: Something does not work as documented
+- name: enhancement
+  color: a2eeef
+  description: New feature or improvement
+- name: documentation
+  color: 0075ca
+  description: Docs, README, guides
+- name: question
+  color: d876e3
+  description: Usage question (consider Discussions)
+- name: good first issue
+  color: 7057ff
+  description: Small, well-described, good for newcomers
+- name: help wanted
+  color: 008672
+  description: Maintainers would welcome a pull request
+- name: needs reproduction
+  color: fbca04
+  description: Cannot act on it until it can be reproduced
+- name: frontend
+  color: c5def5
+  description: React / TypeScript UI
+- name: backend
+  color: bfd4f2
+  description: FastAPI services, database, model integration
+- name: evaluation
+  color: f9d0c4
+  description: Grading, profiles, follow-ups, reports
+- name: platform
+  color: e4e669
+  description: Launcher, Windows / Linux / macOS specifics
+- name: testing
+  color: ededed
+  description: Tests and test infrastructure
+- name: ci
+  color: 5319e7
+  description: GitHub Actions and automation
+- name: security
+  color: b60205
+  description: Security or privacy issue (report vulnerabilities privately)
+- name: performance
+  color: fef2c0
+  description: Speed, memory, model load time
+- name: breaking change
+  color: 000000
+  description: Requires users to change something when upgrading
+- name: dependencies
+  color: 0366d6
+  description: Dependency updates
