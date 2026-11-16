@@ -8,6 +8,8 @@
 
 ## Start here
 
+**Durable project memory (read this when continuing from a new AI/chat):** [Master project handoff](docs/MASTER_PROJECT_HANDOFF.md) · [Research and repository decisions](docs/RESEARCH_AND_REPOSITORY_DECISIONS.md) · [Conversation context archive](docs/CHAT_CONTEXT_ARCHIVE.md) · [Fresh-chat / Codex continuation prompt](docs/AI_CONTINUATION_PROMPT.md)
+
 **Public source-study inventory:** [REFERENCE_REPOSITORIES.txt](REFERENCE_REPOSITORIES.txt) (public repos, model weights, licenses and competitor benchmarks).
 
 **Begin implementing:** [29-step ordered checklist](docs/IMPLEMENTATION_CHECKLIST.md) · [Verified implementation status](docs/IMPLEMENTATION_STATUS.md) · [First working code](packages/interview-core/README.md) · [Codex blocker handoff](docs/CODEX_BLOCKERS.md)
@@ -19,7 +21,7 @@
 | You are… | Read these first |
 | --- | --- |
 | A new developer | [Vision](docs/VISION.md) → [Requirements](docs/PRODUCT_REQUIREMENTS.md) → [Architecture](docs/ARCHITECTURE.md) → [Developer setup](docs/DEVELOPER_SETUP.md) |
-| An AI coding agent / Codex | [AGENTS.md](AGENTS.md) → [Reuse vs build](docs/REUSE_VS_BUILD.md) → [Roadmap](docs/ROADMAP.md) |
+| An AI coding agent / Codex | [AGENTS.md](AGENTS.md) → [Master project handoff](docs/MASTER_PROJECT_HANDOFF.md) → [Research decisions](docs/RESEARCH_AND_REPOSITORY_DECISIONS.md) → [Verified implementation status](docs/IMPLEMENTATION_STATUS.md) |
 | An ML engineer | [Interview engine](docs/INTERVIEW_ENGINE.md) → [Models and fine-tuning](docs/MODEL_AND_FINETUNING.md) → [Quality evaluation](docs/QUALITY_AND_TESTING.md) |
 | A product contributor | [Feature matrix](docs/FEATURE_MATRIX.md) → [Competitor benchmarks](docs/COMPETITOR_BENCHMARKS.md) |
 | A security or legal reviewer | [Security and privacy](docs/SECURITY_AND_PRIVACY.md) → [License audit](docs/LICENSE_AUDIT.md) |
@@ -96,7 +98,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [developer setup guide](docs/DEV
 - **Product:** [Vision](docs/VISION.md), [Requirements](docs/PRODUCT_REQUIREMENTS.md), [Competitor benchmarks](docs/COMPETITOR_BENCHMARKS.md), [Feature matrix](docs/FEATURE_MATRIX.md)
 - **Engineering:** [Architecture](docs/ARCHITECTURE.md), [Interview engine](docs/INTERVIEW_ENGINE.md), [API contracts](docs/API_CONTRACTS.md), [Data model](docs/DATA_MODEL.md), [Voice/coding/whiteboard](docs/VOICE_CODING_WHITEBOARD.md)
 - **AI/quality:** [Model & fine-tuning](docs/MODEL_AND_FINETUNING.md), [Testing & evaluation](docs/QUALITY_AND_TESTING.md)
-- **Execution:** [Project context](docs/PROJECT_CONTEXT.md), [Codex kickoff](docs/CODEX_KICKOFF.md), [Pinned upstream refs](docs/UPSTREAM_SOURCES.md), [Operations](docs/OPERATIONS_DEPLOYMENT.md), [Roadmap](docs/ROADMAP.md), [Reuse vs build](docs/REUSE_VS_BUILD.md), [Credit efficiency](docs/CREDIT_OPTIMIZATION.md), [Developer setup](docs/DEVELOPER_SETUP.md), [AI agent instructions](AGENTS.md)
+- **Execution / continuity:** [Master project handoff](docs/MASTER_PROJECT_HANDOFF.md), [Research decisions](docs/RESEARCH_AND_REPOSITORY_DECISIONS.md), [Conversation context archive](docs/CHAT_CONTEXT_ARCHIVE.md), [Fresh-chat continuation prompt](docs/AI_CONTINUATION_PROMPT.md), [Project context](docs/PROJECT_CONTEXT.md), [Codex kickoff](docs/CODEX_KICKOFF.md), [Pinned upstream refs](docs/UPSTREAM_SOURCES.md), [Operations](docs/OPERATIONS_DEPLOYMENT.md), [Roadmap](docs/ROADMAP.md), [Reuse vs build](docs/REUSE_VS_BUILD.md), [Credit efficiency](docs/CREDIT_OPTIMIZATION.md), [Developer setup](docs/DEVELOPER_SETUP.md), [AI agent instructions](AGENTS.md)
 - **Governance:** [Security & privacy](docs/SECURITY_AND_PRIVACY.md), [License audit](docs/LICENSE_AUDIT.md), [Architecture decisions](docs/decisions/0001-monorepo-reuse-first.md)
 
 _This development candidate is not a deployed product. Last reviewed: 2026-11-14._
