@@ -8,11 +8,14 @@ Build the repository owner's independently branded, commercial-grade AI intervie
 
 ## Mandatory reading order
 
-1. [README](README.md) and [Vision](docs/VISION.md).
-2. [PRD](docs/PRODUCT_REQUIREMENTS.md) and [Feature matrix](docs/FEATURE_MATRIX.md).
-3. [Roadmap](docs/ROADMAP.md), [Architecture](docs/ARCHITECTURE.md), [Reuse vs build](docs/REUSE_VS_BUILD.md).
-4. [License audit](docs/LICENSE_AUDIT.md), [Security](docs/SECURITY_AND_PRIVACY.md), [Contributor guide](CONTRIBUTING.md).
-5. Relevant subsystem spec before editing it.
+1. [README](README.md) and [Master project handoff](docs/MASTER_PROJECT_HANDOFF.md).
+2. [Research/repository decisions](docs/RESEARCH_AND_REPOSITORY_DECISIONS.md) and [Verified implementation status](docs/IMPLEMENTATION_STATUS.md).
+3. [Vision](docs/VISION.md), [PRD](docs/PRODUCT_REQUIREMENTS.md) and [Feature matrix](docs/FEATURE_MATRIX.md).
+4. [Roadmap](docs/ROADMAP.md), [Architecture](docs/ARCHITECTURE.md), [Reuse vs build](docs/REUSE_VS_BUILD.md).
+5. [License audit](docs/LICENSE_AUDIT.md), [Security](docs/SECURITY_AND_PRIVACY.md), [Contributor guide](CONTRIBUTING.md).
+6. Relevant subsystem spec before editing it.
+
+When continuing from a fresh AI/chat session, use [AI_CONTINUATION_PROMPT.md](docs/AI_CONTINUATION_PROMPT.md). The [conversation context archive](docs/CHAT_CONTEXT_ARCHIVE.md) preserves the substantive owner instructions and prior decisions; do not ask the owner to reconstruct the old chat.
 
 ## Non-negotiable workflow
 
