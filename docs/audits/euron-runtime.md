@@ -1,6 +1,8 @@
 # Euron foundation audit
 
-Reviewed: 2026-11-14. This is an in-progress audit, not adoption or a security certification.
+Reviewed: 2026-11-14. This is an in-progress audit, not a security certification.
+
+> Historical decision note: this audit recorded the pre-import gate. Its original recommendation is preserved below as audit history. The browser verification and Zod remediation were subsequently completed, and [ADR 0003](../decisions/0003-candidate-foundation.md) authorized an adapted development-only import under `foundation/euron`. That import is not production approval.
 
 ## Exact sources
 
@@ -41,7 +43,7 @@ The [upstream checks run at the pinned commit](https://github.com/euron-sde-team
 | Real model/voice/microphone | Not run; no provider or microphone test is implied by the stub. |
 | Security, accessibility, data handling and dependency audit | Partial source inspection only; not approved. |
 
-## Recommendation and gate
+## Historical recommendation and gate
 
 Euron remains the leading reuse candidate, but **do not import it or declare the architecture adopted** until the browser failure and high dependency advisory are resolved, and the above evidence, event, privacy and dependency gaps have a concrete integration plan. Avoid building another complete auth, database, or interview application alongside it. The existing interview core is a prototype, not yet the production source of truth. Use one eventual session contract and one auth/database stack.
 

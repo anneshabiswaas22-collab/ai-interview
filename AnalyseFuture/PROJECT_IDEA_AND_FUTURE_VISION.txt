@@ -1,0 +1,546 @@
+AI INTERVIEW — DETAILED PRODUCT IDEA AND LONG-TERM VISION
+Created: 17 November 2026
+
+DOCUMENT STATUS
+
+This is a product and engineering vision, not a claim that every feature already works.
+The current repository contains a development candidate, experimental policy code,
+documentation, and preserved third-party research projects. A feature is implemented only
+after it runs in the authoritative application and passes the relevant tests.
+
+
+1. THE PRODUCT IDEA
+
+AI Interview should become a candidate-first, evidence-based interview practice platform for
+software professionals. It should simulate the depth of a thoughtful human interviewer, ask
+relevant follow-up questions, support text, speech, code, and system-design exercises, and turn
+each session into a precise personal improvement plan.
+
+The core promise is simple:
+
+A candidate completes a realistic practice interview and can clearly understand:
+
+- what they did well;
+- what was incomplete or technically incorrect;
+- the exact answer, code result, or design decision supporting each observation;
+- what to study or practise next;
+- whether their performance is improving over time.
+
+The first market is interview preparation. Employer assessment may be explored later, but only
+with separate governance, validated job-related rubrics, human oversight, accommodations, and
+an appeal process. The product must never become an opaque automatic hire/reject engine.
+
+
+2. THE PROBLEM
+
+Many AI interview products can generate questions and polished-looking scores. That does not
+prove that the interview was realistic or the score was correct. Common weaknesses include:
+
+- generic questions unrelated to the candidate's prior answer;
+- invented or unsupported feedback;
+- shallow technical evaluation;
+- poor handling of silence, interruption, reconnection, or long interviews;
+- coding answers scored by a language model instead of actual tests;
+- hidden privacy costs when resumes, audio, or transcripts are sent to providers;
+- scores that imply false precision or penalize accent, disability, or communication style;
+- vendor lock-in and unpredictable model costs.
+
+AI Interview should compete through trust, technical depth, evidence, privacy, and measurable
+usefulness rather than through the largest feature list.
+
+
+3. PRIMARY USERS
+
+Initial users:
+
+- junior engineers preparing for their first technical interviews;
+- mid-level engineers practising deeper technical discussion;
+- senior and staff engineers preparing for architecture and leadership interviews;
+- frontend, backend, full-stack, mobile, DevOps, data, AI/ML, and security candidates;
+- candidates practising behavioural, resume-led, coding, SQL, and system-design interviews;
+- candidates who need accessible text alternatives, captions, slower pacing, or repeat practice;
+- non-native English speakers who want communication coaching without accent discrimination.
+
+Later users:
+
+- mentors and interview coaches, with candidate-controlled sharing;
+- universities, bootcamps, and career programmes;
+- employers and recruiters, only after tenant isolation, rubric validation, fairness review,
+  human decision-making, accommodations, and legal review are complete.
+
+
+4. THE FLAGSHIP EXPERIENCE
+
+A candidate:
+
+1. Creates an account and selects role, level, interview type, language, duration, and goals.
+2. Optionally uploads a resume or job description after seeing clear privacy and retention terms.
+3. Reviews what the system extracted and can remove or correct it.
+4. Receives a bounded interview plan with competencies and approximate topic coverage.
+5. Completes a text or voice interview with contextual, limited follow-up questions.
+6. For coding, writes and runs code in an isolated executor with deterministic tests.
+7. For system design, creates a diagram and explains trade-offs verbally or in text.
+8. Can reconnect without losing authoritative session progress.
+9. Receives a report whose important statements cite transcript events, test results, or diagram
+   decisions and explicitly mark uncertainty or insufficient evidence.
+10. Receives targeted drills and a learning plan, then repeats comparable practice later.
+11. Controls deletion, export, sharing, transcript retention, and optional audio retention.
+
+
+5. CORE DIFFERENTIATORS
+
+A. Evidence-backed coaching
+
+Every meaningful evaluation statement should point to exact evidence. Unsupported claims should
+be rejected instead of displayed. Evidence presence alone does not prove a score is correct, so
+quality still requires expert-reviewed evaluation.
+
+B. Real technical verification
+
+Runnable code should be judged by tests and sandbox outcomes. Architectural feedback should
+refer to stated requirements and trade-offs. A language model may explain results, but should
+not replace deterministic evidence.
+
+C. Adaptive but controlled interviewing
+
+Questions should respond to the previous answer while remaining bounded by role, rubric, time,
+follow-up budget, and server-owned session state. Candidate content must never control system
+policy, tools, authorization, or scoring.
+
+D. One continuous learning journey
+
+Interview setup, practice, transcript, feedback, drills, history, and progress should feel like
+one coherent product rather than unrelated AI tools.
+
+E. Provider flexibility
+
+Hosted and open-weight models, speech-to-text, and text-to-speech should sit behind versioned
+adapters. The product should measure quality, latency, reliability, and cost before changing
+providers.
+
+F. Privacy and accessibility
+
+Text-only practice must remain a first-class alternative. Audio recording must be optional and
+off by default. The system must not score appearance, emotion, eye contact, accent, disability,
+personality, ethnicity, or vague "culture fit".
+
+G. Honest product status
+
+A simulated demo, local stub, or mocked provider must always be labelled. No "AI accuracy",
+"production ready", "self-hosted", or "fine-tuned model" claim should be made without evidence.
+
+
+6. WHAT EXISTS AND WHAT IT MEANS
+
+The current Euron-based application is the candidate foundation. It includes useful development
+components such as web UI, API, authentication, PostgreSQL, Redis jobs, provider adapters,
+reports, and administration. Its default provider is simulated. It is not production-ready.
+
+The standalone interview-core package is a useful policy experiment. It should be reconciled
+with the selected application rather than becoming a second competing interview engine.
+
+DeepInterview, GrillKit, Local AI Interviewer, and the upstream Euron archive are preserved in
+AnalyseFuture as research material. They must not be merged as complete applications. Useful
+concepts or small compatible components may be adopted only after license, security, quality,
+maintenance, and integration review.
+
+
+7. LANGUAGE AND ARCHITECTURE STRATEGY
+
+Do not rewrite everything into one programming language merely for visual consistency.
+
+Recommended approach:
+
+- TypeScript as the primary product language for the web application, API, shared contracts,
+  interview state, reports, and most business logic;
+- Python only for isolated AI/ML, speech, model evaluation, dataset, or training workloads where
+  the Python ecosystem provides a clear advantage;
+- PostgreSQL as the authoritative relational database;
+- Redis and the existing queue for bounded background work;
+- versioned OpenAPI/JSON Schema contracts between modules;
+- REST or event/job boundaries first; add gRPC only if measured requirements justify it;
+- one authentication system, one session authority, one queue, and one primary database;
+- model, voice, and execution providers hidden behind replaceable interfaces;
+- code execution in a separate, network-restricted sandbox, never in the API process.
+
+A possible long-term monorepo shape:
+
+- apps/web
+- apps/api
+- services/interviewer
+- services/evaluation
+- services/voice
+- services/code-runner
+- packages/contracts
+- packages/ui
+- ml/datasets
+- ml/training
+- ml/evaluation
+- infrastructure
+- tests
+- docs
+- AnalyseFuture
+
+The working foundation should move toward this shape incrementally. A clean-looking folder tree
+is not worth breaking tested code or losing history.
+
+
+8. FEATURES FEASIBLE WITH CURRENT TECHNOLOGY
+
+These are realistic now, although they still require implementation and validation:
+
+- authenticated text interview practice;
+- role, level, duration, and topic setup;
+- safe resume/job-description summarisation with user review;
+- server-owned interview events and reconnectable sessions;
+- bounded adaptive follow-ups;
+- transcript-backed feedback;
+- dashboard, history, export, and deletion;
+- model/provider routing with budgets and timeouts;
+- deterministic coding tests in an isolated executor;
+- persistent system-design whiteboard;
+- captions and text alternatives;
+- real voice using separate speech, model, and voice adapters;
+- cost, latency, error, and quality telemetry;
+- original golden interview scenarios and human-reviewed model comparison;
+- multilingual text practice for languages that pass quality review;
+- private/self-hosted model options when hardware and quality justify them.
+
+
+9. FEATURES REQUIRING RESEARCH OR INDEPENDENT VALIDATION
+
+These are possible in principle but must not be promised before evidence exists:
+
+- consistently human-quality follow-ups across every role and seniority;
+- accurate scoring of complex architecture and leadership judgement;
+- low-latency local voice on inexpensive hardware;
+- reliable multilingual technical scoring across dialects and domains;
+- production-grade open-weight model quality equal to leading hosted models;
+- useful fine-tuning improvements over strong prompting and retrieval;
+- longitudinal scores comparable across model and rubric versions;
+- employer-grade assessment validity and fairness;
+- robust detection of AI-assisted or plagiarised candidate responses;
+- fully private on-device interview processing;
+- safe automatic generation of large original question libraries;
+- meaningful personalized learning recommendations over many months.
+
+Each requires a defined benchmark, held-out data, human review, sample sizes, costs, regression
+criteria, and rollback.
+
+
+10. FEATURES THAT ARE NOT CURRENTLY SAFE OR TRUTHFUL TO PROMISE
+
+The project should explicitly reject:
+
+- guaranteed job offers or guaranteed interview success;
+- perfect, bias-free, hallucination-free AI scoring;
+- fully autonomous hire/reject decisions;
+- mind-reading, personality detection, emotion scoring, or competence inference from faces;
+- reliable deception detection from voice, gaze, or body language;
+- accent scoring as a proxy for technical ability;
+- secret assistance during somebody else's live interview;
+- execution of untrusted candidate code inside normal application containers;
+- training on private resumes, audio, or transcripts without separate informed consent;
+- copying premium question banks or confidential interview material;
+- unlimited free realtime voice or GPU inference with no operating cost;
+- instantly converting several independent applications into one safe production system;
+- training a competitive foundation model from scratch without enormous data, compute,
+  expertise, evaluation, and legal resources.
+
+Some may remain impossible to validate responsibly even if future technology makes them appear
+technically possible.
+
+
+11. DELIVERY ROADMAP
+
+PHASE 0 — RECOVERY AND SOURCE OF TRUTH (0–2 MONTHS)
+
+- Preserve all discovered material.
+- Confirm Git history, licenses, notices, dependency locks, and repository integrity.
+- Identify secrets or personal data without publishing their values; rotate compromised keys.
+- Record every archive as research, not implemented product functionality.
+- Establish one architecture decision log, feature-status matrix, threat model, and build flow.
+- Keep the existing tested foundation operational while restructuring incrementally.
+
+Exit evidence:
+
+- reproducible clean setup and test commands;
+- protected main branch and reviewed access controls;
+- source/license inventory;
+- no committed credentials or personal candidate data;
+- documented authoritative runtime and folder ownership.
+
+PHASE 1 — TRUSTWORTHY TEXT MVP (2–5 MONTHS)
+
+- Stabilize authentication, ownership checks, database migrations, and queue behaviour.
+- Complete role/job-description/resume setup.
+- Make interview questions, events, retries, timing, and completion server-authoritative.
+- Integrate evidence-backed evaluation.
+- Add one real provider behind a replaceable adapter with hard budgets.
+- Deliver the authenticated path from setup through saved report and history.
+- Run cross-user, prompt-injection, reconnect, export, and deletion tests.
+
+Exit evidence:
+
+- a real user completes the full text flow;
+- important report claims cite valid transcript evidence;
+- provider kind, model, rubric, prompt, cost, and latency are recorded;
+- failures do not silently create fake success or duplicate answers.
+
+PHASE 2 — QUALITY LABORATORY AND COACHING (4–8 MONTHS)
+
+- Build original golden conversations for multiple roles and answer qualities.
+- Add expert review, blinded model comparisons, and regression thresholds.
+- Track prompt, model, rubric, latency, token, and cost versions.
+- Deliver targeted drills, improved-answer examples, and repeat-session comparison.
+- Add a clear "insufficient evidence" result rather than forcing every criterion to a score.
+
+Exit evidence:
+
+- documented sample sizes and reviewer agreement;
+- technically correct feedback meets a predeclared threshold;
+- regressions block a provider/prompt promotion;
+- candidate usefulness is measured in moderated studies.
+
+PHASE 3 — REAL VOICE (6–11 MONTHS)
+
+- Add replaceable speech-to-text, voice, and realtime providers.
+- Implement captions, barge-in, silence, retry, reconnect, and transparent text fallback.
+- Measure p50/p95 latency, transcript accuracy, provider failure, and cost per session.
+- Test real devices, slow networks, non-native speakers, and accessibility alternatives.
+- Keep audio recording separately consented and optional.
+
+Exit evidence:
+
+- real microphone/device sessions, not browser or provider stubs;
+- measured interruption and reconnect behavior;
+- accessible text/caption fallback;
+- privacy and cost controls verified.
+
+PHASE 4 — CODING AND SYSTEM DESIGN (9–15 MONTHS)
+
+- Add an isolated code executor with language images, quotas, no normal network access, output
+  limits, hostile-input testing, and deterministic grading.
+- Add a persistent whiteboard with versioned diagrams and synchronized explanation.
+- Create replay across transcript, code snapshots, test results, and diagram events.
+- Evaluate technical feedback with experienced human reviewers.
+
+Exit evidence:
+
+- sandbox escape and denial-of-service threat tests;
+- deterministic public/hidden test behavior;
+- save/reconnect/replay of code and diagram state;
+- expert-reviewed technical feedback.
+
+PHASE 5 — CONTROLLED CANDIDATE BETA (12–18 MONTHS)
+
+- Complete privacy, security, dependency, accessibility, and incident reviews.
+- Add production observability, backups, restore tests, quotas, provider fallback, and cost alerts.
+- Invite a small, consented beta group.
+- Measure completion, correctness, usefulness, retention, reliability, and unit economics.
+- Add simple paid practice plans only after users demonstrate real value.
+
+Exit evidence:
+
+- independent security findings addressed or explicitly accepted;
+- restoration, deletion, export, and incident exercises;
+- production service objectives and support process;
+- measured candidate usefulness and sustainable cost.
+
+PHASE 6 — MODEL OWNERSHIP AND BROADENING (15–24 MONTHS)
+
+- Compare hosted models and licensed open-weight checkpoints on the same held-out suite.
+- Create permissioned, provenance-tracked training examples.
+- Attempt QLoRA only after a baseline shows a specific improvement opportunity.
+- Promote a fine-tuned adapter only if blind evaluation shows meaningful benefit without
+  unacceptable latency, safety, or cost regressions.
+- Expand role and language packs one at a time with expert validation.
+- Explore universities, coaches, and candidate-controlled sharing.
+
+Exit evidence:
+
+- reproducible model/data manifests;
+- held-out gains against the actual baseline;
+- privacy, license, safety, and cost approval;
+- rollback to the previous model.
+
+PHASE 7 — EMPLOYER TRACK (18–30+ MONTHS, SEPARATE PROGRAMME)
+
+- Add organizations, recruiter roles, invitations, reviewer workflows, tenant isolation, and
+  audit logs.
+- Validate each assessment for its intended job use.
+- Provide accommodations, human review, explanation, and appeals.
+- Obtain jurisdiction-specific privacy, employment, and AI governance advice.
+- Never reuse unvalidated candidate-practice scores as hiring decisions.
+
+Exit evidence:
+
+- independently reviewed tenant isolation;
+- job-related validity and fairness studies;
+- accountable human decision workflow;
+- legal and accessibility approval for the intended markets.
+
+
+12. ONE-TO-TWO-YEAR AI-ERA IDEAS
+
+Ideas worth trying after the trustworthy foundation exists:
+
+- a personal interview learning coach that remembers consented competency trends;
+- scenario generation grounded in approved role rubrics and current technical references;
+- multi-agent panel practice where separate interviewer roles cover coding, architecture,
+  product judgement, and behavioural reflection;
+- private local model routing for sensitive resume content;
+- portable candidate-controlled practice portfolios containing evidence rather than one opaque
+  number;
+- mentor mode that lets a candidate share selected sessions for human annotations;
+- adaptive accessibility settings learned from explicit preferences, not inferred disability;
+- interview "digital twins" of target role requirements, built from authorized job data;
+- incident-response, debugging, and pair-programming interview simulations;
+- question packs maintained like tested software, with stable IDs, provenance, review, and
+  retirement rules;
+- provider routing that selects the least expensive model meeting a measured quality threshold.
+
+These ideas are feasible to explore, but they are not promised delivery dates.
+
+
+13. LONGER-TERM RESEARCH
+
+Possible research beyond two years:
+
+- on-device speech and interviewing with strong privacy;
+- federated or privacy-preserving learning from separately consented data;
+- immersive spatial/VR system-design simulations;
+- collaborative incident-response and engineering-team simulations;
+- verified skill portfolios controlled by candidates;
+- live multilingual conversation with stable technical meaning across languages;
+- simulation of complex engineering teams and ambiguous production incidents;
+- open, independently audited interview-quality standards.
+
+These are research directions, not release promises. Each must pass privacy, safety,
+accessibility, cost, and human-value gates.
+
+
+14. SECURITY, PRIVACY, AND FAIRNESS REQUIREMENTS
+
+- Treat resumes, job descriptions, answers, code, diagrams, retrieved content, and model output
+  as untrusted.
+- Rotate any credentials suspected of exposure; never place secret values in Git.
+- Require object-level authorization for every transcript, report, interview, file, and share.
+- Use short-lived provider tokens and keep provider keys off the browser.
+- Separate consent for necessary processing, transcript retention, audio, analytics, sharing,
+  and training-data reuse.
+- Redact personal data from logs and model traces.
+- Scan uploads and safely parse supported formats.
+- Apply rate, duration, token, audio, storage, and cost limits.
+- Maintain an incident-response and backup/restore process.
+- Test prompt injection, cross-user access, event replay, SSRF, parser attacks, sandbox escape,
+  dependency compromise, and model-data leakage.
+- Give candidates deletion, export, correction, and accessible alternatives.
+- Never infer protected or sensitive traits.
+
+
+15. BUSINESS MODEL
+
+Candidate-first options:
+
+- limited free text practice;
+- paid voice minutes or longer sessions;
+- role-specific practice packs;
+- advanced progress and coaching plans;
+- university, bootcamp, or career-service licences;
+- optional mentor/coach collaboration.
+
+Later employer options:
+
+- organization seats;
+- candidate invitations and reviewer workflows;
+- validated assessment templates;
+- usage-based API access.
+
+Billing should follow demonstrated usefulness. It should not be built before provider costs,
+payment eligibility, refund handling, entitlements, and regional obligations are understood.
+
+
+16. SUCCESS MEASURES
+
+Product:
+
+- percentage completing the first interview;
+- percentage reopening and understanding feedback;
+- candidate-rated usefulness;
+- return rate for a second practice session;
+- measurable improvement on comparable rubric items.
+
+AI quality:
+
+- expert-agreed follow-up relevance;
+- technically correct feedback assertions;
+- percentage of claims with valid evidence;
+- unsupported-claim and hallucination rate;
+- prompt-injection success rate;
+- human-review agreement and disagreement.
+
+Reliability:
+
+- session completion without unexpected loss;
+- reconnect recovery rate;
+- queue and provider failure recovery;
+- p50/p95 response and voice latency;
+- backup restoration success.
+
+Safety and accessibility:
+
+- cross-user authorization failures;
+- personal-data leakage incidents;
+- deletion/export completion;
+- keyboard and screen-reader task completion;
+- caption availability and text fallback;
+- fairness and accommodation findings.
+
+Economics:
+
+- total cost per completed text and voice interview;
+- cost by provider and modality;
+- support burden;
+- paid conversion and retention;
+- gross margin only after infrastructure and model costs.
+
+Initial targets are hypotheses. They must never be presented as achieved metrics without
+measured sample sizes and evidence.
+
+
+17. SOURCE-ADOPTION PRIORITIES
+
+From the preserved research projects, investigate these concepts first:
+
+1. Local AI Interviewer's deterministic evidence validation, compare-and-set transitions,
+   provenance, and provider budgets.
+2. DeepInterview's prep/live/post boundaries, transcript checkpoints, provider contracts, and
+   rubric verifier.
+3. GrillKit's question taxonomy, known-question tracking, combined theory/coding rounds, and
+   public/hidden test workflow.
+4. The Euron upstream snapshot only for provenance and archive-only documentation, because the
+   current foundation is already its safer adapted derivative.
+
+For every adoption:
+
+- select one bounded behavior;
+- verify the source revision and license;
+- write acceptance and security tests;
+- adapt it behind existing auth/database/session contracts;
+- preserve attribution;
+- measure quality and cost;
+- update the implementation status;
+- provide a rollback path.
+
+
+18. DEFINING SUCCESS
+
+The project succeeds when a real candidate can finish an actual interview, trust why the
+feedback was produced, identify the next improvement, return to practise it, and retain control
+of their data.
+
+The project does not succeed merely because it has many source files, attractive screens, many
+models, or a long feature list. Its defensible advantage should be trustworthy technical
+coaching, measurable interview quality, privacy, accessibility, provider flexibility, and
+honest evidence.

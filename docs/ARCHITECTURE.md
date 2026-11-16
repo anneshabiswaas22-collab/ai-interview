@@ -1,6 +1,6 @@
-# System Architecture — Proposed, Not Yet Implemented
+# System Architecture — Development Candidate and Target
 
-**Architecture status: design target.** The Euron repository is a *candidate* application foundation, not yet imported. Its documented stack is Next.js + Express + PostgreSQL + Redis. Confirm it by source/runtime audit before adopting a different stack.
+**Architecture status:** an adapted Euron application is present under `foundation/euron` as the single development candidate. It uses Next.js, Express, PostgreSQL, and Redis. It is not production-approved or deployed. The diagram and long-term service boundaries below remain design targets; see [ADR 0003](decisions/0003-candidate-foundation.md) and [the repository structure](REPOSITORY_STRUCTURE.md).
 
 ## Design goals
 
@@ -65,7 +65,7 @@ ai-interview/
   AGENTS.md
 ```
 
-Actual directories do not yet exist. Contributors should not claim they do.
+This is an incremental target, not the current tree. Do not relocate the tested foundation merely to match it. Introduce a boundary only when a working component, migration plan, and tests justify it. The authoritative current layout is documented in [Repository Structure and Ownership](REPOSITORY_STRUCTURE.md).
 
 ## Responsibilities
 

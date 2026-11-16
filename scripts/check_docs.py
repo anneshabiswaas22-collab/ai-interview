@@ -12,6 +12,7 @@ from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 SKIP = {".git", "node_modules", ".venv", ".next"}
+PRESERVED_SOURCE_ROOT = Path("AnalyseFuture/sources")
 LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 
 
@@ -20,6 +21,9 @@ def markdown_files() -> list[Path]:
         path
         for path in ROOT.rglob("*.md")
         if not any(part in SKIP for part in path.relative_to(ROOT).parts)
+        # Preserved third-party snapshots are intentionally immutable research
+        # material. Their upstream links are not maintained by this project.
+        and not path.relative_to(ROOT).is_relative_to(PRESERVED_SOURCE_ROOT)
     ]
 
 

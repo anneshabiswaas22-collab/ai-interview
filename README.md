@@ -14,6 +14,8 @@
 
 **Run the development candidate:** [Setup and limitations](foundation/euron/README.md) · [Text-practice contract](docs/TEXT_PRACTICE_DEVELOPMENT.md) · [Foundation decision](docs/decisions/0003-candidate-foundation.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
+**Repository recovery and future analysis:** [Authoritative structure](docs/REPOSITORY_STRUCTURE.md) · [Preserved sources](AnalyseFuture/README.md) · [Source inventory](AnalyseFuture/SOURCE_INVENTORY.md) · [Detailed long-term idea](AnalyseFuture/PROJECT_IDEA_AND_FUTURE_VISION.txt)
+
 **Quick handoff:** [Complete project context](docs/PROJECT_CONTEXT.md) · [Codex kickoff prompt](docs/CODEX_KICKOFF.md) · [First task: issue #1](https://github.com/anneshabiswaas22-collab/ai-interview/issues/1) · [All issues](https://github.com/anneshabiswaas22-collab/ai-interview/issues)
 
 | You are… | Read these first |
