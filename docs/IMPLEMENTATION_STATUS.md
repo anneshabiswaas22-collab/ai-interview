@@ -2,7 +2,7 @@
 
 ## Development candidate
 
-An adapted Euron application is included in [foundation/euron](../foundation/euron/README.md). It contains the candidate UI, API, database migrations, job worker, provider adapters and local demo infrastructure. It is a development preview and has not been approved for production or deployed. See [ADR 0003](decisions/0003-candidate-foundation.md) and [third-party notices](../THIRD_PARTY_NOTICES.md).
+An adapted Euron application is included in [apps/interview-platform](../apps/interview-platform/README.md). It contains the candidate UI, API, database migrations, job worker, provider adapters and local demo infrastructure. It is a development preview and has not been approved for production or deployed. See [ADR 0003](decisions/0003-candidate-foundation.md) and [third-party notices](../THIRD_PARTY_NOTICES.md).
 
 The pinned patched upstream candidate previously passed [232 unit tests, 150 PostgreSQL/Redis integration tests and 8 browser tests](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43519071316). The browser tests used a verification-aware signup test. The imported copy also passed its own [clean-checkout unit, PostgreSQL/Redis integration and offline browser workflow](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43583803264).
 

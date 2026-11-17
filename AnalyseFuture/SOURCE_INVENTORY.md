@@ -4,7 +4,7 @@ Reviewed: 17 November 2026. This is a static source review. Archived programs we
 
 ## Decision summary
 
-Keep `foundation/euron` as the only runnable development candidate. Preserve all four extracted projects here for provenance and future analysis. Adopt ideas or small components only after a dedicated architecture decision, license review, threat model, and tests. Do not concatenate complete applications.
+Keep `apps/interview-platform` as the only runnable development candidate. Preserve all four extracted projects here for provenance and future analysis. Adopt ideas or small components only after a dedicated architecture decision, license review, threat model, and tests. Do not concatenate complete applications.
 
 ## DeepInterview
 
@@ -21,7 +21,7 @@ Path: `sources/DeepInterview-main/`
 Path: `sources/euron-open-real-time-ai-conversation-system-main/`
 
 - License: MIT; retain the ENGAGESPHERE/Euron copyright and license notice.
-- Pinned source: archive identifies commit `216a8fc52a055587f436f2446f1a80b6868bd14a`, matching the upstream base already used by `foundation/euron`.
+- Pinned source: archive identifies commit `216a8fc52a055587f436f2446f1a80b6868bd14a`, matching the upstream base already used by `apps/interview-platform`.
 - Stack: TypeScript monorepo with Next.js, Express, PostgreSQL, Redis/BullMQ, model and realtime adapters, shared packages, Docker, Terraform, Vitest, and Playwright.
 - Current relationship: most of this source duplicates the existing foundation. The current foundation intentionally adds text practice, transactional score dispatch, provider/source labeling, updated Zod, consent corrections, migrations, and tests.
 - Material risks: upstream voice transcripts and proctoring remain browser-authored/advisory; model scores are not sufficient evidence; code is not safely executed; real-provider quality, cost, privacy, accessibility, and security remain unapproved.

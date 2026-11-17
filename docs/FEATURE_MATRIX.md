@@ -1,6 +1,6 @@
 # Feature Inventory and Reuse Matrix
 
-> **DEVELOPMENT STATUS:** An adapted candidate application is now present under `foundation/euron`. Its imported features are development-preview capabilities, not production-ready claims. The default demo uses deterministic stand-ins; verify the actual imported copy and real providers separately.
+> **DEVELOPMENT STATUS:** An adapted candidate application is now present under `apps/interview-platform`. Its imported features are development-preview capabilities, not production-ready claims. The default demo uses deterministic stand-ins; verify the actual imported copy and real providers separately.
 
 Legend: P0 = first working interview; P1 = competitive candidate product; P2 = commercial/enterprise. Source statuses are **upstream claims pending audit**. Change this table only after tests/inspection.
 

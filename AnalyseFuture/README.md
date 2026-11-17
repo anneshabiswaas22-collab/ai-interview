@@ -4,17 +4,17 @@ This directory preserves every source archive supplied to the repository without
 
 ## Why this directory exists
 
-The four ZIP files at the repository root were added by commit `a610107` and remain untouched. Their complete extracted contents are preserved under `sources/` so they can be inspected, compared, licensed, and selectively studied without overwriting the working application.
+The four ZIP files added by commit `a610107` remain byte-for-byte preserved under `archives/`. Their complete extracted contents are preserved under `sources/` so they can be inspected, compared, licensed, and selectively studied without overwriting the working application.
 
 Nothing under `AnalyseFuture/sources/` is an active product dependency. Do not run, deploy, copy, or merge an archived application wholesale. The sources were inspected as untrusted research material and were not executed during this restructuring.
 
 ## Authoritative project structure
 
-- `foundation/euron/` — the one development candidate application and current runtime foundation.
+- `apps/interview-platform/` — the one development candidate application and current runtime foundation.
 - `packages/interview-core/` — an experimental policy/evaluation package; not a second production engine.
 - `docs/` — product, architecture, security, roadmap, and implementation source of truth.
 - `AnalyseFuture/sources/` — untouched extracted research projects.
-- Root ZIP files — the original preserved archives.
+- `AnalyseFuture/archives/` — the original preserved ZIP archives.
 
 ## Preserved sources
 

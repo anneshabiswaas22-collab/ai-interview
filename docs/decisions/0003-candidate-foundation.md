@@ -1,11 +1,13 @@
 # ADR 0003 — Provisional candidate application foundation
 
+> **Path note (17 November 2026):** the candidate was initially imported under `foundation/euron` and later moved without source changes to `apps/interview-platform` during the repository-wide functional reorganization. The monorepo remains an isolated, self-contained application boundary.
+
 - **Status:** Development preview; production adoption remains gated
 - **Date:** 2026-11-14
 
 ## Decision
 
-Import one pinned, MIT-licensed Euron application into `foundation/euron` as the working candidate foundation. Retain its license, relevant runtime components and lockfile; do not import DeepInterview as a second app. Keep `packages/interview-core` as an experimental policy module until a single authoritative interview state model is selected.
+Import one pinned, MIT-licensed Euron application into `apps/interview-platform` as the working candidate foundation. Retain its license, relevant runtime components and lockfile; do not import DeepInterview as a second app. Keep `packages/interview-core` as an experimental policy module until a single authoritative interview state model is selected.
 
 The pinned upstream built and passed 232 unit and 150 PostgreSQL/Redis integration tests. Its unmodified browser suite failed one signup test because the test assumed immediate sign-in when email verification was required; a verification-aware version passed all eight tests. A Zod 4.6.7 update removed the reported production dependency advisory in the test environment. A separate integration failure exposed an export audit race, fixed by recording export access before streaming. See [the verification run](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43519071316).
 

@@ -1,6 +1,6 @@
 # System Architecture — Development Candidate and Target
 
-**Architecture status:** an adapted Euron application is present under `foundation/euron` as the single development candidate. It uses Next.js, Express, PostgreSQL, and Redis. It is not production-approved or deployed. The diagram and long-term service boundaries below remain design targets; see [ADR 0003](decisions/0003-candidate-foundation.md) and [the repository structure](REPOSITORY_STRUCTURE.md).
+**Architecture status:** an adapted Euron application is present under `apps/interview-platform` as the single development candidate. It uses Next.js, Express, PostgreSQL, and Redis. It is not production-approved or deployed. The diagram and long-term service boundaries below remain design targets; see [ADR 0003](decisions/0003-candidate-foundation.md) and [the repository structure](REPOSITORY_STRUCTURE.md).
 
 ## Design goals
 

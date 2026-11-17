@@ -1,6 +1,6 @@
 # Codex Handoff — Current Status and Blockers
 
-The pinned candidate application is imported under `foundation/euron`. Its clean-checkout unit, PostgreSQL/Redis integration and offline browser tests passed with simulated providers. Written practice, persisted questions and answers, retries, and a scoring-dispatch recovery path are implemented in the development branches. Read [implementation status](IMPLEMENTATION_STATUS.md), [the implementation checklist](IMPLEMENTATION_CHECKLIST.md), [text-practice contract](TEXT_PRACTICE_DEVELOPMENT.md), [foundation decision](decisions/0003-candidate-foundation.md), and [runtime audit](audits/euron-runtime.md).
+The pinned candidate application is imported under `apps/interview-platform`. Its clean-checkout unit, PostgreSQL/Redis integration and offline browser tests passed with simulated providers. Written practice, persisted questions and answers, retries, and a scoring-dispatch recovery path are implemented in the development branches. Read [implementation status](IMPLEMENTATION_STATUS.md), [the implementation checklist](IMPLEMENTATION_CHECKLIST.md), [text-practice contract](TEXT_PRACTICE_DEVELOPMENT.md), [foundation decision](decisions/0003-candidate-foundation.md), and [runtime audit](audits/euron-runtime.md).
 
 ## Work still required
 

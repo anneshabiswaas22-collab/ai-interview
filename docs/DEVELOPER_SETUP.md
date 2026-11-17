@@ -1,6 +1,6 @@
 # Developer Onboarding and Local Setup
 
-The repository contains a development-only candidate application under [foundation/euron](../foundation/euron/README.md), plus a separate experimental interview-core package. The candidate is not production-ready; its default demo uses simulated model responses and scores. See [implementation status](IMPLEMENTATION_STATUS.md) and [the foundation decision](decisions/0003-candidate-foundation.md).
+The repository contains a development-only candidate application under [apps/interview-platform](../apps/interview-platform/README.md), plus a separate experimental interview-core package. The candidate is not production-ready; its default demo uses simulated model responses and scores. See [implementation status](IMPLEMENTATION_STATUS.md) and [the foundation decision](decisions/0003-candidate-foundation.md).
 
 ## Obtain the source
 
@@ -16,7 +16,7 @@ Read `README.md`, `AGENTS.md`, the foundation README and [third-party notices](.
 Install Git, Docker with Compose v2, `make`, Bash and OpenSSL. Then:
 
 ```bash
-cd foundation/euron
+cd apps/interview-platform
 make up
 make demo
 ```
@@ -36,7 +36,7 @@ node --test packages/interview-core/test/*.test.mjs
 For the candidate application, install Node 22 and pnpm 9.15.0 through Corepack:
 
 ```bash
-cd foundation/euron
+cd apps/interview-platform
 corepack enable
 pnpm install --frozen-lockfile
 pnpm lint

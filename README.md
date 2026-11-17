@@ -12,9 +12,9 @@
 
 **Begin implementing:** [29-step ordered checklist](docs/IMPLEMENTATION_CHECKLIST.md) · [Verified implementation status](docs/IMPLEMENTATION_STATUS.md) · [First working code](packages/interview-core/README.md) · [Codex blocker handoff](docs/CODEX_BLOCKERS.md)
 
-**Run the development candidate:** [Setup and limitations](foundation/euron/README.md) · [Text-practice contract](docs/TEXT_PRACTICE_DEVELOPMENT.md) · [Foundation decision](docs/decisions/0003-candidate-foundation.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+**Run the development candidate:** [Setup and limitations](apps/interview-platform/README.md) · [Text-practice contract](docs/TEXT_PRACTICE_DEVELOPMENT.md) · [Foundation decision](docs/decisions/0003-candidate-foundation.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
-**Repository recovery and future analysis:** [Authoritative structure](docs/REPOSITORY_STRUCTURE.md) · [Preserved sources](AnalyseFuture/README.md) · [Source inventory](AnalyseFuture/SOURCE_INVENTORY.md) · [Detailed long-term idea](AnalyseFuture/PROJECT_IDEA_AND_FUTURE_VISION.txt)
+**Repository recovery and future analysis:** [Authoritative structure](PROJECT_STRUCTURE.md) · [Preserved sources](AnalyseFuture/README.md) · [Source inventory](AnalyseFuture/SOURCE_INVENTORY.md) · [Detailed long-term idea](AnalyseFuture/PROJECT_IDEA_AND_FUTURE_VISION.txt)
 
 **Quick handoff:** [Complete project context](docs/PROJECT_CONTEXT.md) · [Codex kickoff prompt](docs/CODEX_KICKOFF.md) · [First task: issue #1](https://github.com/anneshabiswaas22-collab/ai-interview/issues/1) · [All issues](https://github.com/anneshabiswaas22-collab/ai-interview/issues)
 
@@ -47,7 +47,7 @@ See [benchmarks](docs/COMPETITOR_BENCHMARKS.md) for what to research and how to 
 
 **One modular monorepo; selective integration of mature open-source components.** Do not copy/merge all upstream applications wholesale.
 
-**Development foundation:** an adapted, pinned copy of [Euron Open Conversation](https://github.com/euron-sde-team/euron-open-real-time-ai-conversation-system) (MIT) is in [foundation/euron](foundation/euron/README.md). Its use is provisional and limited to development until the [release gates](docs/decisions/0003-candidate-foundation.md) pass. Study [DeepInterview](https://github.com/ngoanpv/DeepInterview) for its interview-agent architecture; integrate other components only where justified.
+**Development foundation:** an adapted, pinned copy of [Euron Open Conversation](https://github.com/euron-sde-team/euron-open-real-time-ai-conversation-system) (MIT) is in [apps/interview-platform](apps/interview-platform/README.md). Its use is provisional and limited to development until the [release gates](docs/decisions/0003-candidate-foundation.md) pass. Study [DeepInterview](https://github.com/ngoanpv/DeepInterview) for its interview-agent architecture; integrate other components only where justified.
 
 Important: a test of the upstream candidate is not automatically a test of the imported copy or real providers. Distinguish **verified**, **upstream claimed**, **planned**, **in progress**, and **implemented + tested** in every update.
 

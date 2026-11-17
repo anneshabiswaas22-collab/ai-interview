@@ -11,7 +11,7 @@ Welcome! This repository is the source of truth for an AI interviewing project. 
 
 ## 2. Find your first task
 
-Review [implementation status](docs/IMPLEMENTATION_STATUS.md) and choose a scoped issue. The Euron development candidate is in `foundation/euron`; DeepInterview has not been imported.
+Review [implementation status](docs/IMPLEMENTATION_STATUS.md) and choose a scoped issue. The Euron development candidate is in `apps/interview-platform`; DeepInterview is preserved only as non-runtime research under `AnalyseFuture` and has not been adopted as another application.
 
 Good early contributions:
 - Verify upstream packages and test/demo instructions.
