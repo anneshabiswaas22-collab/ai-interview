@@ -68,7 +68,9 @@ for mail in outbox smtp ses; do
     SES_REGION=us-east-1 SES_CONFIGURATION_SET=open-conversation-local-mail)
 
   printf '%-46s ' "$label"
-  out=$(env "${env_args[@]}" "${vitest[@]}" 2>&1)
+  # The local SES row deliberately uses throwaway static credentials. A developer's
+  # AWS_PROFILE must not override them or read a real account configuration.
+  out=$(env -u AWS_PROFILE -u AWS_DEFAULT_PROFILE "${env_args[@]}" "${vitest[@]}" 2>&1)
   code=$?
   summary=$(grep -E '^\s+Tests ' <<<"$out" | tail -1 | sed -E 's/^\s+//')
   if [[ $code -ne 0 ]]; then
