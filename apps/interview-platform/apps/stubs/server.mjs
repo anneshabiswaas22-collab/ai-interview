@@ -213,12 +213,50 @@ export function stubScore(userText) {
   };
 }
 
+/** A deliberately simulated grounded response; these numbers do not assess ability. */
+export function stubTextEvidence(userText) {
+  let answers = [];
+  try {
+    answers = JSON.parse(fenced(userText, "answer-events"));
+  } catch {
+    /* invalid fixture */
+  }
+  const answer = answers.find((a) => typeof a.text === "string" && a.text.trim());
+  return {
+    assessments: ["domain", "communication"].map((criterionId) =>
+      answer
+        ? {
+            criterionId,
+            score: 50,
+            confidence: "low",
+            evidence: [{ eventId: answer.id, quote: answer.text.slice(0, 200) }],
+            observations: [
+              {
+                kind: "next_step",
+                text: "Simulated demo feedback: discuss this answer with a reviewer for meaningful coaching.",
+                evidenceIndexes: [0],
+              },
+            ],
+          }
+        : {
+            criterionId,
+            score: null,
+            confidence: "insufficient",
+            evidence: [],
+            observations: [],
+          }
+    ),
+  };
+}
+
 /** What the model says, given the system prompt and the last user text. */
 export function decide(system, user) {
   if (/STUB_FAIL/.test(user)) return { status: 500 };
   if (/STUB_RATELIMIT/.test(user)) return { status: 429 };
   if (/STUB_GARBAGE/.test(user)) return { text: "I am not going to answer in JSON today." };
   if (/Output format: interview_plan/.test(system)) return { text: JSON.stringify(stubPlan(user)) };
+  if (/Output format: text_evidence_score/.test(system))
+    return { text: JSON.stringify(stubTextEvidence(user)) };
   if (/Output format: answer_score/.test(system)) return { text: JSON.stringify(stubScore(user)) };
   if (/single word: ok/i.test(user)) return { text: "ok" };
   return { text: `This is a stub answer to: "${user.slice(0, 120)}".` };
