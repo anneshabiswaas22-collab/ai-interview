@@ -3,7 +3,10 @@ import { db, type Executor } from "../db/kysely";
 type TokenType = "VERIFY_EMAIL" | "RESET_PASSWORD";
 
 export class AuthTokenRepository {
-  insert(row: { id: string; user_id: string; type: TokenType; token_hash: string; expires_at: Date }, exec: Executor = db) {
+  insert(
+    row: { id: string; user_id: string; type: TokenType; token_hash: string; expires_at: Date },
+    exec: Executor = db
+  ) {
     return exec.insertInto("auth_tokens").values(row).execute();
   }
 
@@ -22,7 +25,13 @@ export class AuthTokenRepository {
   }
 
   invalidateOutstanding(userId: string, type: TokenType, exec: Executor = db) {
-    return exec.updateTable("auth_tokens").set({ used_at: new Date() }).where("user_id", "=", userId).where("type", "=", type).where("used_at", "is", null).execute();
+    return exec
+      .updateTable("auth_tokens")
+      .set({ used_at: new Date() })
+      .where("user_id", "=", userId)
+      .where("type", "=", type)
+      .where("used_at", "is", null)
+      .execute();
   }
 }
 

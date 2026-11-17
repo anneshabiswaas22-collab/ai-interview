@@ -25,14 +25,12 @@ import { clearSettingsCache, saveSettings } from "../../src/services/settings.se
 registerAllJobs();
 export const app = createApp();
 
-
 // enum[] and citext[] columns parse as arrays only after this lookup, as at boot.
 beforeAll(async () => {
   await initDbTypes();
   await ensureStarterCatalog(db, { includeStub: true });
   clearModelCache();
 });
-
 
 export const PASSWORD = "correct-horse-battery-staple";
 let passwordHash: string | null = null;
@@ -54,7 +52,14 @@ export function unique(prefix: string): string {
 export type Role = "USER" | "ADMIN";
 
 /** Insert an ACTIVE, verified user directly, and mint an access token for them. */
-export async function createUser(over: { role?: Role; status?: "ACTIVE" | "SUSPENDED" | "BANNED"; displayName?: string; username?: string } = {}): Promise<TestUser> {
+export async function createUser(
+  over: {
+    role?: Role;
+    status?: "ACTIVE" | "SUSPENDED" | "BANNED";
+    displayName?: string;
+    username?: string;
+  } = {}
+): Promise<TestUser> {
   passwordHash ??= await hashPassword(PASSWORD);
   const username = over.username ?? unique("u");
   const email = `${username}@example.com`;
@@ -69,11 +74,19 @@ export async function createUser(over: { role?: Role; status?: "ACTIVE" | "SUSPE
       role: over.role ?? "USER",
       status: over.status ?? "ACTIVE",
       email_verified_at: new Date(),
-      ...(over.status === "SUSPENDED" ? { suspended_until: new Date(Date.now() + 86_400_000) } : {}),
+      ...(over.status === "SUSPENDED"
+        ? { suspended_until: new Date(Date.now() + 86_400_000) }
+        : {}),
     })
     .returningAll()
     .executeTakeFirstOrThrow();
-  return { id: row.id, email, username, displayName: row.display_name, token: signAccessToken(row.id, row.token_version) };
+  return {
+    id: row.id,
+    email,
+    username,
+    displayName: row.display_name,
+    token: signAccessToken(row.id, row.token_version),
+  };
 }
 
 /** A supertest agent that sends the user's bearer token on every request. */
@@ -100,7 +113,11 @@ export interface StubModels {
 
 /** The ids of the stub provider's models (ensureStarterCatalog inserted them). */
 export async function stubModels(): Promise<StubModels> {
-  const rows = await db.selectFrom("models").select(["id", "model_ref"]).where("provider_id", "=", "stub").execute();
+  const rows = await db
+    .selectFrom("models")
+    .select(["id", "model_ref"])
+    .where("provider_id", "=", "stub")
+    .execute();
   const by = (ref: string) => rows.find((r) => r.model_ref === ref)!.id;
   return { text: by("stub-text"), voice: by("stub-voice") };
 }
@@ -141,12 +158,21 @@ export async function stubRequests(): Promise<StubRequest[]> {
 
 /** Chat completion requests whose messages mention `marker` anywhere, newest first. */
 export async function chatRequestsMentioning(marker: string): Promise<StubRequest[]> {
-  return (await stubRequests()).filter((r) => r.path === "/v1/chat/completions" && JSON.stringify(r.body?.messages ?? []).includes(marker));
+  return (await stubRequests()).filter(
+    (r) =>
+      r.path === "/v1/chat/completions" && JSON.stringify(r.body?.messages ?? []).includes(marker)
+  );
 }
 
 /** The realtime client secrets the stub minted (newest first) with the session config each carried. */
-export async function stubRealtime(): Promise<{ secrets: { value: string; session: any }[]; hangups: string[] }> {
-  return (await (await fetch(`${stubsUrl()}/__/realtime`)).json()) as { secrets: { value: string; session: any }[]; hangups: string[] };
+export async function stubRealtime(): Promise<{
+  secrets: { value: string; session: any }[];
+  hangups: string[];
+}> {
+  return (await (await fetch(`${stubsUrl()}/__/realtime`)).json()) as {
+    secrets: { value: string; session: any }[];
+    hangups: string[];
+  };
 }
 
 // ─── Interviews ─────────────────────────────────────────────────────────────
@@ -155,17 +181,30 @@ export const JOB_DESCRIPTION =
   "We are hiring a Backend Engineer to build Node.js and TypeScript services on Postgres and Redis. You will design APIs, own reliability for payment flows, write tests, review code and mentor two junior engineers. Requirements: 4+ years of backend experience.";
 
 /** Create an interview from a job description; the inline planner makes it READY before this returns. */
-export async function jdInterview(user: TestUser, over: { company?: string; role?: string; jobDescription?: string; proctoring?: boolean } = {}): Promise<Interview> {
+export async function jdInterview(
+  user: TestUser,
+  over: { company?: string; role?: string; jobDescription?: string; proctoring?: boolean } = {}
+): Promise<Interview> {
   const res = await as(user)
     .post("/api/interviews/from-job-description")
-    .send({ company: over.company ?? "Example Labs", role: over.role ?? "Backend Engineer", jobDescription: over.jobDescription ?? JOB_DESCRIPTION, ...(over.proctoring !== undefined ? { proctoring: over.proctoring } : {}) });
-  if (res.status !== 201) throw new Error(`create interview: ${res.status} ${JSON.stringify(res.body)}`);
+    .send({
+      company: over.company ?? "Example Labs",
+      role: over.role ?? "Backend Engineer",
+      jobDescription: over.jobDescription ?? JOB_DESCRIPTION,
+      ...(over.proctoring !== undefined ? { proctoring: over.proctoring } : {}),
+    });
+  if (res.status !== 201)
+    throw new Error(`create interview: ${res.status} ${JSON.stringify(res.body)}`);
   const got = await as(user).get(`/api/interviews/${res.body.id}`);
   return got.body as Interview;
 }
 
 /** Open a live session for the current question (or the one given). */
-export async function startLive(user: TestUser, interviewId: string, at: { round?: number; question?: number } = {}): Promise<LiveSessionGrant> {
+export async function startLive(
+  user: TestUser,
+  interviewId: string,
+  at: { round?: number; question?: number } = {}
+): Promise<LiveSessionGrant> {
   const res = await as(user).post(`/api/interviews/${interviewId}/live`).send(at);
   if (res.status !== 201) throw new Error(`start live: ${res.status} ${JSON.stringify(res.body)}`);
   return res.body as LiveSessionGrant;
@@ -174,7 +213,11 @@ export async function startLive(user: TestUser, interviewId: string, at: { round
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Poll until fn returns something truthy. */
-export async function waitFor<T>(fn: () => Promise<T | null | undefined | false>, timeoutMs = 10_000, everyMs = 50): Promise<T> {
+export async function waitFor<T>(
+  fn: () => Promise<T | null | undefined | false>,
+  timeoutMs = 10_000,
+  everyMs = 50
+): Promise<T> {
   const until = Date.now() + timeoutMs;
   for (;;) {
     const v = await fn();

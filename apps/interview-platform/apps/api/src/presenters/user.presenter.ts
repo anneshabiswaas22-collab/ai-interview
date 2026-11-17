@@ -14,7 +14,10 @@ export function toSummary(row: SummaryRow): UserSummary {
 }
 
 /** Batch-load UserSummary DTOs for a set of user ids. */
-export async function loadSummaries(ids: readonly (string | null | undefined)[], exec: Executor = db): Promise<Map<string, UserSummary>> {
+export async function loadSummaries(
+  ids: readonly (string | null | undefined)[],
+  exec: Executor = db
+): Promise<Map<string, UserSummary>> {
   const wanted = ids.filter((x): x is string => !!x);
   const rows = await userRepo.findSummaries(wanted, exec);
   return new Map(rows.map((r) => [r.id, toSummary(r)]));
@@ -30,7 +33,8 @@ export async function toMe(row: UserRow, exec: Executor = db): Promise<Me> {
     ...(summary as UserSummary),
     email: row.email,
     status: row.status,
-    suspendedUntil: row.status === "SUSPENDED" && row.suspended_until ? row.suspended_until.toISOString() : null,
+    suspendedUntil:
+      row.status === "SUSPENDED" && row.suspended_until ? row.suspended_until.toISOString() : null,
     emailVerified: !!row.email_verified_at,
     totpEnabled: row.totp_enabled,
     deletionRequestedAt: row.deletion_requested_at?.toISOString() ?? null,

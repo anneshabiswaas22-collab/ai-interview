@@ -6,7 +6,8 @@ import * as PopoverPrimitive from "@radix-ui/react-popover";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { cn } from "../lib/cn";
 
-const surface = "z-[70] rounded-lg border border-border bg-popover text-popover-foreground shadow-popover data-[state=open]:animate-pop-in";
+const surface =
+  "z-[70] rounded-lg border border-border bg-popover text-popover-foreground shadow-popover data-[state=open]:animate-pop-in";
 
 export const DropdownMenu = DropdownPrimitive.Root;
 export const DropdownMenuTrigger = DropdownPrimitive.Trigger;
@@ -19,7 +20,13 @@ export const DropdownMenuContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DropdownPrimitive.Content>
 >(({ className, sideOffset = 6, align = "end", ...props }, ref) => (
   <DropdownPrimitive.Portal>
-    <DropdownPrimitive.Content ref={ref} sideOffset={sideOffset} align={align} className={cn(surface, "min-w-[200px] p-1", className)} {...props} />
+    <DropdownPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      align={align}
+      className={cn(surface, "min-w-[200px] p-1", className)}
+      {...props}
+    />
   </DropdownPrimitive.Portal>
 ));
 DropdownMenuContent.displayName = "DropdownMenuContent";
@@ -33,7 +40,11 @@ export const DropdownMenuItem = React.forwardRef<
 >(({ className, destructive, ...props }, ref) => (
   <DropdownPrimitive.Item
     ref={ref}
-    className={cn(itemClass, destructive && "text-danger [&_svg]:text-danger data-[highlighted]:bg-danger-soft", className)}
+    className={cn(
+      itemClass,
+      destructive && "text-danger [&_svg]:text-danger data-[highlighted]:bg-danger-soft",
+      className
+    )}
     {...props}
   />
 ));
@@ -54,12 +65,27 @@ export const DropdownMenuSeparator = React.forwardRef<
   React.ElementRef<typeof DropdownPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof DropdownPrimitive.Separator>
 >(({ className, ...props }, ref) => (
-  <DropdownPrimitive.Separator ref={ref} className={cn("-mx-1 my-1 h-px bg-border", className)} {...props} />
+  <DropdownPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 my-1 h-px bg-border", className)}
+    {...props}
+  />
 ));
 DropdownMenuSeparator.displayName = "DropdownMenuSeparator";
 
-export function DropdownMenuLabel({ className, ...props }: React.ComponentPropsWithoutRef<typeof DropdownPrimitive.Label>) {
-  return <DropdownPrimitive.Label className={cn("px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide text-subtle-foreground", className)} {...props} />;
+export function DropdownMenuLabel({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof DropdownPrimitive.Label>) {
+  return (
+    <DropdownPrimitive.Label
+      className={cn(
+        "px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide text-subtle-foreground",
+        className
+      )}
+      {...props}
+    />
+  );
 }
 
 export const Popover = PopoverPrimitive.Root;
@@ -72,7 +98,13 @@ export const PopoverContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
 >(({ className, sideOffset = 6, align = "center", ...props }, ref) => (
   <PopoverPrimitive.Portal>
-    <PopoverPrimitive.Content ref={ref} sideOffset={sideOffset} align={align} className={cn(surface, "p-3 focus:outline-none", className)} {...props} />
+    <PopoverPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      align={align}
+      className={cn(surface, "p-3 focus:outline-none", className)}
+      {...props}
+    />
   </PopoverPrimitive.Portal>
 ));
 PopoverContent.displayName = "PopoverContent";

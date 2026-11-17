@@ -10,15 +10,21 @@ describe("queue producer", () => {
     await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
     const address = server.address();
     if (!address || typeof address === "string") throw new Error("No test port");
-    await new Promise<void>((resolve, reject) => server.close((err) => err ? reject(err) : resolve()));
+    await new Promise<void>((resolve, reject) =>
+      server.close((err) => (err ? reject(err) : resolve()))
+    );
     const oldMode = config.JOBS_MODE;
     const oldUrl = config.REDIS_URL;
     config.JOBS_MODE = "queue";
     config.REDIS_URL = `redis://127.0.0.1:${address.port}`;
     try {
       const started = Date.now();
-      await expect(enqueue("interview.score", { answerId: "test-answer", version: new Date().toISOString() })).rejects.toThrow();
-      await expect(enqueue("interview.score", { answerId: "test-answer", version: new Date().toISOString() })).rejects.toThrow();
+      await expect(
+        enqueue("interview.score", { answerId: "test-answer", version: new Date().toISOString() })
+      ).rejects.toThrow();
+      await expect(
+        enqueue("interview.score", { answerId: "test-answer", version: new Date().toISOString() })
+      ).rejects.toThrow();
       expect(Date.now() - started).toBeLessThan(5_000);
     } finally {
       await closeQueues();

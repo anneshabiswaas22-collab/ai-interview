@@ -24,7 +24,7 @@ export function useUrlState() {
       if (opts.push) router.push(url, { scroll: false });
       else router.replace(url, { scroll: false });
     },
-    [params, router, pathname],
+    [params, router, pathname]
   );
   return { get, set, params };
 }

@@ -1,7 +1,19 @@
 "use client";
 
 import { useEffect, useId, useState, type ReactNode } from "react";
-import { Button, Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Field, Input, Textarea } from "@open-conversation/ui";
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Field,
+  Input,
+  Textarea,
+} from "@open-conversation/ui";
 import { adminErrorMessage } from "@/lib/admin";
 
 export interface ReasonDialogProps {
@@ -47,7 +59,8 @@ export function ReasonDialog(p: ReasonDialogProps) {
   const mode = p.reason ?? "required";
   const max = p.maxDays ?? 365;
   const dayCount = Number(days);
-  const daysOk = p.days === undefined || (Number.isInteger(dayCount) && dayCount >= 1 && dayCount <= max);
+  const daysOk =
+    p.days === undefined || (Number.isInteger(dayCount) && dayCount >= 1 && dayCount <= max);
   const reasonOk = mode !== "required" || reason.trim().length >= 3;
   const typedOk = !p.typeToConfirm || typed.trim() === p.typeToConfirm;
   const ok = daysOk && reasonOk && typedOk && p.canConfirm !== false;
@@ -81,25 +94,59 @@ export function ReasonDialog(p: ReasonDialogProps) {
           <DialogBody className="space-y-4">
             {p.children}
             {p.days !== undefined ? (
-              <Field label="Days" htmlFor={`${id}-days`} error={daysOk ? undefined : `Between 1 and ${max} days.`}>
-                <Input id={`${id}-days`} type="number" inputMode="numeric" min={1} max={max} value={days} onChange={(e) => setDays(e.target.value)} className="w-28" data-testid="reason-days" />
+              <Field
+                label="Days"
+                htmlFor={`${id}-days`}
+                error={daysOk ? undefined : `Between 1 and ${max} days.`}
+              >
+                <Input
+                  id={`${id}-days`}
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={max}
+                  value={days}
+                  onChange={(e) => setDays(e.target.value)}
+                  className="w-28"
+                  data-testid="reason-days"
+                />
               </Field>
             ) : null}
             {mode !== "none" ? (
-              <Field label={p.reasonLabel ?? "Reason"} htmlFor={`${id}-reason`} optional={mode === "optional"} hint={p.reasonHint ?? "Recorded in the audit log."}>
-                <Textarea id={`${id}-reason`} rows={3} maxLength={300} value={reason} onChange={(e) => setReason(e.target.value)} data-testid="reason-input" />
+              <Field
+                label={p.reasonLabel ?? "Reason"}
+                htmlFor={`${id}-reason`}
+                optional={mode === "optional"}
+                hint={p.reasonHint ?? "Recorded in the audit log."}
+              >
+                <Textarea
+                  id={`${id}-reason`}
+                  rows={3}
+                  maxLength={300}
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  data-testid="reason-input"
+                />
               </Field>
             ) : null}
             {p.typeToConfirm ? (
               <Field
                 label={
                   <span>
-                    Type <span className="font-mono text-[13px] font-semibold">{p.typeToConfirm}</span> to confirm
+                    Type{" "}
+                    <span className="font-mono text-[13px] font-semibold">{p.typeToConfirm}</span>{" "}
+                    to confirm
                   </span>
                 }
                 htmlFor={`${id}-typed`}
               >
-                <Input id={`${id}-typed`} value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" data-testid="reason-typed" />
+                <Input
+                  id={`${id}-typed`}
+                  value={typed}
+                  onChange={(e) => setTyped(e.target.value)}
+                  autoComplete="off"
+                  data-testid="reason-typed"
+                />
               </Field>
             ) : null}
             {error ? (
@@ -109,10 +156,21 @@ export function ReasonDialog(p: ReasonDialogProps) {
             ) : null}
           </DialogBody>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => p.onOpenChange(false)} disabled={busy}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => p.onOpenChange(false)}
+              disabled={busy}
+            >
               Cancel
             </Button>
-            <Button type="submit" variant={p.destructive ? "danger" : "primary"} disabled={!ok} loading={busy} data-testid="reason-confirm">
+            <Button
+              type="submit"
+              variant={p.destructive ? "danger" : "primary"}
+              disabled={!ok}
+              loading={busy}
+              data-testid="reason-confirm"
+            >
               {p.confirmLabel}
             </Button>
           </DialogFooter>

@@ -9,11 +9,18 @@ describe("error copy", () => {
     expect(errorCopy(undefined)).toBe("Something went wrong. Try again.");
   });
   it("uses the first field error for validation failures", () => {
-    const e = new ApiError({ status: 400, code: "VALIDATION_FAILED", message: "x", details: { fields: [{ path: "body", message: "must not be empty" }] } });
+    const e = new ApiError({
+      status: 400,
+      code: "VALIDATION_FAILED",
+      message: "x",
+      details: { fields: [{ path: "body", message: "must not be empty" }] },
+    });
     expect(errorMessage(e)).toBe("Some fields need attention. Must not be empty.");
   });
   it("treats 404, 401 and validation as quiet", () => {
     expect(isQuietError(new ApiError({ status: 404, code: "NOT_FOUND", message: "" }))).toBe(true);
-    expect(isQuietError(new ApiError({ status: 500, code: "SERVER_ERROR", message: "" }))).toBe(false);
+    expect(isQuietError(new ApiError({ status: 500, code: "SERVER_ERROR", message: "" }))).toBe(
+      false
+    );
   });
 });

@@ -40,7 +40,16 @@ describe("CountBadge", () => {
 describe("Segmented", () => {
   it("marks the active option and reports changes", async () => {
     const onChange = vi.fn();
-    render(<Segmented value="latest" onChange={onChange} options={[{ value: "latest", label: "Latest" }, { value: "top", label: "Top" }]} />);
+    render(
+      <Segmented
+        value="latest"
+        onChange={onChange}
+        options={[
+          { value: "latest", label: "Latest" },
+          { value: "top", label: "Top" },
+        ]}
+      />
+    );
     expect(screen.getByRole("tab", { name: "Latest" })).toHaveAttribute("aria-selected", "true");
     await userEvent.click(screen.getByRole("tab", { name: "Top" }));
     expect(onChange).toHaveBeenCalledWith("top");
@@ -49,7 +58,13 @@ describe("Segmented", () => {
 
 describe("EmptyState", () => {
   it("renders title, description and action", () => {
-    render(<EmptyState title="Nothing yet" description="Posts will show here" action={<button>Create</button>} />);
+    render(
+      <EmptyState
+        title="Nothing yet"
+        description="Posts will show here"
+        action={<button>Create</button>}
+      />
+    );
     expect(screen.getByText("Nothing yet")).toBeInTheDocument();
     expect(screen.getByText("Posts will show here")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Create" })).toBeInTheDocument();

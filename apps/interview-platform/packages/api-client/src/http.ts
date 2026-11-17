@@ -1,7 +1,8 @@
 import type { AuthResult, IssuedNativeSession } from "@open-conversation/types";
 import { ApiError, REFRESHABLE_CODES, networkError, toApiError } from "./errors";
 
-export type QueryValue = string | number | boolean | null | undefined | readonly (string | number)[];
+export type QueryValue =
+  string | number | boolean | null | undefined | readonly (string | number)[];
 export type Query = Record<string, QueryValue>;
 
 export interface RequestOptions {
@@ -70,7 +71,11 @@ export function buildQuery(query?: Query): string {
 }
 
 const defaultLock = <T>(fn: () => Promise<T>): Promise<T> => {
-  const locks = (globalThis as { navigator?: { locks?: { request: (name: string, cb: () => Promise<T>) => Promise<T> } } }).navigator?.locks;
+  const locks = (
+    globalThis as {
+      navigator?: { locks?: { request: (name: string, cb: () => Promise<T>) => Promise<T> } };
+    }
+  ).navigator?.locks;
   return locks ? locks.request("open-conversation-auth-refresh", fn) : fn();
 };
 
@@ -116,7 +121,8 @@ export class HttpClient {
   /** Keep the refresh token of a native session (sign-in, sign-up, verification, refresh). */
   async captureSession(result: unknown): Promise<void> {
     const r = result as Partial<IssuedNativeSession> | undefined;
-    if (this.opts.native && r?.refreshToken) await this.opts.native.setRefreshToken(r.refreshToken, r.refreshExpiresAt);
+    if (this.opts.native && r?.refreshToken)
+      await this.opts.native.setRefreshToken(r.refreshToken, r.refreshExpiresAt);
   }
 
   /** The body native sign-out needs (`{ refreshToken }`); undefined on the web. */
@@ -134,7 +140,12 @@ export class HttpClient {
       const refreshToken = await this.opts.native.getRefreshToken();
       if (!refreshToken) return null;
       try {
-        const result = await this.send<IssuedNativeSession>("POST", "/auth/refresh", { body: { refreshToken }, noRefresh: true }, null);
+        const result = await this.send<IssuedNativeSession>(
+          "POST",
+          "/auth/refresh",
+          { body: { refreshToken }, noRefresh: true },
+          null
+        );
         await this.captureSession(result);
         this.opts.onRefresh?.(result);
         return result;
@@ -147,7 +158,12 @@ export class HttpClient {
       }
     }
     try {
-      const result = await this.send<AuthResult | undefined>("POST", "/auth/refresh", { withCredentials: true, noRefresh: true }, null);
+      const result = await this.send<AuthResult | undefined>(
+        "POST",
+        "/auth/refresh",
+        { withCredentials: true, noRefresh: true },
+        null
+      );
       // 204: there was no session to refresh (signed out).
       if (!result) return null;
       this.opts.onRefresh?.(result);
@@ -176,8 +192,17 @@ export class HttpClient {
     }
   }
 
-  private async send<T>(method: string, path: string, options: RequestOptions, token: string | null): Promise<T> {
-    const headers: Record<string, string> = { Accept: "application/json", ...(this.opts.native ? { "X-Client": "native" } : {}), ...options.headers };
+  private async send<T>(
+    method: string,
+    path: string,
+    options: RequestOptions,
+    token: string | null
+  ): Promise<T> {
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+      ...(this.opts.native ? { "X-Client": "native" } : {}),
+      ...options.headers,
+    };
     let body: BodyInit | undefined;
     if (options.body !== undefined) {
       const b = options.body;
@@ -198,7 +223,11 @@ export class HttpClient {
         body,
         signal: options.signal,
         ...(options.keepalive ? { keepalive: true } : {}),
-        credentials: this.opts.native ? "omit" : options.withCredentials ? "include" : "same-origin",
+        credentials: this.opts.native
+          ? "omit"
+          : options.withCredentials
+            ? "include"
+            : "same-origin",
       });
     } catch (e) {
       if (isAbort(e)) throw e;

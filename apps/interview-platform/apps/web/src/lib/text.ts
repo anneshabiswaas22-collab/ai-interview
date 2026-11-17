@@ -11,7 +11,8 @@ export type Segment =
   | { type: "tag"; text: string; tag: string };
 
 // One pass over three alternatives so overlapping matches resolve left to right.
-const TOKEN = /(\bhttps?:\/\/[^\s<>"']+|\bwww\.[^\s<>"']+)|(^|[^\w@/])@([A-Za-z0-9_]{3,30})\b|(^|[^\p{L}\p{N}_&#/])#([\p{L}\p{N}_]{1,50})/gu;
+const TOKEN =
+  /(\bhttps?:\/\/[^\s<>"']+|\bwww\.[^\s<>"']+)|(^|[^\w@/])@([A-Za-z0-9_]{3,30})\b|(^|[^\p{L}\p{N}_&#/])#([\p{L}\p{N}_]{1,50})/gu;
 const TRAILING = /[.,!?;:'")\]}]+$/;
 
 /** Only http(s) links are ever produced, so `javascript:` and friends can not sneak in. */
@@ -75,12 +76,17 @@ export function extractTags(input: string, max = 10): string[] {
 
 export function extractMentions(input: string): string[] {
   const seen: string[] = [];
-  for (const s of tokenize(input)) if (s.type === "mention" && !seen.includes(s.username.toLowerCase())) seen.push(s.username.toLowerCase());
+  for (const s of tokenize(input))
+    if (s.type === "mention" && !seen.includes(s.username.toLowerCase()))
+      seen.push(s.username.toLowerCase());
   return seen;
 }
 
 /** The @query being typed at the caret, if any: drives the mention typeahead. */
-export function activeMention(text: string, caret: number): { start: number; query: string } | null {
+export function activeMention(
+  text: string,
+  caret: number
+): { start: number; query: string } | null {
   const before = text.slice(0, caret);
   const m = before.match(/(^|[^\w@])@([A-Za-z0-9_]{0,30})$/);
   if (!m) return null;
@@ -89,7 +95,12 @@ export function activeMention(text: string, caret: number): { start: number; que
 }
 
 /** Replace the active @query with the chosen username and a trailing space. */
-export function insertMention(text: string, start: number, caret: number, username: string): { text: string; caret: number } {
+export function insertMention(
+  text: string,
+  start: number,
+  caret: number,
+  username: string
+): { text: string; caret: number } {
   const insert = `@${username} `;
   const next = text.slice(0, start) + insert + text.slice(caret);
   return { text: next, caret: start + insert.length };
@@ -105,8 +116,12 @@ export function isLong(text: string, maxLines = 6, charsPerLine = 70): boolean {
 
 // ─── Markdown-lite for Q&A ───────────────────────────────────────────────────
 
-export type Inline = { type: "text"; text: string } | { type: "code"; text: string } | { type: "link"; text: string; href: string };
-export type Block = { type: "paragraph"; inlines: Inline[] } | { type: "code"; text: string; lang: string | null };
+export type Inline =
+  | { type: "text"; text: string }
+  | { type: "code"; text: string }
+  | { type: "link"; text: string; href: string };
+export type Block =
+  { type: "paragraph"; inlines: Inline[] } | { type: "code"; text: string; lang: string | null };
 
 /** Paragraphs, fenced code blocks, inline code and links ([text](url) or bare URLs). */
 export function parseMarkdownLite(input: string): Block[] {

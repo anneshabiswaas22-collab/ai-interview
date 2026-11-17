@@ -1,7 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { completedInterview, newContext, newUser, pageFor, waitForScores } from "../helpers";
 
-test("share a report without the transcript, read it signed out, revoke it in Settings", async ({ browser, request }) => {
+test("share a report without the transcript, read it signed out, revoke it in Settings", async ({
+  browser,
+  request,
+}) => {
   const user = await newUser(request);
   const iv = await completedInterview(request, user);
   const page = await pageFor(browser, user, `/i/${iv.id}/report`);
@@ -41,7 +44,9 @@ test("share a report without the transcript, read it signed out, revoke it in Se
     await expect(list.getByText("Scores only, no transcript")).toBeVisible();
     await list.locator('[data-testid^="share-revoke-"]').click();
     await page.getByTestId("confirm-action").click();
-    await expect(page.getByTestId("toast-success").filter({ hasText: "Link revoked" })).toBeVisible();
+    await expect(
+      page.getByTestId("toast-success").filter({ hasText: "Link revoked" })
+    ).toBeVisible();
     await expect(list.getByText("No shared links")).toBeVisible();
   });
 

@@ -3,17 +3,31 @@
  * the transcript, voice time and proctoring events. Averages are computed in SQL over
  * scored answers only (an unscored answer is not a zero).
  */
-import type { InterviewReport, ProctorEventKind, QuestionReport, RoundReport, TranscriptLine } from "@open-conversation/types";
+import type {
+  InterviewReport,
+  ProctorEventKind,
+  QuestionReport,
+  RoundReport,
+  TranscriptLine,
+} from "@open-conversation/types";
 import { sql } from "kysely";
 import { type Actor, requireActor } from "../../core/context";
 import { db } from "../../db/kysely";
-import { planOf, toAnswer, toInterviewSummary, type InterviewRow } from "../../presenters/interview.presenter";
+import {
+  planOf,
+  toAnswer,
+  toInterviewSummary,
+  type InterviewRow,
+} from "../../presenters/interview.presenter";
 import { ownedInterview, statsFor } from "./interview.service";
 
 const round1 = (v: unknown) => (v === null || v === undefined ? null : Math.round(Number(v)));
 
 /** Build the report for an interview row the caller is entitled to see. */
-export async function buildReport(row: InterviewRow, opts: { includeTranscript: boolean }): Promise<InterviewReport> {
+export async function buildReport(
+  row: InterviewRow,
+  opts: { includeTranscript: boolean }
+): Promise<InterviewReport> {
   const plan = planOf(row) ?? [];
   const [answers, byRound, overall, voice, events, owner, stats] = await Promise.all([
     db.selectFrom("answers").selectAll().where("interview_id", "=", row.id).execute(),
@@ -23,8 +37,14 @@ export async function buildReport(row: InterviewRow, opts: { includeTranscript: 
         "round_index",
         sql<number>`count(*)::int`.as("answered"),
         sql<number | null>`avg(domain_rating) filter (where status = 'SCORED')`.as("domain"),
-        sql<number | null>`avg(communication_rating) filter (where status = 'SCORED')`.as("communication"),
-        sql<number | null>`avg((domain_rating + communication_rating) / 2.0) filter (where status = 'SCORED')`.as("overall"),
+        sql<number | null>`avg(communication_rating) filter (where status = 'SCORED')`.as(
+          "communication"
+        ),
+        sql<
+          number | null
+        >`avg((domain_rating + communication_rating) / 2.0) filter (where status = 'SCORED')`.as(
+          "overall"
+        ),
       ])
       .where("interview_id", "=", row.id)
       .groupBy("round_index")
@@ -33,14 +53,30 @@ export async function buildReport(row: InterviewRow, opts: { includeTranscript: 
       .selectFrom("answers")
       .select([
         sql<number | null>`avg(domain_rating) filter (where status = 'SCORED')`.as("domain"),
-        sql<number | null>`avg(communication_rating) filter (where status = 'SCORED')`.as("communication"),
-        sql<number | null>`avg((domain_rating + communication_rating) / 2.0) filter (where status = 'SCORED')`.as("overall"),
+        sql<number | null>`avg(communication_rating) filter (where status = 'SCORED')`.as(
+          "communication"
+        ),
+        sql<
+          number | null
+        >`avg((domain_rating + communication_rating) / 2.0) filter (where status = 'SCORED')`.as(
+          "overall"
+        ),
       ])
       .where("interview_id", "=", row.id)
       .executeTakeFirst(),
-    db.selectFrom("live_sessions").select(sql<number>`coalesce(sum(seconds), 0)::int`.as("s")).where("interview_id", "=", row.id).executeTakeFirst(),
+    db
+      .selectFrom("live_sessions")
+      .select(sql<number>`coalesce(sum(seconds), 0)::int`.as("s"))
+      .where("interview_id", "=", row.id)
+      .executeTakeFirst(),
     row.proctoring
-      ? db.selectFrom("proctor_events").select(["kind", "occurred_at", "round_index", "question_index"]).where("interview_id", "=", row.id).orderBy("occurred_at").limit(500).execute()
+      ? db
+          .selectFrom("proctor_events")
+          .select(["kind", "occurred_at", "round_index", "question_index"])
+          .where("interview_id", "=", row.id)
+          .orderBy("occurred_at")
+          .limit(500)
+          .execute()
       : Promise.resolve([]),
     db.selectFrom("users").select("display_name").where("id", "=", row.user_id).executeTakeFirst(),
     statsFor([row.id]),
@@ -70,10 +106,13 @@ export async function buildReport(row: InterviewRow, opts: { includeTranscript: 
         text: q.text,
         code: q.code,
         answer: a ? toAnswer(a) : null,
-        transcript: a && opts.includeTranscript ? ((a.transcript as unknown as TranscriptLine[]) ?? []) : null,
+        transcript:
+          a && opts.includeTranscript
+            ? ((a.transcript as unknown as TranscriptLine[]) ?? [])
+            : null,
         submittedCode: a && opts.includeTranscript ? a.code : null,
       };
-    }),
+    })
   );
 
   return {
@@ -88,7 +127,12 @@ export async function buildReport(row: InterviewRow, opts: { includeTranscript: 
     proctoring: row.proctoring
       ? {
           enabled: true,
-          events: events.map((e) => ({ kind: e.kind as ProctorEventKind, occurredAt: e.occurred_at.toISOString(), round: e.round_index, question: e.question_index })),
+          events: events.map((e) => ({
+            kind: e.kind as ProctorEventKind,
+            occurredAt: e.occurred_at.toISOString(),
+            round: e.round_index,
+            question: e.question_index,
+          })),
         }
       : null,
   };

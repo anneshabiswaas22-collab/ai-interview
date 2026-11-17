@@ -6,7 +6,15 @@ import { flattenPages, nextCursor } from "@open-conversation/api-client";
 import { Button } from "@open-conversation/ui";
 import type { AdminInterviewRow, InterviewStatus } from "@open-conversation/types";
 import { api } from "@/lib/api";
-import { INTERVIEW_SOURCE_LABEL, INTERVIEW_STATUS_LABEL, INTERVIEW_STATUS_TONE, formatCount, formatMinutes, scoreLabel, shortDate } from "@/lib/admin";
+import {
+  INTERVIEW_SOURCE_LABEL,
+  INTERVIEW_STATUS_LABEL,
+  INTERVIEW_STATUS_TONE,
+  formatCount,
+  formatMinutes,
+  scoreLabel,
+  shortDate,
+} from "@/lib/admin";
 import { AdminPage, DataTable, FilterBar, StatusText, useUrlState, type Column } from "../shell";
 import { ak, PersonAvatar } from "./common";
 
@@ -19,7 +27,8 @@ const STATUS_TABS: { value: "all" | InterviewStatus; label: string }[] = [
   { value: "PLAN_FAILED", label: "Plan failed" },
 ];
 
-const isStatus = (v: string): v is InterviewStatus => STATUS_TABS.some((t) => t.value === v && v !== "all");
+const isStatus = (v: string): v is InterviewStatus =>
+  STATUS_TABS.some((t) => t.value === v && v !== "all");
 
 /** Every interview on the deployment, as metadata only. Transcripts, answers and feedback stay with their owner. */
 export function AdminInterviews() {
@@ -33,7 +42,8 @@ export function AdminInterviews() {
 
   const list = useInfiniteQuery({
     queryKey: ak.interviews(f),
-    queryFn: ({ pageParam }) => api().admin.interviews({ q: q || undefined, status, userId, cursor: pageParam, limit: 30 }),
+    queryFn: ({ pageParam }) =>
+      api().admin.interviews({ q: q || undefined, status, userId, cursor: pageParam, limit: 30 }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: nextCursor,
     placeholderData: (p) => p,
@@ -48,7 +58,9 @@ export function AdminInterviews() {
         cell: (r) => (
           <div className="min-w-0">
             <p className="truncate font-medium text-foreground">{r.title || "Untitled"}</p>
-            <p className="truncate text-[12.5px] text-muted-foreground">{INTERVIEW_SOURCE_LABEL[r.source]}</p>
+            <p className="truncate text-[12.5px] text-muted-foreground">
+              {INTERVIEW_SOURCE_LABEL[r.source]}
+            </p>
           </div>
         ),
         className: "max-w-[220px] sm:max-w-[320px]",
@@ -69,12 +81,25 @@ export function AdminInterviews() {
         ),
         hideBelow: "md",
       },
-      { key: "status", header: "Status", cell: (r) => <StatusText tone={INTERVIEW_STATUS_TONE[r.status]}>{INTERVIEW_STATUS_LABEL[r.status]}</StatusText> },
+      {
+        key: "status",
+        header: "Status",
+        cell: (r) => (
+          <StatusText tone={INTERVIEW_STATUS_TONE[r.status]}>
+            {INTERVIEW_STATUS_LABEL[r.status]}
+          </StatusText>
+        ),
+      },
       {
         key: "answered",
         header: "Answered",
         align: "right",
-        cell: (r) => (r.questionCount ? `${formatCount(r.answeredCount)} of ${formatCount(r.questionCount)}` : <span className="text-subtle-foreground">No plan</span>),
+        cell: (r) =>
+          r.questionCount ? (
+            `${formatCount(r.answeredCount)} of ${formatCount(r.questionCount)}`
+          ) : (
+            <span className="text-subtle-foreground">No plan</span>
+          ),
         sortValue: (r) => r.answeredCount,
         hideBelow: "sm",
       },
@@ -82,13 +107,32 @@ export function AdminInterviews() {
         key: "score",
         header: "Score",
         align: "right",
-        cell: (r) => (r.overallScore === null ? <span className="text-subtle-foreground">{scoreLabel(null)}</span> : <span className="font-medium text-foreground">{scoreLabel(r.overallScore)}</span>),
+        cell: (r) =>
+          r.overallScore === null ? (
+            <span className="text-subtle-foreground">{scoreLabel(null)}</span>
+          ) : (
+            <span className="font-medium text-foreground">{scoreLabel(r.overallScore)}</span>
+          ),
         sortValue: (r) => r.overallScore,
       },
-      { key: "voice", header: "Voice", align: "right", cell: (r) => formatMinutes(r.voiceMinutes), sortValue: (r) => r.voiceMinutes, hideBelow: "md" },
-      { key: "created", header: "Created", align: "right", cell: (r) => <span className="text-muted-foreground">{shortDate(r.createdAt)}</span>, sortValue: (r) => r.createdAt, hideBelow: "lg" },
+      {
+        key: "voice",
+        header: "Voice",
+        align: "right",
+        cell: (r) => formatMinutes(r.voiceMinutes),
+        sortValue: (r) => r.voiceMinutes,
+        hideBelow: "md",
+      },
+      {
+        key: "created",
+        header: "Created",
+        align: "right",
+        cell: (r) => <span className="text-muted-foreground">{shortDate(r.createdAt)}</span>,
+        sortValue: (r) => r.createdAt,
+        hideBelow: "lg",
+      },
     ],
-    [setUrl],
+    [setUrl]
   );
 
   const ownerName = userId ? rows.find((r) => r.owner.id === userId)?.owner.displayName : undefined;
@@ -111,9 +155,17 @@ export function AdminInterviews() {
             testId="interviews-filter"
           />
           {userId ? (
-            <p className="mt-3 flex flex-wrap items-center gap-x-2 text-[13.5px] text-muted-foreground" data-testid="interviews-owner-filter">
+            <p
+              className="mt-3 flex flex-wrap items-center gap-x-2 text-[13.5px] text-muted-foreground"
+              data-testid="interviews-owner-filter"
+            >
               Showing interviews by {ownerName ?? "one account"}.
-              <Button variant="link" size="sm" className="h-auto p-0 text-[13.5px]" onClick={() => url.set({ user: null })}>
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto p-0 text-[13.5px]"
+                onClick={() => url.set({ user: null })}
+              >
                 Show everyone
               </Button>
             </p>

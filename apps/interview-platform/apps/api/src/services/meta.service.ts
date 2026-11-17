@@ -13,7 +13,11 @@ export async function appMeta(): Promise<AppMeta> {
     registration: s.registration,
     interviewerName: s.interviewerName,
     features: { ...s.features },
-    limits: { maxResumeMb: config.MAX_RESUME_MB, maxJobDescriptionChars: MAX_JOB_DESCRIPTION_CHARS, acceptedResumeTypes: [...RESUME_MIME_TYPES] },
+    limits: {
+      maxResumeMb: config.MAX_RESUME_MB,
+      maxJobDescriptionChars: MAX_JOB_DESCRIPTION_CHARS,
+      acceptedResumeTypes: [...RESUME_MIME_TYPES],
+    },
     support: { email: s.supportEmail },
     minSupportedVersion: s.minSupportedVersion,
   };

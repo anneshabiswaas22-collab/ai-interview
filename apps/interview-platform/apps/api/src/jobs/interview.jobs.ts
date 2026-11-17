@@ -17,7 +17,13 @@ import { db } from "../db/kysely";
 import { generateJson, ModelOutputError } from "../services/interview/ai";
 import { hangup, sweepLiveSessions } from "../services/interview/live.service";
 import { normalisePlan, plannerOutput, questionAt } from "../services/interview/plan";
-import { codeScorer, textScorer, plannerFromJobDescription, plannerFromResume, voiceScorer } from "../services/interview/prompts";
+import {
+  codeScorer,
+  textScorer,
+  plannerFromJobDescription,
+  plannerFromResume,
+  voiceScorer,
+} from "../services/interview/prompts";
 import { resolveTextModel } from "../services/models.service";
 import { recordUsage } from "../services/quota.service";
 import { getSettings } from "../services/settings.service";
@@ -26,23 +32,49 @@ import { registerJob } from "./registry";
 import { dispatchPendingScores } from "./score-outbox";
 
 export async function planInterview(interviewId: string, resumeText?: string): Promise<void> {
-  const row = await db.selectFrom("interviews").selectAll().where("id", "=", interviewId).executeTakeFirst();
+  const row = await db
+    .selectFrom("interviews")
+    .selectAll()
+    .where("id", "=", interviewId)
+    .executeTakeFirst();
   if (!row || row.status !== "PLANNING") return;
   const fail = async (reason: string) => {
-    await db.updateTable("interviews").set({ status: "PLAN_FAILED", plan_error: reason, updated_at: new Date() }).where("id", "=", row.id).where("status", "=", "PLANNING").execute();
+    await db
+      .updateTable("interviews")
+      .set({ status: "PLAN_FAILED", plan_error: reason, updated_at: new Date() })
+      .where("id", "=", row.id)
+      .where("status", "=", "PLANNING")
+      .execute();
     // The interview was booked when it was created; a failed plan gives it back.
-    if (row.text_model_id) await recordUsage({ userId: row.user_id, modelId: row.text_model_id, interviews: -1 });
+    if (row.text_model_id)
+      await recordUsage({ userId: row.user_id, modelId: row.text_model_id, interviews: -1 });
   };
-  if (row.source === "RESUME" && !resumeText) return fail("The resume is no longer available. Upload it again.");
+  if (row.source === "RESUME" && !resumeText)
+    return fail("The resume is no longer available. Upload it again.");
   const model = await resolveTextModel(row.text_model_id);
   if (!model) return fail("No model is set up to plan interviews.");
   const settings = await getSettings();
   const prompt =
     row.source === "RESUME"
       ? plannerFromResume(resumeText!, settings.interviewerName)
-      : plannerFromJobDescription({ company: row.company ?? "", role: row.role ?? "", jobDescription: row.job_description ?? "" }, settings.interviewerName);
+      : plannerFromJobDescription(
+          {
+            company: row.company ?? "",
+            role: row.role ?? "",
+            jobDescription: row.job_description ?? "",
+          },
+          settings.interviewerName
+        );
   try {
-    const out = await generateJson({ model, userId: row.user_id, system: prompt.system, user: prompt.user, schema: plannerOutput, maxOutputTokens: 12_000, temperature: 0.8 });
+    const out = await generateJson({
+      model,
+      userId: row.user_id,
+      system: prompt.system,
+      user: prompt.user,
+      schema: plannerOutput,
+      maxOutputTokens: 12_000,
+      temperature: 0.8,
+    });
     const plan = normalisePlan(out.rounds);
     const role = row.source === "JOB_DESCRIPTION" ? row.role : out.role || null;
     await db
@@ -63,7 +95,11 @@ export async function planInterview(interviewId: string, resumeText?: string): P
       .where("status", "=", "PLANNING")
       .execute();
   } catch (err) {
-    if (!(err instanceof ModelOutputError) && !(err instanceof Error && err.message.includes("no usable rounds"))) captureError(err, { where: "interview.plan", interviewId });
+    if (
+      !(err instanceof ModelOutputError) &&
+      !(err instanceof Error && err.message.includes("no usable rounds"))
+    )
+      captureError(err, { where: "interview.plan", interviewId });
     await fail("The interviewer could not prepare questions this time. Try again.");
   }
 }
@@ -81,20 +117,49 @@ const scoreOutput = z.object({
 const clampRating = (n: number) => Math.min(100, Math.max(1, Math.round(n)));
 
 export async function scoreAnswer(answerId: string, version: string): Promise<void> {
-  const a = await db.selectFrom("answers").selectAll().where("id", "=", answerId).executeTakeFirst();
+  const a = await db
+    .selectFrom("answers")
+    .selectAll()
+    .where("id", "=", answerId)
+    .executeTakeFirst();
   if (!a || a.status !== "SCORING" || a.updated_at.toISOString() !== version) return;
-  const row = await db.selectFrom("interviews").selectAll().where("id", "=", a.interview_id).executeTakeFirst();
+  const row = await db
+    .selectFrom("interviews")
+    .selectAll()
+    .where("id", "=", a.interview_id)
+    .executeTakeFirst();
   const q = row ? questionAt(planOf(row) ?? [], a.round_index, a.question_index) : null;
-  const markFailed = () => db.updateTable("answers").set({ status: "FAILED" }).where("id", "=", a.id).where("updated_at", "=", a.updated_at).execute();
+  const markFailed = () =>
+    db
+      .updateTable("answers")
+      .set({ status: "FAILED" })
+      .where("id", "=", a.id)
+      .where("updated_at", "=", a.updated_at)
+      .execute();
   if (!row || !q) return void (await markFailed());
   const model = await resolveTextModel(row.text_model_id);
   if (!model) return void (await markFailed());
   const transcript = (a.transcript as { role: "interviewer" | "candidate"; text: string }[]) ?? [];
-  const prompt = a.kind === "CODE" ? codeScorer({ question: q.text, code: a.code ?? "", language: a.language, role: row.role }) : a.kind === "TEXT" ? textScorer({ question: q.text, transcript, role: row.role }) : voiceScorer({ question: q.text, transcript, role: row.role });
+  const prompt =
+    a.kind === "CODE"
+      ? codeScorer({ question: q.text, code: a.code ?? "", language: a.language, role: row.role })
+      : a.kind === "TEXT"
+        ? textScorer({ question: q.text, transcript, role: row.role })
+        : voiceScorer({ question: q.text, transcript, role: row.role });
   try {
-    const out = await generateJson({ model, userId: row.user_id, system: prompt.system, user: prompt.user, schema: scoreOutput, maxOutputTokens: 3000, temperature: 0.2 });
+    const out = await generateJson({
+      model,
+      userId: row.user_id,
+      system: prompt.system,
+      user: prompt.user,
+      schema: scoreOutput,
+      maxOutputTokens: 3000,
+      temperature: 0.2,
+    });
     // A candidate who never spoke gets the floor, whatever the model thought.
-    const said = transcript.some((l) => l.role === "candidate" && l.text.trim().length > 0) || (a.code ?? "").trim().length > 0;
+    const said =
+      transcript.some((l) => l.role === "candidate" && l.text.trim().length > 0) ||
+      (a.code ?? "").trim().length > 0;
     await db
       .updateTable("answers")
       .set({
@@ -115,7 +180,8 @@ export async function scoreAnswer(answerId: string, version: string): Promise<vo
       .where("updated_at", "=", a.updated_at)
       .execute();
   } catch (err) {
-    if (!(err instanceof ModelOutputError)) captureError(err, { where: "interview.score", answerId });
+    if (!(err instanceof ModelOutputError))
+      captureError(err, { where: "interview.score", answerId });
     await markFailed();
   }
 }

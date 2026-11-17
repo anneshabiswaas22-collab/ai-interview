@@ -36,7 +36,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang="en" suppressHydrationWarning className={`${sans.variable} ${display.variable}`}>
       <head>
         {/* Applies the saved theme before first paint (no flash). */}
-        <script nonce={nonce} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: THEME_BOOT }}
+        />
         {/* Runtime config (API URL, product name), parser-blocking so it runs before any
             client code reads it. Browsers hide nonce attributes from the DOM, hence the
             suppressed hydration warning. It is tiny and same-origin, so blocking is cheap. */}

@@ -12,7 +12,12 @@
  */
 import type { NextFunction, Request, Response } from "express";
 import type { Redis } from "ioredis";
-import { RateLimiterMemory, RateLimiterRedis, type RateLimiterAbstract, RateLimiterRes } from "rate-limiter-flexible";
+import {
+  RateLimiterMemory,
+  RateLimiterRedis,
+  type RateLimiterAbstract,
+  RateLimiterRes,
+} from "rate-limiter-flexible";
 import { rateLimitEnv } from "../core/config";
 import { tooMany } from "../core/errors";
 import { redis } from "../integrations/redis";
@@ -20,18 +25,31 @@ import { redis } from "../integrations/redis";
 const limiters = new Map<string, RateLimiterAbstract>();
 
 /** A Redis limiter that falls back to memory when Redis is unavailable. Exported for tests. */
-export function redisLimiter(client: Redis, name: string, points: number, durationSeconds: number): RateLimiterRedis {
+export function redisLimiter(
+  client: Redis,
+  name: string,
+  points: number,
+  durationSeconds: number
+): RateLimiterRedis {
   return new RateLimiterRedis({
     storeClient: client,
     keyPrefix: `rl:${name}`,
     points,
     duration: durationSeconds,
     rejectIfRedisNotReady: true,
-    insuranceLimiter: new RateLimiterMemory({ keyPrefix: `rl-insurance:${name}`, points, duration: durationSeconds }),
+    insuranceLimiter: new RateLimiterMemory({
+      keyPrefix: `rl-insurance:${name}`,
+      points,
+      duration: durationSeconds,
+    }),
   });
 }
 
-export function limiter(name: string, points: number, durationSeconds: number): RateLimiterAbstract {
+export function limiter(
+  name: string,
+  points: number,
+  durationSeconds: number
+): RateLimiterAbstract {
   const key = `${name}:${points}:${durationSeconds}`;
   let l = limiters.get(key);
   if (!l) {
@@ -49,7 +67,12 @@ function enabled(): boolean {
 }
 
 /** Consume one point; throws a 429 with Retry-After when the budget is spent. */
-export async function consume(name: string, subject: string, points: number, durationSeconds: number): Promise<void> {
+export async function consume(
+  name: string,
+  subject: string,
+  points: number,
+  durationSeconds: number
+): Promise<void> {
   if (!enabled()) return;
   try {
     await limiter(name, points, durationSeconds).consume(subject);
@@ -64,28 +87,49 @@ export async function consume(name: string, subject: string, points: number, dur
  * without spending anything; `penalise` records one failure; `forgive` clears it.
  */
 export const failureBudget = {
-  async spent(name: string, subject: string, points: number, durationSeconds: number): Promise<boolean> {
+  async spent(
+    name: string,
+    subject: string,
+    points: number,
+    durationSeconds: number
+  ): Promise<boolean> {
     if (!enabled()) return false;
     const res = await limiter(name, points, durationSeconds).get(subject);
     return !!res && res.consumedPoints >= points;
   },
-  async penalise(name: string, subject: string, points: number, durationSeconds: number): Promise<void> {
+  async penalise(
+    name: string,
+    subject: string,
+    points: number,
+    durationSeconds: number
+  ): Promise<void> {
     if (!enabled()) return;
     await limiter(name, points, durationSeconds).penalty(subject, 1);
   },
-  async forgive(name: string, subject: string, points: number, durationSeconds: number): Promise<void> {
+  async forgive(
+    name: string,
+    subject: string,
+    points: number,
+    durationSeconds: number
+  ): Promise<void> {
     if (!enabled()) return;
     await limiter(name, points, durationSeconds).delete(subject);
   },
 };
 
-export function rateLimit(name: string, points: number, durationSeconds: number, by: "ip" | "user" = "user") {
+export function rateLimit(
+  name: string,
+  points: number,
+  durationSeconds: number,
+  by: "ip" | "user" = "user"
+) {
   return async (req: Request, res: Response, next: NextFunction) => {
     const subject = by === "user" && req.actor ? `u:${req.actor.id}` : `ip:${req.ip}`;
     try {
       await consume(name, subject, points, durationSeconds);
     } catch (err) {
-      const retry = (err as { details?: { retryAfterSeconds?: number } }).details?.retryAfterSeconds;
+      const retry = (err as { details?: { retryAfterSeconds?: number } }).details
+        ?.retryAfterSeconds;
       if (retry) res.setHeader("Retry-After", String(retry));
       throw err;
     }

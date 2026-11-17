@@ -5,7 +5,11 @@ export class RecoveryCodeRepository {
   /** Replace every code of the user with these hashes. */
   async replace(userId: string, hashes: string[], exec: Executor = db): Promise<void> {
     await exec.deleteFrom("totp_recovery_codes").where("user_id", "=", userId).execute();
-    if (hashes.length) await exec.insertInto("totp_recovery_codes").values(hashes.map((code_hash) => ({ user_id: userId, code_hash }))).execute();
+    if (hashes.length)
+      await exec
+        .insertInto("totp_recovery_codes")
+        .values(hashes.map((code_hash) => ({ user_id: userId, code_hash })))
+        .execute();
   }
 
   /** Spend one code. True only for an unused code of this user; concurrent uses cannot both win. */

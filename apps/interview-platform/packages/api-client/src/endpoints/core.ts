@@ -33,42 +33,80 @@ export function coreEndpoints(h: Helpers) {
   };
 
   const auth = {
-    signup: async (body: SignupInput) => keep(await http.request<SignupResult>("POST", "/auth/signup", { body, withCredentials: true, noRefresh: true })),
-    verifyEmail: async (token: string) => keep(await http.request<AuthResult>("POST", "/auth/verify-email", { body: { token }, withCredentials: true, noRefresh: true })),
-    resendVerification: (email: string) => http.request<void>("POST", "/auth/resend-verification", { body: { email }, noRefresh: true }),
-    login: async (body: LoginInput) => keep(await http.request<LoginResult>("POST", "/auth/login", { body, withCredentials: true, noRefresh: true })),
+    signup: async (body: SignupInput) =>
+      keep(
+        await http.request<SignupResult>("POST", "/auth/signup", {
+          body,
+          withCredentials: true,
+          noRefresh: true,
+        })
+      ),
+    verifyEmail: async (token: string) =>
+      keep(
+        await http.request<AuthResult>("POST", "/auth/verify-email", {
+          body: { token },
+          withCredentials: true,
+          noRefresh: true,
+        })
+      ),
+    resendVerification: (email: string) =>
+      http.request<void>("POST", "/auth/resend-verification", { body: { email }, noRefresh: true }),
+    login: async (body: LoginInput) =>
+      keep(
+        await http.request<LoginResult>("POST", "/auth/login", {
+          body,
+          withCredentials: true,
+          noRefresh: true,
+        })
+      ),
     refresh: () => http.refreshSession(),
     /** Ends this session (native: sends and then forgets the stored refresh token). */
     logout: async () => {
       try {
         const body = await http.logoutBody();
-        await http.request<void>("POST", "/auth/logout", { body, withCredentials: true, noRefresh: true });
+        await http.request<void>("POST", "/auth/logout", {
+          body,
+          withCredentials: true,
+          noRefresh: true,
+        });
       } finally {
         await http.clearNativeSession();
       }
     },
     logoutAll: () => http.request<void>("POST", "/auth/logout-all", { withCredentials: true }),
-    forgotPassword: (email: string) => http.request<void>("POST", "/auth/forgot-password", { body: { email }, noRefresh: true }),
-    resetPassword: (token: string, password: string) => http.request<void>("POST", "/auth/reset-password", { body: { token, password }, noRefresh: true }),
-    changePassword: (currentPassword: string, newPassword: string) => http.request<void>("POST", "/auth/change-password", { body: { currentPassword, newPassword }, withCredentials: true }),
+    forgotPassword: (email: string) =>
+      http.request<void>("POST", "/auth/forgot-password", { body: { email }, noRefresh: true }),
+    resetPassword: (token: string, password: string) =>
+      http.request<void>("POST", "/auth/reset-password", {
+        body: { token, password },
+        noRefresh: true,
+      }),
+    changePassword: (currentPassword: string, newPassword: string) =>
+      http.request<void>("POST", "/auth/change-password", {
+        body: { currentPassword, newPassword },
+        withCredentials: true,
+      }),
     me: (signal?: AbortSignal) => get<Me>("/auth/me", undefined, signal),
     totpSetup: () => post<{ secret: string; otpauthUrl: string }>("/auth/totp/setup"),
     /** Turns two-factor on and returns the one-time recovery codes (shown once). */
     totpEnable: (code: string) => post<{ recoveryCodes: string[] }>("/auth/totp/enable", { code }),
     totpDisable: (password: string, code: string) => post("/auth/totp/disable", { password, code }),
     /** Replaces every recovery code with a fresh set. */
-    totpRecoveryCodes: (password: string, code: string) => post<{ recoveryCodes: string[] }>("/auth/totp/recovery-codes", { password, code }),
+    totpRecoveryCodes: (password: string, code: string) =>
+      post<{ recoveryCodes: string[] }>("/auth/totp/recovery-codes", { password, code }),
   };
 
   const meta = {
-    get: (signal?: AbortSignal) => http.request<AppMeta>("GET", "/meta", { signal, noRefresh: true }),
+    get: (signal?: AbortSignal) =>
+      http.request<AppMeta>("GET", "/meta", { signal, noRefresh: true }),
   };
 
   const users = {
     me: () => get<Me>("/users/me"),
     updateMe: (body: AccountPatch) => patch<Me>("/users/me", body),
     /** Asks for deletion: signed out everywhere, erased after the grace period. 409 LAST_ADMIN. */
-    deleteMe: (body: { password: string; totp?: string; recoveryCode?: string }) => http.request<{ purgeAfter: string }>("DELETE", "/users/me", { body }),
+    deleteMe: (body: { password: string; totp?: string; recoveryCode?: string }) =>
+      http.request<{ purgeAfter: string }>("DELETE", "/users/me", { body }),
     /** Everything the account holds, as a JSON file (rate limited: 429 after 3 a day). */
     exportData: () => download("/users/me/export"),
     sessions: () => get<SessionInfo[]>("/users/me/sessions"),

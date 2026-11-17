@@ -57,21 +57,29 @@ class ToastStore {
 
 export const toastStore = new ToastStore();
 
-type ToastInput = string | { title: string; description?: string; action?: ToastItem["action"]; duration?: number };
+type ToastInput =
+  string | { title: string; description?: string; action?: ToastItem["action"]; duration?: number };
 const norm = (i: ToastInput) => (typeof i === "string" ? { title: i } : i);
 
-export const toast = Object.assign((i: ToastInput) => toastStore.push({ tone: "info", ...norm(i) }), {
-  success: (i: ToastInput) => toastStore.push({ tone: "success", ...norm(i) }),
-  error: (i: ToastInput) => toastStore.push({ tone: "error", ...norm(i) }),
-  info: (i: ToastInput) => toastStore.push({ tone: "info", ...norm(i) }),
-  dismiss: (id: number) => toastStore.dismiss(id),
-});
+export const toast = Object.assign(
+  (i: ToastInput) => toastStore.push({ tone: "info", ...norm(i) }),
+  {
+    success: (i: ToastInput) => toastStore.push({ tone: "success", ...norm(i) }),
+    error: (i: ToastInput) => toastStore.push({ tone: "error", ...norm(i) }),
+    info: (i: ToastInput) => toastStore.push({ tone: "info", ...norm(i) }),
+    dismiss: (id: number) => toastStore.dismiss(id),
+  }
+);
 
 const icons = { info: Info, success: CheckCircle2, error: AlertCircle } as const;
 const iconTone = { info: "text-primary", success: "text-success", error: "text-danger" } as const;
 
 export function Toaster() {
-  const items = React.useSyncExternalStore(toastStore.subscribe, toastStore.getSnapshot, toastStore.getSnapshot);
+  const items = React.useSyncExternalStore(
+    toastStore.subscribe,
+    toastStore.getSnapshot,
+    toastStore.getSnapshot
+  );
   return (
     <ToastPrimitive.Provider swipeDirection="right" duration={5000}>
       {items.map((t) => {
@@ -88,17 +96,30 @@ export function Toaster() {
           >
             <Icon className={cn("mt-0.5 size-5 shrink-0", iconTone[t.tone])} aria-hidden />
             <div className="min-w-0 flex-1">
-              <ToastPrimitive.Title className="text-sm font-semibold">{t.title}</ToastPrimitive.Title>
-              {t.description ? <ToastPrimitive.Description className="mt-0.5 text-sm text-muted-foreground">{t.description}</ToastPrimitive.Description> : null}
+              <ToastPrimitive.Title className="text-sm font-semibold">
+                {t.title}
+              </ToastPrimitive.Title>
+              {t.description ? (
+                <ToastPrimitive.Description className="mt-0.5 text-sm text-muted-foreground">
+                  {t.description}
+                </ToastPrimitive.Description>
+              ) : null}
               {t.action ? (
                 <ToastPrimitive.Action altText={t.action.label} asChild>
-                  <button type="button" onClick={t.action.onClick} className="mt-2 text-sm font-semibold text-link hover:underline">
+                  <button
+                    type="button"
+                    onClick={t.action.onClick}
+                    className="mt-2 text-sm font-semibold text-link hover:underline"
+                  >
                     {t.action.label}
                   </button>
                 </ToastPrimitive.Action>
               ) : null}
             </div>
-            <ToastPrimitive.Close aria-label="Dismiss" className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+            <ToastPrimitive.Close
+              aria-label="Dismiss"
+              className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
               <X className="size-4" />
             </ToastPrimitive.Close>
           </ToastPrimitive.Root>

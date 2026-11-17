@@ -16,9 +16,27 @@ export interface AdminSession {
 export interface AdminStats {
   from: string;
   to: string;
-  totals: { users: number; newUsers: number; activeUsers: number; interviews: number; completedInterviews: number; answers: number; voiceMinutes: number; estimatedCostUsd: number };
+  totals: {
+    users: number;
+    newUsers: number;
+    activeUsers: number;
+    interviews: number;
+    completedInterviews: number;
+    answers: number;
+    voiceMinutes: number;
+    estimatedCostUsd: number;
+  };
   daily: { date: string; activeUsers: number; interviews: number; voiceMinutes: number }[];
-  byModel: { modelId: string; displayName: string; kind: ModelKind; calls: number; inputTokens: number; outputTokens: number; voiceMinutes: number; estimatedCostUsd: number }[];
+  byModel: {
+    modelId: string;
+    displayName: string;
+    kind: ModelKind;
+    calls: number;
+    inputTokens: number;
+    outputTokens: number;
+    voiceMinutes: number;
+    estimatedCostUsd: number;
+  }[];
   /** Mean overall score of answers scored in the range; null when none. */
   averageScore: number | null;
 }
@@ -39,7 +57,12 @@ export interface AdminUserRow extends UserSummary {
 
 export interface AdminUserDetail extends AdminUserRow {
   override: QuotaOverride | null;
-  totals: { interviews: number; completedInterviews: number; answers: number; voiceMinutes: number };
+  totals: {
+    interviews: number;
+    completedInterviews: number;
+    answers: number;
+    voiceMinutes: number;
+  };
   /** The last 30 UTC days. */
   usage: { date: string; interviews: number; voiceMinutes: number }[];
 }
@@ -115,7 +138,14 @@ export interface AppSettings {
   interviewerName: string;
   /** House rules added to every interviewer instruction (tone, language, things to avoid). */
   interviewerAddendum: string;
-  features: { resumeUpload: boolean; jobDescription: boolean; codeQuestions: boolean; proctoring: boolean; sharing: boolean; pdfExport: boolean };
+  features: {
+    resumeUpload: boolean;
+    jobDescription: boolean;
+    codeQuestions: boolean;
+    proctoring: boolean;
+    sharing: boolean;
+    pdfExport: boolean;
+  };
   /** Delete interviews older than this many days; null keeps them forever. */
   retentionDays: number | null;
   minSupportedVersion: string | null;

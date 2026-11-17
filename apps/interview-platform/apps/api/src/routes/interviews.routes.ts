@@ -13,9 +13,20 @@ router.get("/", authenticate, ctrl.list);
  * stored. Books one interview against this month's quota and returns the `Interview` in PLANNING; poll until READY.
  * 400 FILE_TYPE, 422 RESUME_TOO_SHORT, 429 QUOTA_EXCEEDED, 503 NO_TEXT_MODEL.
  */
-router.post("/from-resume", authenticate, rateLimit("interview-create", 10, 3600), ctrl.resumeUpload, ctrl.fromResume);
+router.post(
+  "/from-resume",
+  authenticate,
+  rateLimit("interview-create", 10, 3600),
+  ctrl.resumeUpload,
+  ctrl.fromResume
+);
 /** Plan from `{ company, role, jobDescription, proctoring? }`. Same quota and polling as a resume. */
-router.post("/from-job-description", authenticate, rateLimit("interview-create", 10, 3600), ctrl.fromJobDescription);
+router.post(
+  "/from-job-description",
+  authenticate,
+  rateLimit("interview-create", 10, 3600),
+  ctrl.fromJobDescription
+);
 /** One interview with its plan, position and answers (`Interview`). 404 when it is not yours. */
 router.get("/:id", authenticate, ctrl.get);
 /** Before the first live session: `{ title?, plan?, proctoring?, realtimeModelId? }`. After: only `title`. 409 INTERVIEW_STARTED. */
@@ -26,8 +37,18 @@ router.post("/:id/replan", authenticate, rateLimit("interview-replan", 5, 3600),
 router.delete("/:id", authenticate, ctrl.remove);
 /** Text practice requires explicit consent and uses server-selected questions. */
 router.get("/:id/text", authenticate, ctrl.getTextPractice);
-router.post("/:id/text/start", authenticate, rateLimit("text-practice-start", 40, 3600), ctrl.startTextPractice);
-router.post("/:id/text/answers", authenticate, rateLimit("text-practice-answer", 120, 3600), ctrl.answerTextPractice);
+router.post(
+  "/:id/text/start",
+  authenticate,
+  rateLimit("text-practice-start", 40, 3600),
+  ctrl.startTextPractice
+);
+router.post(
+  "/:id/text/answers",
+  authenticate,
+  rateLimit("text-practice-answer", 120, 3600),
+  ctrl.answerTextPractice
+);
 /**
  * Open a live voice session for the current question (or `{ round, question }`): returns a `LiveSessionGrant` with a
  * short-lived credential that has the interviewer's instructions locked inside. Closes any other open session of yours.
@@ -42,7 +63,12 @@ router.post("/:id/live/:sid/end", authenticate, ctrl.endLive);
  */
 router.post("/:id/answers", authenticate, rateLimit("interview-answer", 120, 3600), ctrl.answer);
 /** Proctoring events from the browser: `{ events: [{ kind, occurredAt, round?, question? }] }`. 409 PROCTORING_OFF. */
-router.post("/:id/proctor-events", authenticate, rateLimit("interview-proctor", 300, 3600), ctrl.proctorEvents);
+router.post(
+  "/:id/proctor-events",
+  authenticate,
+  rateLimit("interview-proctor", 300, 3600),
+  ctrl.proctorEvents
+);
 /** Finish now; unanswered questions stay unanswered. Returns `Interview`. */
 router.post("/:id/complete", authenticate, ctrl.complete);
 /** The full report with transcripts (`InterviewReport`). */

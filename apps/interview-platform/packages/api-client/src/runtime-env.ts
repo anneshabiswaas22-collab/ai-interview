@@ -18,9 +18,13 @@ export function envScript(env: object): string {
 
 export function envScriptResponse(env: object): Response {
   return new Response(envScript(env), {
-    headers: { "content-type": "application/javascript; charset=utf-8", "cache-control": "no-store" },
+    headers: {
+      "content-type": "application/javascript; charset=utf-8",
+      "cache-control": "no-store",
+    },
   });
 }
 
 /** A trimmed non-empty string, or undefined. */
-export const nonEmpty = (v: unknown): string | undefined => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+export const nonEmpty = (v: unknown): string | undefined =>
+  typeof v === "string" && v.trim() ? v.trim() : undefined;

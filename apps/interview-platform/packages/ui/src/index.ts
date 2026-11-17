@@ -1,6 +1,12 @@
 export { cn } from "./lib/cn";
 export { initials, avatarColor, avatarHue, hashString, AVATAR_HUES } from "./lib/avatar";
-export { Button, IconButton, buttonVariants, type ButtonProps, type IconButtonProps } from "./components/button";
+export {
+  Button,
+  IconButton,
+  buttonVariants,
+  type ButtonProps,
+  type IconButtonProps,
+} from "./components/button";
 export { Input, Textarea, Label, Field, fieldBase } from "./components/input";
 export { Select, NativeSelect, type SelectOption } from "./components/select";
 export { Checkbox, Switch } from "./components/checkbox";

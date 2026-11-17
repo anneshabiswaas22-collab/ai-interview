@@ -1,5 +1,15 @@
 /** The admin sidebar model. Every admin sees every area (the API has one admin role). Pure (tested). */
-import { Boxes, Gauge, Link2, MessagesSquare, ScrollText, Settings2, SlidersHorizontal, Users, type LucideIcon } from "lucide-react";
+import {
+  Boxes,
+  Gauge,
+  Link2,
+  MessagesSquare,
+  ScrollText,
+  Settings2,
+  SlidersHorizontal,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 
 export interface AdminNavItem {
   href: string;
@@ -19,10 +29,16 @@ export const ADMIN_NAV: AdminNavItem[] = [
 ];
 
 /** The item a pathname belongs to: the longest matching href ("/admin" only matches itself). */
-export function activeNavHref(pathname: string, items: readonly AdminNavItem[] = ADMIN_NAV): string | null {
+export function activeNavHref(
+  pathname: string,
+  items: readonly AdminNavItem[] = ADMIN_NAV
+): string | null {
   let best: string | null = null;
   for (const i of items) {
-    const hit = i.href === "/admin" ? pathname === "/admin" || pathname === "/admin/" : pathname === i.href || pathname.startsWith(`${i.href}/`);
+    const hit =
+      i.href === "/admin"
+        ? pathname === "/admin" || pathname === "/admin/"
+        : pathname === i.href || pathname.startsWith(`${i.href}/`);
     if (hit && (!best || i.href.length > best.length)) best = i.href;
   }
   return best;

@@ -24,7 +24,8 @@ export function resolveTheme(pref: ThemePref, prefersDark: boolean): "light" | "
 
 export function applyTheme(pref: ThemePref) {
   if (typeof document === "undefined") return;
-  const prefersDark = typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+  const prefersDark =
+    typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches;
   const root = document.documentElement;
   if (pref === "system") root.removeAttribute("data-theme");
   else root.setAttribute("data-theme", pref);

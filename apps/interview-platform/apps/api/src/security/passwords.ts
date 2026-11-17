@@ -19,7 +19,8 @@ export function passwordProblem(password: string, ...personal: string[]): string
   if (/^(.)\1+$/.test(password)) return "That password is too easy to guess";
   const lower = password.toLowerCase();
   for (const p of personal) {
-    if (p && p.length >= 3 && lower.includes(p.toLowerCase().split("@")[0] as string)) return "Do not use your email or username in your password";
+    if (p && p.length >= 3 && lower.includes(p.toLowerCase().split("@")[0] as string))
+      return "Do not use your email or username in your password";
   }
   return null;
 }

@@ -23,7 +23,10 @@ const schema = z.object({
     .string()
     .trim()
     // Mirrors the API's USERNAME_PATTERN.
-    .regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,38}[a-zA-Z0-9]$/, "3 to 40 letters, digits or hyphens, not starting or ending with a hyphen"),
+    .regex(
+      /^[a-zA-Z0-9][a-zA-Z0-9-]{1,38}[a-zA-Z0-9]$/,
+      "3 to 40 letters, digits or hyphens, not starting or ending with a hyphen"
+    ),
   displayName: z.string().trim().min(1, "Enter your name").max(80),
   password: z.string().min(10, "Use at least 10 characters").max(128),
 });
@@ -45,7 +48,10 @@ export function SignupForm() {
   const [error, setError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
-  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { email: "", username: "", displayName: "", password: "" } });
+  const form = useForm<Values>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: "", username: "", displayName: "", password: "" },
+  });
   const password = form.watch("password");
 
   useEffect(() => {
@@ -97,7 +103,16 @@ export function SignupForm() {
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-primary-soft text-primary-soft-foreground">
           <MailCheck className="size-6" />
         </div>
-        <AuthHeading title="Check your email" description={<>We sent a confirmation link to <span className="font-semibold text-foreground">{sentTo}</span>. Open it to finish creating your account.</>} />
+        <AuthHeading
+          title="Check your email"
+          description={
+            <>
+              We sent a confirmation link to{" "}
+              <span className="font-semibold text-foreground">{sentTo}</span>. Open it to finish
+              creating your account.
+            </>
+          }
+        />
         <Button
           variant="outline"
           block
@@ -118,7 +133,11 @@ export function SignupForm() {
         </Button>
         <p className="mt-4 text-sm text-muted-foreground">
           Wrong address?{" "}
-          <button type="button" className="font-semibold text-link hover:underline" onClick={() => setSentTo(null)}>
+          <button
+            type="button"
+            className="font-semibold text-link hover:underline"
+            onClick={() => setSentTo(null)}
+          >
             Start again
           </button>
         </p>
@@ -129,34 +148,84 @@ export function SignupForm() {
   const errs = form.formState.errors;
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
-      <AuthHeading title="Create your account" description="Keep your progress, notes and certificates in one place." />
+      <AuthHeading
+        title="Create your account"
+        description="Keep your progress, notes and certificates in one place."
+      />
       {error ? <FormAlert>{error}</FormAlert> : null}
       {closed ? <FormAlert tone="info">Sign-ups are closed right now.</FormAlert> : null}
-      {meta.data?.registration === "INVITE_ONLY" ? <FormAlert tone="info">Sign-up is open to approved email domains only.</FormAlert> : null}
+      {meta.data?.registration === "INVITE_ONLY" ? (
+        <FormAlert tone="info">Sign-up is open to approved email domains only.</FormAlert>
+      ) : null}
       <div className="space-y-4">
         <Field label="Email" htmlFor="email" error={errs.email?.message}>
-          <Input id="email" type="email" autoComplete="email" autoFocus aria-invalid={!!errs.email || undefined} {...form.register("email")} />
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            autoFocus
+            aria-invalid={!!errs.email || undefined}
+            {...form.register("email")}
+          />
         </Field>
-        <Field label="Name" htmlFor="displayName" hint="Shown in the app and on chats you share." error={errs.displayName?.message}>
-          <Input id="displayName" autoComplete="name" aria-invalid={!!errs.displayName || undefined} {...form.register("displayName")} />
+        <Field
+          label="Name"
+          htmlFor="displayName"
+          hint="Shown in the app and on chats you share."
+          error={errs.displayName?.message}
+        >
+          <Input
+            id="displayName"
+            autoComplete="name"
+            aria-invalid={!!errs.displayName || undefined}
+            {...form.register("displayName")}
+          />
         </Field>
-        <Field label="Username" htmlFor="username" hint="Letters, digits and hyphens. Used to sign in." error={errs.username?.message}>
+        <Field
+          label="Username"
+          htmlFor="username"
+          hint="Letters, digits and hyphens. Used to sign in."
+          error={errs.username?.message}
+        >
           <div className="relative">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-subtle-foreground">@</span>
-            <Input id="username" autoComplete="username" className="pl-7" aria-invalid={!!errs.username || undefined} {...form.register("username")} />
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-subtle-foreground">
+              @
+            </span>
+            <Input
+              id="username"
+              autoComplete="username"
+              className="pl-7"
+              aria-invalid={!!errs.username || undefined}
+              {...form.register("username")}
+            />
           </div>
         </Field>
         <Field label="Password" htmlFor="password" error={errs.password?.message}>
-          <PasswordInput id="password" autoComplete="new-password" aria-invalid={!!errs.password || undefined} {...form.register("password")} />
+          <PasswordInput
+            id="password"
+            autoComplete="new-password"
+            aria-invalid={!!errs.password || undefined}
+            {...form.register("password")}
+          />
           {!errs.password ? <StrengthMeter value={password} /> : null}
         </Field>
       </div>
-      <Button type="submit" block size="lg" className="mt-6" loading={form.formState.isSubmitting} data-testid="signup-submit">
+      <Button
+        type="submit"
+        block
+        size="lg"
+        className="mt-6"
+        loading={form.formState.isSubmitting}
+        data-testid="signup-submit"
+      >
         Create account
       </Button>
       <p className="mt-5 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link href={next !== "/" ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="font-semibold text-link hover:underline">
+        <Link
+          href={next !== "/" ? `/login?next=${encodeURIComponent(next)}` : "/login"}
+          className="font-semibold text-link hover:underline"
+        >
           Sign in
         </Link>
       </p>

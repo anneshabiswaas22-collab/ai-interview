@@ -51,9 +51,14 @@ export function VerifyEmail() {
       <div className="mb-4 flex size-11 items-center justify-center rounded-full bg-warning-soft text-warning-soft-foreground">
         <MailWarning className="size-5" />
       </div>
-      <AuthHeading title="That link did not work" description={error || "The link may have expired or already been used."} />
+      <AuthHeading
+        title="That link did not work"
+        description={error || "The link may have expired or already been used."}
+      />
       {sent ? (
-        <p className="text-sm text-muted-foreground">If that address has an account waiting for confirmation, a new link is on its way.</p>
+        <p className="text-sm text-muted-foreground">
+          If that address has an account waiting for confirmation, a new link is on its way.
+        </p>
       ) : (
         <form
           onSubmit={async (e) => {
@@ -68,7 +73,13 @@ export function VerifyEmail() {
           }}
         >
           <Field label="Email" htmlFor="resend-email">
-            <Input id="resend-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+            <Input
+              id="resend-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
           </Field>
           <Button type="submit" block className="mt-4" disabled={!email.includes("@")}>
             Send a new link

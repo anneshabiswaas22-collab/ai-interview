@@ -27,7 +27,9 @@ describe("cursor pagination helpers", () => {
   });
 
   it("collectPages stops at max and on a repeated cursor", async () => {
-    await expect(collectPages(async () => page([1, 2, 3], "same"), 5)).resolves.toEqual([1, 2, 3, 1, 2]);
+    await expect(collectPages(async () => page([1, 2, 3], "same"), 5)).resolves.toEqual([
+      1, 2, 3, 1, 2,
+    ]);
     const stuck = vi.fn(async (c: string | undefined) => page([c ?? "x"], "same"));
     await collectPages(stuck, 1000);
     expect(stuck).toHaveBeenCalledTimes(2);

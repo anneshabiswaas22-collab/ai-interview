@@ -35,16 +35,19 @@ async function main(): Promise<void> {
           if (!handler) throw new Error(`no handler for job ${job.name}`);
           await handler(job.data);
         },
-        { connection: redisConnection(), concurrency: queue === "interview" ? 8 : 2 },
-      ),
+        { connection: redisConnection(), concurrency: queue === "interview" ? 8 : 2 }
+      )
   );
   for (const w of workers) {
-    w.on("failed", (job, err) => captureError(err, { job: job?.name, attempts: job?.attemptsMade }));
+    w.on("failed", (job, err) =>
+      captureError(err, { job: job?.name, attempts: job?.attemptsMade })
+    );
   }
 
   // Repeatable jobs are keyed by name + interval, so every worker task registering
   // them on boot leaves exactly one schedule.
-  for (const s of SCHEDULES) await enqueue(s.name, {} as never, { repeat: { every: s.everyMs }, jobId: s.name });
+  for (const s of SCHEDULES)
+    await enqueue(s.name, {} as never, { repeat: { every: s.everyMs }, jobId: s.name });
 
   logger.info({ queues: QUEUES }, "worker started");
 

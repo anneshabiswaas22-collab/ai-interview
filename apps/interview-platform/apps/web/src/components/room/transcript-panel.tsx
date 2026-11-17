@@ -4,7 +4,9 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@open-conversation/ui";
 
-export type ShownLine = { role: "interviewer" | "candidate"; text: string; partial?: boolean } | { role: "divider"; text: string; partial?: undefined };
+export type ShownLine =
+  | { role: "interviewer" | "candidate"; text: string; partial?: boolean }
+  | { role: "divider"; text: string; partial?: undefined };
 
 export function TranscriptPanel({ lines, name }: { lines: ShownLine[]; name: string }) {
   const box = useRef<HTMLDivElement>(null);
@@ -15,7 +17,9 @@ export function TranscriptPanel({ lines, name }: { lines: ShownLine[]; name: str
   }, [lines]);
   return (
     <div className="flex h-full w-full flex-col" data-testid="transcript">
-      <h2 className="shrink-0 border-b border-border px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.06em] text-subtle-foreground">Transcript</h2>
+      <h2 className="shrink-0 border-b border-border px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.06em] text-subtle-foreground">
+        Transcript
+      </h2>
       <div
         ref={box}
         onScroll={(e) => {
@@ -26,18 +30,39 @@ export function TranscriptPanel({ lines, name }: { lines: ShownLine[]; name: str
         aria-live="polite"
         aria-relevant="additions"
       >
-        {!lines.length ? <p className="text-[13px] text-subtle-foreground">What you and {name} say appears here.</p> : null}
+        {!lines.length ? (
+          <p className="text-[13px] text-subtle-foreground">
+            What you and {name} say appears here.
+          </p>
+        ) : null}
         {lines.map((l, i) =>
           l.role === "divider" ? (
-            <p key={i} className="pt-2 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-subtle-foreground">
+            <p
+              key={i}
+              className="pt-2 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-subtle-foreground"
+            >
               Question {l.text}
             </p>
           ) : (
             <div key={i}>
-              <p className={cn("text-[12px] font-semibold", l.role === "interviewer" ? "text-primary" : "text-foreground")}>{l.role === "interviewer" ? name : "You"}</p>
-              <p className={cn("whitespace-pre-line text-[14px] leading-relaxed", l.partial && "text-muted-foreground")}>{l.text}</p>
+              <p
+                className={cn(
+                  "text-[12px] font-semibold",
+                  l.role === "interviewer" ? "text-primary" : "text-foreground"
+                )}
+              >
+                {l.role === "interviewer" ? name : "You"}
+              </p>
+              <p
+                className={cn(
+                  "whitespace-pre-line text-[14px] leading-relaxed",
+                  l.partial && "text-muted-foreground"
+                )}
+              >
+                {l.text}
+              </p>
             </div>
-          ),
+          )
         )}
       </div>
     </div>

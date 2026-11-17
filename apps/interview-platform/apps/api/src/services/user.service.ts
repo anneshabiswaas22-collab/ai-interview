@@ -25,7 +25,11 @@ export async function updateMe(actor: Actor, patch: AccountPatch): Promise<Me> {
   let displayName: string | undefined;
   if (patch.displayName !== undefined) {
     const cleaned = cleanDisplayName(patch.displayName);
-    if (!cleaned) throw badRequest("Use your name, not an email address or phone number", "DISPLAY_NAME_INVALID");
+    if (!cleaned)
+      throw badRequest(
+        "Use your name, not an email address or phone number",
+        "DISPLAY_NAME_INVALID"
+      );
     displayName = cleaned;
   }
   const row = await userRepo.update(actor.id, {
@@ -41,7 +45,8 @@ export async function updateMe(actor: Actor, patch: AccountPatch): Promise<Me> {
  */
 export async function sessions(actor: Actor, meta: RequestMeta): Promise<SessionInfo[]> {
   const rows = await sessionRepo.listActive(actor.id);
-  const currentId = rows.find((r) => r.user_agent === (meta.userAgent?.slice(0, 300) ?? null))?.id ?? null;
+  const currentId =
+    rows.find((r) => r.user_agent === (meta.userAgent?.slice(0, 300) ?? null))?.id ?? null;
   return rows.map((r) => ({
     id: r.id,
     userAgent: r.user_agent,
@@ -52,9 +57,25 @@ export async function sessions(actor: Actor, meta: RequestMeta): Promise<Session
   }));
 }
 
-export async function revokeSession(actor: Actor, sessionId: string, meta: RequestMeta): Promise<void> {
-  const row = await db.selectFrom("sessions").select(["id", "family_id"]).where("id", "=", sessionId).where("user_id", "=", actor.id).where("revoked_at", "is", null).executeTakeFirst();
+export async function revokeSession(
+  actor: Actor,
+  sessionId: string,
+  meta: RequestMeta
+): Promise<void> {
+  const row = await db
+    .selectFrom("sessions")
+    .select(["id", "family_id"])
+    .where("id", "=", sessionId)
+    .where("user_id", "=", actor.id)
+    .where("revoked_at", "is", null)
+    .executeTakeFirst();
   if (!row) throw notFound("Session not found");
   await sessionRepo.revokeFamily(row.family_id);
-  await audit({ actorId: actor.id, action: "session.revoke", entityType: "session", entityId: row.id, ip: meta.ip });
+  await audit({
+    actorId: actor.id,
+    action: "session.revoke",
+    entityType: "session",
+    entityId: row.id,
+    ip: meta.ip,
+  });
 }

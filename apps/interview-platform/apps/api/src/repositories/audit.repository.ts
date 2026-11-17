@@ -17,12 +17,29 @@ export interface AuditFilter {
 
 export class AuditRepository {
   list(filter: AuditFilter, opts: { cursor: TimeKey | null; limit: number }, exec: Executor = db) {
-    let q = exec.selectFrom("audit_log as a").select(["a.id", "a.actor_id", "a.action", "a.entity_type", "a.entity_id", "a.data", "a.created_at", atKey("a.created_at")]);
-    if (filter.action) q = q.where("a.action", "like", `${filter.action.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
+    let q = exec
+      .selectFrom("audit_log as a")
+      .select([
+        "a.id",
+        "a.actor_id",
+        "a.action",
+        "a.entity_type",
+        "a.entity_id",
+        "a.data",
+        "a.created_at",
+        atKey("a.created_at"),
+      ]);
+    if (filter.action)
+      q = q.where("a.action", "like", `${filter.action.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
     if (filter.actorId) q = q.where("a.actor_id", "=", filter.actorId);
     if (filter.entityType) q = q.where("a.entity_type", "=", filter.entityType);
     if (filter.entityId) q = q.where("a.entity_id", "=", filter.entityId);
-    return q.where(olderThan("a.created_at", "a.id", opts.cursor)).orderBy("a.created_at", "desc").orderBy("a.id", "desc").limit(opts.limit + 1).execute();
+    return q
+      .where(olderThan("a.created_at", "a.id", opts.cursor))
+      .orderBy("a.created_at", "desc")
+      .orderBy("a.id", "desc")
+      .limit(opts.limit + 1)
+      .execute();
   }
 }
 

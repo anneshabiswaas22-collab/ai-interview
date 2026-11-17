@@ -1,6 +1,15 @@
 /** Pure helpers for the /admin control plane (tested in test/admin). No React, no fetching. */
 import { isApiError } from "@open-conversation/api-client";
-import type { AdminModel, AppSettings, InterviewSource, InterviewStatus, ModelKind, ProviderKind, UserRole, UserStatus } from "@open-conversation/types";
+import type {
+  AdminModel,
+  AppSettings,
+  InterviewSource,
+  InterviewStatus,
+  ModelKind,
+  ProviderKind,
+  UserRole,
+  UserStatus,
+} from "@open-conversation/types";
 import { errorMessage } from "./errors";
 
 // ─── Numbers and dates ──────────────────────────────────────────────────────
@@ -12,14 +21,21 @@ export function formatCount(v: number, locale?: string): string {
 
 /** 3.5M, 950, 12K: for token totals that run into the millions. */
 export function formatCompact(v: number, locale?: string): string {
-  return new Intl.NumberFormat(locale, { notation: v >= 10_000 ? "compact" : "standard", maximumFractionDigits: 1 }).format(v);
+  return new Intl.NumberFormat(locale, {
+    notation: v >= 10_000 ? "compact" : "standard",
+    maximumFractionDigits: 1,
+  }).format(v);
 }
 
 /** "Mar 4, 2026" */
 export function shortDate(iso: string | null | undefined, locale?: string): string {
   if (!iso) return "";
   const t = new Date(iso);
-  return Number.isNaN(t.getTime()) ? "" : new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "numeric" }).format(t);
+  return Number.isNaN(t.getTime())
+    ? ""
+    : new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "numeric" }).format(
+        t
+      );
 }
 
 /** YYYY-MM-DD of a moment in UTC (the stats API counts UTC days). */
@@ -45,7 +61,12 @@ export function presetRange(days: number, now = new Date()): { from: string; to:
 /** "$12.40", or "$0.0031" for sums under a cent, so a small estimate never reads as zero. */
 export function formatUsd(v: number, locale?: string): string {
   const small = v > 0 && v < 0.01;
-  return new Intl.NumberFormat(locale, { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: small ? 4 : 2 }).format(v);
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: small ? 4 : 2,
+  }).format(v);
 }
 
 /** "42 min", "1,250 min": voice time is counted in whole and partial minutes. */
@@ -80,7 +101,10 @@ export const STATUS_TONE: Record<UserStatus, StatusTone> = {
 };
 
 /** Which account actions make sense for a target, given who is looking. Mirrors the API rules. */
-export function accountActions(target: { id: string; role: UserRole; status: UserStatus }, actorId: string | undefined) {
+export function accountActions(
+  target: { id: string; role: UserRole; status: UserStatus },
+  actorId: string | undefined
+) {
   const self = target.id === actorId;
   const erased = target.status === "DEACTIVATED";
   const admin = target.role === "ADMIN";
@@ -90,7 +114,11 @@ export function accountActions(target: { id: string; role: UserRole; status: Use
     makeAdmin: !self && !erased && !admin && target.status !== "BANNED",
     removeAdmin: !self && admin,
     // The API protects admins: demote first.
-    suspend: !self && !erased && !admin && (target.status === "ACTIVE" || target.status === "PENDING_VERIFICATION"),
+    suspend:
+      !self &&
+      !erased &&
+      !admin &&
+      (target.status === "ACTIVE" || target.status === "PENDING_VERIFICATION"),
     unsuspend: !self && target.status === "SUSPENDED",
     ban: !self && !erased && !admin && target.status !== "BANNED",
     unban: !self && target.status === "BANNED",
@@ -170,7 +198,11 @@ export const PROVIDER_KIND_LABEL: Record<ProviderKind, string> = {
 };
 
 export const MODEL_KINDS: { kind: ModelKind; label: string; description: string }[] = [
-  { kind: "REALTIME", label: "Voice", description: "Run the live interview: the interviewer speaks and listens in real time." },
+  {
+    kind: "REALTIME",
+    label: "Voice",
+    description: "Run the live interview: the interviewer speaks and listens in real time.",
+  },
   { kind: "TEXT", label: "Text", description: "Write interview plans and score answers." },
 ];
 
@@ -181,7 +213,8 @@ export const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/;
 export function groupModels(models: readonly AdminModel[]): Record<ModelKind, AdminModel[]> {
   const out: Record<ModelKind, AdminModel[]> = { TEXT: [], REALTIME: [] };
   for (const m of models) out[m.kind].push(m);
-  for (const k of Object.keys(out) as ModelKind[]) out[k].sort((a, b) => a.sortOrder - b.sortOrder || a.displayName.localeCompare(b.displayName));
+  for (const k of Object.keys(out) as ModelKind[])
+    out[k].sort((a, b) => a.sortOrder - b.sortOrder || a.displayName.localeCompare(b.displayName));
   return out;
 }
 
@@ -203,7 +236,14 @@ export function priceText(v: number | null | undefined): string {
 
 /** Split a typed list of voices (commas, spaces or new lines) into clean, unique names, in order. */
 export function parseVoices(text: string): string[] {
-  return [...new Set(text.split(/[\s,;]+/).map((v) => v.trim()).filter(Boolean))];
+  return [
+    ...new Set(
+      text
+        .split(/[\s,;]+/)
+        .map((v) => v.trim())
+        .filter(Boolean)
+    ),
+  ];
 }
 
 // ─── Interviews ─────────────────────────────────────────────────────────────
@@ -224,7 +264,10 @@ export const INTERVIEW_STATUS_TONE: Record<InterviewStatus, StatusTone> = {
   COMPLETED: "success",
 };
 
-export const INTERVIEW_SOURCE_LABEL: Record<InterviewSource, string> = { RESUME: "Resume", JOB_DESCRIPTION: "Job description" };
+export const INTERVIEW_SOURCE_LABEL: Record<InterviewSource, string> = {
+  RESUME: "Resume",
+  JOB_DESCRIPTION: "Job description",
+};
 
 // ─── Settings ───────────────────────────────────────────────────────────────
 
@@ -251,9 +294,18 @@ export function settingsPatch(base: AppSettings, draft: AppSettings): Partial<Ap
     const a = base[key];
     const b = draft[key];
     if (same(a, b)) continue;
-    if (a && b && typeof a === "object" && typeof b === "object" && !Array.isArray(a) && !Array.isArray(b)) {
+    if (
+      a &&
+      b &&
+      typeof a === "object" &&
+      typeof b === "object" &&
+      !Array.isArray(a) &&
+      !Array.isArray(b)
+    ) {
       const ao = a as unknown as Record<string, unknown>;
-      out[key] = Object.fromEntries(Object.entries(b as unknown as Record<string, unknown>).filter(([k, v]) => !same(ao[k], v)));
+      out[key] = Object.fromEntries(
+        Object.entries(b as unknown as Record<string, unknown>).filter(([k, v]) => !same(ao[k], v))
+      );
     } else out[key] = b;
   }
   return out as Partial<AppSettings>;
@@ -262,13 +314,23 @@ export function settingsPatch(base: AppSettings, draft: AppSettings): Partial<Ap
 /** Which form groups have unsaved changes. */
 export function dirtyGroups(base: AppSettings, draft: AppSettings): SettingsGroup[] {
   const patch = settingsPatch(base, draft);
-  return (Object.keys(SETTINGS_GROUP_KEYS) as SettingsGroup[]).filter((g) => SETTINGS_GROUP_KEYS[g].some((k) => k in patch));
+  return (Object.keys(SETTINGS_GROUP_KEYS) as SettingsGroup[]).filter((g) =>
+    SETTINGS_GROUP_KEYS[g].some((k) => k in patch)
+  );
 }
 
 /** The patch restricted to one group's keys (each group saves on its own). */
-export function groupPatch(base: AppSettings, draft: AppSettings, group: SettingsGroup): Partial<AppSettings> {
+export function groupPatch(
+  base: AppSettings,
+  draft: AppSettings,
+  group: SettingsGroup
+): Partial<AppSettings> {
   const patch = settingsPatch(base, draft);
-  return Object.fromEntries(Object.entries(patch).filter(([k]) => SETTINGS_GROUP_KEYS[group].includes(k as keyof AppSettings))) as Partial<AppSettings>;
+  return Object.fromEntries(
+    Object.entries(patch).filter(([k]) =>
+      SETTINGS_GROUP_KEYS[group].includes(k as keyof AppSettings)
+    )
+  ) as Partial<AppSettings>;
 }
 
 /** Field problems in a draft, by key, matching the server's rules. */
@@ -277,23 +339,38 @@ export function settingsErrors(s: AppSettings): Partial<Record<keyof AppSettings
   if (!s.appName.trim()) e.appName = "Give the app a name.";
   else if (s.appName.trim().length > 60) e.appName = "Use 60 characters or fewer.";
   if (s.tagline.length > 160) e.tagline = "Use 160 characters or fewer.";
-  if (s.supportEmail !== null && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.supportEmail.trim())) e.supportEmail = "Enter a valid email address, or leave it empty.";
-  if (s.registration === "INVITE_ONLY" && !s.allowedEmailDomains.length) e.allowedEmailDomains = "Invite-only sign-up needs at least one allowed domain.";
+  if (s.supportEmail !== null && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.supportEmail.trim()))
+    e.supportEmail = "Enter a valid email address, or leave it empty.";
+  if (s.registration === "INVITE_ONLY" && !s.allowedEmailDomains.length)
+    e.allowedEmailDomains = "Invite-only sign-up needs at least one allowed domain.";
   if (!s.interviewerName.trim()) e.interviewerName = "Give the interviewer a name.";
   else if (s.interviewerName.trim().length > 40) e.interviewerName = "Use 40 characters or fewer.";
   if (s.interviewerAddendum.length > 2000) e.interviewerAddendum = "Use 2,000 characters or fewer.";
-  if (s.retentionDays !== null && !(Number.isInteger(s.retentionDays) && s.retentionDays >= 7 && s.retentionDays <= 3650)) e.retentionDays = "Between 7 and 3,650 days.";
-  if (s.minSupportedVersion !== null && !/^\d+\.\d+\.\d+$/.test(s.minSupportedVersion)) e.minSupportedVersion = "Use a version like 1.4.0, or leave it empty.";
+  if (
+    s.retentionDays !== null &&
+    !(Number.isInteger(s.retentionDays) && s.retentionDays >= 7 && s.retentionDays <= 3650)
+  )
+    e.retentionDays = "Between 7 and 3,650 days.";
+  if (s.minSupportedVersion !== null && !/^\d+\.\d+\.\d+$/.test(s.minSupportedVersion))
+    e.minSupportedVersion = "Use a version like 1.4.0, or leave it empty.";
   return e;
 }
 
 /** Split a pasted list of domains (commas, spaces or new lines) into clean, unique entries. */
-export function parseDomains(input: string, existing: readonly string[] = []): { added: string[]; invalid: string[] } {
+export function parseDomains(
+  input: string,
+  existing: readonly string[] = []
+): { added: string[]; invalid: string[] } {
   const seen = new Set(existing);
   const added: string[] = [];
   const invalid: string[] = [];
   for (const raw of input.split(/[\s,;]+/)) {
-    const d = raw.trim().toLowerCase().replace(/^@/, "").replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+    const d = raw
+      .trim()
+      .toLowerCase()
+      .replace(/^@/, "")
+      .replace(/^https?:\/\//, "")
+      .replace(/\/.*$/, "");
     if (!d) continue;
     if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(d)) invalid.push(raw.trim());
     else if (!seen.has(d)) {
@@ -316,7 +393,12 @@ export function humanizeAction(action: string): string {
 export function prettyJson(v: unknown): string {
   const sort = (x: unknown): unknown => {
     if (Array.isArray(x)) return x.map(sort);
-    if (x && typeof x === "object") return Object.fromEntries(Object.keys(x as Record<string, unknown>).sort().map((k) => [k, sort((x as Record<string, unknown>)[k])]));
+    if (x && typeof x === "object")
+      return Object.fromEntries(
+        Object.keys(x as Record<string, unknown>)
+          .sort()
+          .map((k) => [k, sort((x as Record<string, unknown>)[k])])
+      );
     return x;
   };
   return JSON.stringify(sort(v), null, 2);

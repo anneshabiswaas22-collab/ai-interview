@@ -4,7 +4,11 @@ import { realtimeOrigins, serverEnv } from "@/lib/runtime-env";
 
 describe("content security policy", () => {
   it("is strict by default, allows the realtime origin, WebAssembly and no frames", () => {
-    const csp = buildCsp({ nonce: "abc", dev: false, realtime: ["wss://generativelanguage.googleapis.com"] });
+    const csp = buildCsp({
+      nonce: "abc",
+      dev: false,
+      realtime: ["wss://generativelanguage.googleapis.com"],
+    });
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("script-src 'self' 'nonce-abc' 'strict-dynamic' 'wasm-unsafe-eval'");
     expect(csp).not.toContain("'unsafe-eval'");
@@ -19,7 +23,11 @@ describe("content security policy", () => {
     expect(buildCsp({ nonce: "n", dev: false, realtime: [] })).not.toContain("ws:");
   });
   it("parses realtime origins, defaults to Gemini Live, and drops anything that is not a wss or https origin", () => {
-    expect(realtimeOrigins("wss://live.example.org, https://rt.example.org/ ,javascript:x,http://plain.example,wss://a.example/path")).toEqual(["wss://live.example.org", "https://rt.example.org"]);
+    expect(
+      realtimeOrigins(
+        "wss://live.example.org, https://rt.example.org/ ,javascript:x,http://plain.example,wss://a.example/path"
+      )
+    ).toEqual(["wss://live.example.org", "https://rt.example.org"]);
     expect(realtimeOrigins(undefined)).toEqual(["wss://generativelanguage.googleapis.com"]);
     expect(realtimeOrigins(" ")).toEqual(["wss://generativelanguage.googleapis.com"]);
   });
@@ -28,6 +36,8 @@ describe("content security policy", () => {
 describe("runtime env", () => {
   it("reads the container environment with defaults", () => {
     expect(serverEnv({})).toEqual({ productName: "AI Interview", apiUrl: "/api" });
-    expect(serverEnv({ PRODUCT_NAME: " Acme Assistant ", PUBLIC_API_URL: "https://api.example.org/api" })).toMatchObject({ productName: "Acme Assistant", apiUrl: "https://api.example.org/api" });
+    expect(
+      serverEnv({ PRODUCT_NAME: " Acme Assistant ", PUBLIC_API_URL: "https://api.example.org/api" })
+    ).toMatchObject({ productName: "Acme Assistant", apiUrl: "https://api.example.org/api" });
   });
 });

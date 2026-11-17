@@ -10,7 +10,8 @@
  * handy for `next dev`) > the defaults below.
  */
 // Kept free of imports: middleware (edge runtime) loads this module.
-const nonEmpty = (v: unknown): string | undefined => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+const nonEmpty = (v: unknown): string | undefined =>
+  typeof v === "string" && v.trim() ? v.trim() : undefined;
 
 export interface RuntimeEnv {
   /** Product name shown in the header wordmark, titles and copy. */
@@ -31,7 +32,10 @@ declare global {
 /** Server-side resolution, used by the env.js route and by server components. */
 export function serverEnv(env: Record<string, string | undefined> = process.env): RuntimeEnv {
   return {
-    productName: nonEmpty(env.PRODUCT_NAME) ?? nonEmpty(env.NEXT_PUBLIC_PRODUCT_NAME) ?? DEFAULT_ENV.productName,
+    productName:
+      nonEmpty(env.PRODUCT_NAME) ??
+      nonEmpty(env.NEXT_PUBLIC_PRODUCT_NAME) ??
+      DEFAULT_ENV.productName,
     apiUrl: nonEmpty(env.PUBLIC_API_URL) ?? nonEmpty(env.NEXT_PUBLIC_API_URL) ?? DEFAULT_ENV.apiUrl,
   };
 }
@@ -41,8 +45,12 @@ export function runtimeEnv(): RuntimeEnv {
   if (typeof window === "undefined") return serverEnv();
   const injected = globalThis.__CONV_ENV;
   return {
-    productName: nonEmpty(injected?.productName) ?? nonEmpty(process.env.NEXT_PUBLIC_PRODUCT_NAME) ?? DEFAULT_ENV.productName,
-    apiUrl: nonEmpty(injected?.apiUrl) ?? nonEmpty(process.env.NEXT_PUBLIC_API_URL) ?? DEFAULT_ENV.apiUrl,
+    productName:
+      nonEmpty(injected?.productName) ??
+      nonEmpty(process.env.NEXT_PUBLIC_PRODUCT_NAME) ??
+      DEFAULT_ENV.productName,
+    apiUrl:
+      nonEmpty(injected?.apiUrl) ?? nonEmpty(process.env.NEXT_PUBLIC_API_URL) ?? DEFAULT_ENV.apiUrl,
   };
 }
 

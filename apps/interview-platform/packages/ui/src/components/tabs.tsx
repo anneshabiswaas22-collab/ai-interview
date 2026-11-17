@@ -12,7 +12,10 @@ export const TabsList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={cn("flex items-center gap-1 overflow-x-auto border-b border-border [scrollbar-width:none]", className)}
+    className={cn(
+      "flex items-center gap-1 overflow-x-auto border-b border-border [scrollbar-width:none]",
+      className
+    )}
     {...props}
   />
 ));
@@ -26,7 +29,7 @@ export const TabsTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "relative -mb-px inline-flex h-11 shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent px-3 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring data-[state=active]:border-primary data-[state=active]:text-primary-soft-foreground",
-      className,
+      className
     )}
     {...props}
   />
@@ -37,7 +40,11 @@ export const TabsContent = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
 >(({ className, ...props }, ref) => (
-  <TabsPrimitive.Content ref={ref} className={cn("focus-visible:outline-none", className)} {...props} />
+  <TabsPrimitive.Content
+    ref={ref}
+    className={cn("focus-visible:outline-none", className)}
+    {...props}
+  />
 ));
 TabsContent.displayName = "TabsContent";
 
@@ -62,7 +69,11 @@ export function Segmented<T extends string>({
 }) {
   const radio = kind === "radio";
   return (
-    <div role={radio ? "radiogroup" : "tablist"} aria-label={ariaLabel} className={cn("inline-flex items-center gap-1 rounded-lg bg-muted p-1", className)}>
+    <div
+      role={radio ? "radiogroup" : "tablist"}
+      aria-label={ariaLabel}
+      className={cn("inline-flex items-center gap-1 rounded-lg bg-muted p-1", className)}
+    >
       {options.map((o) => {
         const active = o.value === value;
         return (
@@ -75,11 +86,17 @@ export function Segmented<T extends string>({
             onClick={() => onChange(o.value)}
             className={cn(
               "inline-flex h-7 items-center gap-1.5 rounded-md px-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+              active
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             {o.label}
-            {o.count ? <span className="rounded-full bg-primary px-1.5 text-2xs font-bold text-primary-foreground">{o.count > 99 ? "99+" : o.count}</span> : null}
+            {o.count ? (
+              <span className="rounded-full bg-primary px-1.5 text-2xs font-bold text-primary-foreground">
+                {o.count > 99 ? "99+" : o.count}
+              </span>
+            ) : null}
           </button>
         );
       })}

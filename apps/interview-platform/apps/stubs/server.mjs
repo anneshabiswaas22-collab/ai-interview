@@ -57,7 +57,11 @@ function send(res, status, body, headers = {}) {
 }
 
 function sse(res) {
-  res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" });
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+  });
   return {
     data: (obj) => res.write(`data: ${typeof obj === "string" ? obj : JSON.stringify(obj)}\n\n`),
     event: (name, obj) => res.write(`event: ${name}\ndata: ${JSON.stringify(obj)}\n\n`),
@@ -69,26 +73,48 @@ function sse(res) {
 
 /** The text inside <untrusted source="name"> ... </untrusted>, or "". */
 export function fenced(text, name) {
-  const m = new RegExp(`<untrusted source="${name}[^"]*">\\n([\\s\\S]*?)\\n</untrusted>`).exec(text);
+  const m = new RegExp(`<untrusted source="${name}[^"]*">\\n([\\s\\S]*?)\\n</untrusted>`).exec(
+    text
+  );
   return m ? m[1].trim() : "";
 }
 
-const TECH = /(engineer|developer|software|programm|backend|frontend|full[- ]stack|data scien|machine learning|devops|python|javascript|typescript|java\b|react|node)/i;
+const TECH =
+  /(engineer|developer|software|programm|backend|frontend|full[- ]stack|data scien|machine learning|devops|python|javascript|typescript|java\b|react|node)/i;
 
 export function stubPlan(userText) {
   const source = fenced(userText, "resume") || fenced(userText, "job-description");
-  const role = fenced(userText, "role") || (/(senior|lead|junior)?\s*(backend|frontend|software|data|product|machine learning)\s+(engineer|manager|scientist|analyst|developer)/i.exec(source)?.[0] ?? "Software Engineer");
+  const role =
+    fenced(userText, "role") ||
+    (/(senior|lead|junior)?\s*(backend|frontend|software|data|product|machine learning)\s+(engineer|manager|scientist|analyst|developer)/i.exec(
+      source
+    )?.[0] ??
+      "Software Engineer");
   const company = fenced(userText, "company");
   const technical = TECH.test(`${role} ${source}`);
-  const topic = /react|frontend/i.test(source) ? "React & Frontend" : /data|sql|analyt/i.test(source) ? "Data & SQL" : technical ? "Systems & Design" : "Role Depth";
+  const topic = /react|frontend/i.test(source)
+    ? "React & Frontend"
+    : /data|sql|analyt/i.test(source)
+      ? "Data & SQL"
+      : technical
+        ? "Systems & Design"
+        : "Role Depth";
   const rounds = [
     {
       name: "Introduction & Background",
       focus: "Communication and motivation",
       description: "How clearly the candidate tells their story and why this role fits.",
       questions: [
-        { text: `Please introduce yourself and walk me through your background${company ? `, and tell me why ${company} interests you` : ""}.`, code: false, language: null },
-        { text: "What has been the most meaningful project of your career so far, and what was your part in it?", code: false, language: null },
+        {
+          text: `Please introduce yourself and walk me through your background${company ? `, and tell me why ${company} interests you` : ""}.`,
+          code: false,
+          language: null,
+        },
+        {
+          text: "What has been the most meaningful project of your career so far, and what was your part in it?",
+          code: false,
+          language: null,
+        },
       ],
     },
     {
@@ -96,8 +122,16 @@ export function stubPlan(userText) {
       focus: `Depth for the ${role} role`,
       description: "Hands-on depth, trade-offs and real examples.",
       questions: [
-        { text: `Tell me about a hard ${technical ? "technical" : "professional"} decision you made recently. What options did you consider?`, code: false, language: null },
-        { text: "How do you check that your work actually achieved what it was meant to?", code: false, language: null },
+        {
+          text: `Tell me about a hard ${technical ? "technical" : "professional"} decision you made recently. What options did you consider?`,
+          code: false,
+          language: null,
+        },
+        {
+          text: "How do you check that your work actually achieved what it was meant to?",
+          code: false,
+          language: null,
+        },
       ],
     },
   ];
@@ -119,18 +153,28 @@ export function stubPlan(userText) {
     name: "Goals & Culture Fit",
     focus: "Motivation and expectations",
     description: "Where the candidate wants to grow.",
-    questions: [{ text: "Where do you want to be in two years, and how would this role help?", code: false, language: null }],
+    questions: [
+      {
+        text: "Where do you want to be in two years, and how would this role help?",
+        code: false,
+        language: null,
+      },
+    ],
   });
   return {
     domain: technical ? "Software Engineering" : "Business",
     role,
-    summary: source ? `Based on the ${fenced(userText, "resume") ? "resume" : "job description"}: ${source.replace(/\s+/g, " ").slice(0, 220)}` : `A ${role} interview.`,
+    summary: source
+      ? `Based on the ${fenced(userText, "resume") ? "resume" : "job description"}: ${source.replace(/\s+/g, " ").slice(0, 220)}`
+      : `A ${role} interview.`,
     rounds,
   };
 }
 
 export function stubScore(userText) {
-  const code = /<untrusted source="code/.test(userText) ? (/<untrusted source="code[^"]*">\n([\s\S]*?)\n<\/untrusted>/.exec(userText)?.[1] ?? "") : null;
+  const code = /<untrusted source="code/.test(userText)
+    ? (/<untrusted source="code[^"]*">\n([\s\S]*?)\n<\/untrusted>/.exec(userText)?.[1] ?? "")
+    : null;
   if (code !== null) {
     const good = /return/.test(code) && code.trim().length > 20;
     return {
@@ -139,8 +183,12 @@ export function stubScore(userText) {
       strengths: good ? ["Returns a result", "Readable structure"] : ["Attempted the problem"],
       weaknesses: good ? ["No tests for edge cases"] : ["The solution is incomplete"],
       suggestions: ["Handle empty input", "State the time complexity"],
-      analysis: good ? "A working approach with clear structure. Consider edge cases and complexity." : "The code does not yet solve the problem. Start from the hint and return the indices.",
-      correctedSnippet: good ? null : "def two_sum(nums, target):\n    seen = {}\n    for i, n in enumerate(nums):\n        if target - n in seen:\n            return [seen[target - n], i]\n        seen[n] = i",
+      analysis: good
+        ? "A working approach with clear structure. Consider edge cases and complexity."
+        : "The code does not yet solve the problem. Start from the hint and return the indices.",
+      correctedSnippet: good
+        ? null
+        : "def two_sum(nums, target):\n    seen = {}\n    for i, n in enumerate(nums):\n        if target - n in seen:\n            return [seen[target - n], i]\n        seen[n] = i",
     };
   }
   const convo = fenced(userText, "conversation");
@@ -157,7 +205,10 @@ export function stubScore(userText) {
     strengths: said > 20 ? ["Concrete example", "Clear structure"] : ["Answered directly"],
     weaknesses: said > 20 ? ["Could quantify the outcome"] : ["Very brief", "No example"],
     suggestions: ["Use a situation, action, result structure", "Add one measurable outcome"],
-    analysis: said > 20 ? "A clear answer with a concrete example. Adding a measurable result would make it stronger." : "The answer was short. Give a specific example and explain your reasoning.",
+    analysis:
+      said > 20
+        ? "A clear answer with a concrete example. Adding a measurable result would make it stronger."
+        : "The answer was short. Give a specific example and explain your reasoning.",
     correctedSnippet: null,
   };
 }
@@ -176,22 +227,42 @@ export function decide(system, user) {
 const piecesOf = (text) => text.match(/.{1,40}/gs) ?? [text];
 
 function failure(res, d) {
-  if (d.status === 500) return send(res, 500, { error: { message: "stub failure" } }), true;
-  if (d.status === 429) return send(res, 429, { error: { message: "rate limited (stub)" } }), true;
+  if (d.status === 500) return (send(res, 500, { error: { message: "stub failure" } }), true);
+  if (d.status === 429)
+    return (send(res, 429, { error: { message: "rate limited (stub)" } }), true);
   return false;
 }
 
 async function openAiChat(res, body) {
   const msgs = body.messages ?? [];
-  const system = msgs.filter((m) => m.role === "system").map((m) => m.content).join("\n");
+  const system = msgs
+    .filter((m) => m.role === "system")
+    .map((m) => m.content)
+    .join("\n");
   const lu = [...msgs].reverse().find((m) => m.role === "user");
-  const parts = Array.isArray(lu?.content) ? lu.content : [{ type: "text", text: lu?.content ?? "" }];
-  const user = parts.filter((p) => p.type === "text").map((p) => p.text).join("\n");
+  const parts = Array.isArray(lu?.content)
+    ? lu.content
+    : [{ type: "text", text: lu?.content ?? "" }];
+  const user = parts
+    .filter((p) => p.type === "text")
+    .map((p) => p.text)
+    .join("\n");
   const d = decide(system, user);
   if (failure(res, d)) return;
   const id = `chatcmpl-${randomBytes(6).toString("hex")}`;
-  const usage = { prompt_tokens: Math.ceil(JSON.stringify(msgs).length / 4), completion_tokens: Math.ceil(d.text.length / 4) + 5 };
-  if (!body.stream) return send(res, 200, { id, object: "chat.completion", choices: [{ index: 0, message: { role: "assistant", content: d.text }, finish_reason: "stop" }], usage });
+  const usage = {
+    prompt_tokens: Math.ceil(JSON.stringify(msgs).length / 4),
+    completion_tokens: Math.ceil(d.text.length / 4) + 5,
+  };
+  if (!body.stream)
+    return send(res, 200, {
+      id,
+      object: "chat.completion",
+      choices: [
+        { index: 0, message: { role: "assistant", content: d.text }, finish_reason: "stop" },
+      ],
+      usage,
+    });
   const s = sse(res);
   for (const piece of piecesOf(d.text)) {
     if (res.destroyed) return;
@@ -206,15 +277,39 @@ async function openAiChat(res, body) {
 
 async function anthropicMessages(res, body) {
   const lu = [...(body.messages ?? [])].reverse().find((m) => m.role === "user");
-  const blocks = Array.isArray(lu?.content) ? lu.content : [{ type: "text", text: lu?.content ?? "" }];
-  const d = decide(typeof body.system === "string" ? body.system : "", blocks.filter((b) => b.type === "text").map((b) => b.text).join("\n"));
+  const blocks = Array.isArray(lu?.content)
+    ? lu.content
+    : [{ type: "text", text: lu?.content ?? "" }];
+  const d = decide(
+    typeof body.system === "string" ? body.system : "",
+    blocks
+      .filter((b) => b.type === "text")
+      .map((b) => b.text)
+      .join("\n")
+  );
   if (failure(res, d)) return;
   const s = sse(res);
-  s.event("message_start", { type: "message_start", message: { id: "msg_stub", usage: { input_tokens: 42, output_tokens: 1 } } });
-  s.event("content_block_start", { type: "content_block_start", index: 0, content_block: { type: "text", text: "" } });
-  for (const piece of piecesOf(d.text)) s.event("content_block_delta", { type: "content_block_delta", index: 0, delta: { type: "text_delta", text: piece } });
+  s.event("message_start", {
+    type: "message_start",
+    message: { id: "msg_stub", usage: { input_tokens: 42, output_tokens: 1 } },
+  });
+  s.event("content_block_start", {
+    type: "content_block_start",
+    index: 0,
+    content_block: { type: "text", text: "" },
+  });
+  for (const piece of piecesOf(d.text))
+    s.event("content_block_delta", {
+      type: "content_block_delta",
+      index: 0,
+      delta: { type: "text_delta", text: piece },
+    });
   s.event("content_block_stop", { type: "content_block_stop", index: 0 });
-  s.event("message_delta", { type: "message_delta", delta: { stop_reason: "end_turn" }, usage: { output_tokens: Math.ceil(d.text.length / 4) } });
+  s.event("message_delta", {
+    type: "message_delta",
+    delta: { stop_reason: "end_turn" },
+    usage: { output_tokens: Math.ceil(d.text.length / 4) },
+  });
   s.event("message_stop", { type: "message_stop" });
   s.end();
 }
@@ -222,13 +317,35 @@ async function anthropicMessages(res, body) {
 async function gemini(res, body, stream) {
   const contents = body.contents ?? [];
   const lu = [...contents].reverse().find((c) => c.role === "user");
-  const d = decide((body.systemInstruction?.parts ?? []).map((p) => p.text).join("\n"), (lu?.parts ?? []).filter((p) => p.text).map((p) => p.text).join("\n"));
+  const d = decide(
+    (body.systemInstruction?.parts ?? []).map((p) => p.text).join("\n"),
+    (lu?.parts ?? [])
+      .filter((p) => p.text)
+      .map((p) => p.text)
+      .join("\n")
+  );
   if (failure(res, d)) return;
-  const usageMetadata = { promptTokenCount: 40, candidatesTokenCount: Math.ceil(d.text.length / 4) + 3 };
-  if (!stream) return send(res, 200, { candidates: [{ content: { role: "model", parts: [{ text: d.text }] }, finishReason: "STOP" }], usageMetadata });
+  const usageMetadata = {
+    promptTokenCount: 40,
+    candidatesTokenCount: Math.ceil(d.text.length / 4) + 3,
+  };
+  if (!stream)
+    return send(res, 200, {
+      candidates: [{ content: { role: "model", parts: [{ text: d.text }] }, finishReason: "STOP" }],
+      usageMetadata,
+    });
   const s = sse(res);
   const pieces = piecesOf(d.text);
-  for (let i = 0; i < pieces.length; i++) s.data({ candidates: [{ content: { role: "model", parts: [{ text: pieces[i] }] }, ...(i === pieces.length - 1 ? { finishReason: "STOP" } : {}) }], ...(i === pieces.length - 1 ? { usageMetadata } : {}) });
+  for (let i = 0; i < pieces.length; i++)
+    s.data({
+      candidates: [
+        {
+          content: { role: "model", parts: [{ text: pieces[i] }] },
+          ...(i === pieces.length - 1 ? { finishReason: "STOP" } : {}),
+        },
+      ],
+      ...(i === pieces.length - 1 ? { usageMetadata } : {}),
+    });
   s.end();
 }
 
@@ -236,34 +353,56 @@ async function gemini(res, body, stream) {
 
 export function createStubs(options = {}) {
   const port = Number(options.port ?? process.env.PORT ?? 5139);
-  const config = { publicUrl: options.publicUrl ?? process.env.STUB_PUBLIC_URL ?? `http://localhost:${port}` };
+  const config = {
+    publicUrl: options.publicUrl ?? process.env.STUB_PUBLIC_URL ?? `http://localhost:${port}`,
+  };
   const state = { requests: [], realtime: [], hangups: [] };
 
   async function handler(req, res) {
     const url = new URL(req.url ?? "/", "http://stub");
     const p = url.pathname;
     try {
-      const raw = req.method === "POST" || req.method === "PUT" ? await readBody(req) : Buffer.alloc(0);
+      const raw =
+        req.method === "POST" || req.method === "PUT" ? await readBody(req) : Buffer.alloc(0);
       const type = req.headers["content-type"] ?? "";
-      const body = raw.length && type.includes("application/json") ? JSON.parse(raw.toString("utf8")) : {};
+      const body =
+        raw.length && type.includes("application/json") ? JSON.parse(raw.toString("utf8")) : {};
       if (!p.startsWith("/__/") && p !== "/up") {
-        state.requests.unshift({ method: req.method, path: p, at: new Date().toISOString(), body: type.includes("json") ? body : null, headers: { authorization: req.headers.authorization ? "present" : "absent" } });
+        state.requests.unshift({
+          method: req.method,
+          path: p,
+          at: new Date().toISOString(),
+          body: type.includes("json") ? body : null,
+          headers: { authorization: req.headers.authorization ? "present" : "absent" },
+        });
         state.requests.length = Math.min(state.requests.length, 200);
       }
 
       if (p === "/up") return send(res, 200, { ok: true });
       if (p === "/__/requests") return send(res, 200, state.requests);
-      if (p === "/__/realtime") return send(res, 200, { secrets: state.realtime, hangups: state.hangups });
-      if (p === "/__/reset" && req.method === "POST") return (state.requests.length = 0), (state.realtime.length = 0), (state.hangups.length = 0), send(res, 200, { ok: true });
+      if (p === "/__/realtime")
+        return send(res, 200, { secrets: state.realtime, hangups: state.hangups });
+      if (p === "/__/reset" && req.method === "POST")
+        return (
+          (state.requests.length = 0),
+          (state.realtime.length = 0),
+          (state.hangups.length = 0),
+          send(res, 200, { ok: true })
+        );
 
       if (p === "/v1/chat/completions" && req.method === "POST") return openAiChat(res, body);
-      if (p === "/anthropic/v1/messages" && req.method === "POST") return anthropicMessages(res, body);
-      const gm = /^\/gemini\/v1beta\/models\/([^:]+):(streamGenerateContent|generateContent)$/.exec(p);
+      if (p === "/anthropic/v1/messages" && req.method === "POST")
+        return anthropicMessages(res, body);
+      const gm = /^\/gemini\/v1beta\/models\/([^:]+):(streamGenerateContent|generateContent)$/.exec(
+        p
+      );
       if (gm && req.method === "POST") return gemini(res, body, gm[2] === "streamGenerateContent");
 
       if (p === "/v1/realtime/client_secrets" && req.method === "POST") {
-        if (!String(req.headers.authorization ?? "").startsWith("Bearer ")) return send(res, 401, { error: { message: "missing key" } });
-        if (/STUB_FAIL/.test(body.session?.instructions ?? "")) return send(res, 500, { error: { message: "stub failure" } });
+        if (!String(req.headers.authorization ?? "").startsWith("Bearer "))
+          return send(res, 401, { error: { message: "missing key" } });
+        if (/STUB_FAIL/.test(body.session?.instructions ?? ""))
+          return send(res, 500, { error: { message: "stub failure" } });
         const value = `ek_stub${randomBytes(16).toString("hex")}`;
         const expires_at = Math.floor(Date.now() / 1000) + (body.expires_after?.seconds ?? 60);
         state.realtime.unshift({ value, session: body.session, at: new Date().toISOString() });
@@ -272,13 +411,18 @@ export function createStubs(options = {}) {
       }
       if (p === "/v1/realtime/calls" && req.method === "POST") {
         const auth = String(req.headers.authorization ?? "");
-        if (!state.realtime.some((r) => `Bearer ${r.value}` === auth)) return send(res, 401, { error: { message: "unknown client secret" } });
+        if (!state.realtime.some((r) => `Bearer ${r.value}` === auth))
+          return send(res, 401, { error: { message: "unknown client secret" } });
         const callId = `rtc_stub${randomBytes(8).toString("hex")}`;
-        res.writeHead(201, { "Content-Type": "application/sdp", Location: `/v1/realtime/calls/${callId}` });
+        res.writeHead(201, {
+          "Content-Type": "application/sdp",
+          Location: `/v1/realtime/calls/${callId}`,
+        });
         return res.end("v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=stub\r\nt=0 0\r\n");
       }
       const hang = /^\/v1\/realtime\/calls\/([\w-]+)\/hangup$/.exec(p);
-      if (hang && req.method === "POST") return state.hangups.unshift(hang[1]), send(res, 200, {});
+      if (hang && req.method === "POST")
+        return (state.hangups.unshift(hang[1]), send(res, 200, {}));
       if (p === "/gemini/v1alpha/auth_tokens" && req.method === "POST") {
         const name = `auth_tokens/stub${randomBytes(12).toString("hex")}`;
         state.realtime.unshift({ value: name, session: body, at: new Date().toISOString() });
@@ -298,7 +442,9 @@ export function createStubs(options = {}) {
 export async function startStubs(options = {}) {
   const stubs = createStubs({ ...options, port: options.port ?? 0 });
   const server = http.createServer((req, res) => void stubs.handler(req, res));
-  await new Promise((resolve) => server.listen(options.port ?? 0, options.host ?? "127.0.0.1", resolve));
+  await new Promise((resolve) =>
+    server.listen(options.port ?? 0, options.host ?? "127.0.0.1", resolve)
+  );
   const address = server.address();
   const url = `http://${options.host ?? "127.0.0.1"}:${address.port}`;
   if (!options.publicUrl) stubs.config.publicUrl = url;
@@ -308,5 +454,7 @@ export async function startStubs(options = {}) {
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const stubs = createStubs();
   const port = Number(process.env.PORT ?? 5139);
-  http.createServer((req, res) => void stubs.handler(req, res)).listen(port, "0.0.0.0", () => console.log(`stubs listening on ${port}`));
+  http
+    .createServer((req, res) => void stubs.handler(req, res))
+    .listen(port, "0.0.0.0", () => console.log(`stubs listening on ${port}`));
 }

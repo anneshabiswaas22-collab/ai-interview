@@ -16,7 +16,12 @@ const pkg = path.dirname(require.resolve("@mediapipe/tasks-vision"));
 const from = path.join(pkg, "wasm");
 const to = path.join(here, "..", "public", "mediapipe", "wasm");
 mkdirSync(to, { recursive: true });
-for (const f of ["vision_wasm_internal.js", "vision_wasm_internal.wasm", "vision_wasm_nosimd_internal.js", "vision_wasm_nosimd_internal.wasm"]) {
+for (const f of [
+  "vision_wasm_internal.js",
+  "vision_wasm_internal.wasm",
+  "vision_wasm_nosimd_internal.js",
+  "vision_wasm_nosimd_internal.wasm",
+]) {
   const src = path.join(from, f);
   const dst = path.join(to, f);
   if (existsSync(dst) && statSync(dst).size === statSync(src).size) continue;

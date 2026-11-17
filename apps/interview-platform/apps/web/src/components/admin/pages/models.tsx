@@ -4,13 +4,47 @@ import { useEffect, useId, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ModelInput } from "@open-conversation/api-client";
 import {
-  Button, Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger, Field, IconButton, Input, Select, Switch, Textarea, toast,
+  Button,
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Field,
+  IconButton,
+  Input,
+  Select,
+  Switch,
+  Textarea,
+  toast,
 } from "@open-conversation/ui";
 import { MoreHorizontal } from "lucide-react";
-import type { AdminModel, AdminProvider, ModelKind, ModelTestResult, ProviderKind } from "@open-conversation/types";
+import type {
+  AdminModel,
+  AdminProvider,
+  ModelKind,
+  ModelTestResult,
+  ProviderKind,
+} from "@open-conversation/types";
 import { api } from "@/lib/api";
-import { MODEL_KINDS, PROVIDER_KIND_LABEL, SLUG_RE, adminErrorMessage, formatUsd, groupModels, parsePrice, parseVoices, priceText } from "@/lib/admin";
+import {
+  MODEL_KINDS,
+  PROVIDER_KIND_LABEL,
+  SLUG_RE,
+  adminErrorMessage,
+  formatUsd,
+  groupModels,
+  parsePrice,
+  parseVoices,
+  priceText,
+} from "@/lib/admin";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { ErrorState } from "@/components/common/states";
 import { AdminPage, AdminSection, DataTable, StatusText, type Column } from "../shell";
@@ -56,26 +90,66 @@ function Providers({ onEdit }: { onEdit: (p: AdminProvider | "new") => void }) {
           </div>
         ),
       },
-      { key: "kind", header: "Kind", cell: (p) => <span className="text-muted-foreground">{PROVIDER_KIND_LABEL[p.kind]}</span>, hideBelow: "sm" },
-      { key: "url", header: "Base URL", cell: (p) => <span className="break-all font-mono text-[12px] text-muted-foreground">{p.baseUrl ?? "Default"}</span>, hideBelow: "lg" },
+      {
+        key: "kind",
+        header: "Kind",
+        cell: (p) => <span className="text-muted-foreground">{PROVIDER_KIND_LABEL[p.kind]}</span>,
+        hideBelow: "sm",
+      },
+      {
+        key: "url",
+        header: "Base URL",
+        cell: (p) => (
+          <span className="break-all font-mono text-[12px] text-muted-foreground">
+            {p.baseUrl ?? "Default"}
+          </span>
+        ),
+        hideBelow: "lg",
+      },
       {
         key: "key",
         header: "Key configured",
-        cell: (p) => (p.keyConfigured ? <StatusText tone="success">Yes</StatusText> : <StatusText tone="warning">No</StatusText>),
+        cell: (p) =>
+          p.keyConfigured ? (
+            <StatusText tone="success">Yes</StatusText>
+          ) : (
+            <StatusText tone="warning">No</StatusText>
+          ),
       },
-      { key: "enabled", header: "Enabled", cell: (p) => (p.enabled ? <span className="text-foreground">On</span> : <span className="text-muted-foreground">Off</span>), hideBelow: "sm" },
-      { key: "models", header: "Models", align: "right", cell: (p) => p.modelCount, hideBelow: "md" },
+      {
+        key: "enabled",
+        header: "Enabled",
+        cell: (p) =>
+          p.enabled ? (
+            <span className="text-foreground">On</span>
+          ) : (
+            <span className="text-muted-foreground">Off</span>
+          ),
+        hideBelow: "sm",
+      },
+      {
+        key: "models",
+        header: "Models",
+        align: "right",
+        cell: (p) => p.modelCount,
+        hideBelow: "md",
+      },
       {
         key: "menu",
         header: <span className="sr-only">Actions</span>,
         align: "right",
         className: "w-10",
         cell: (p) => (
-          <RowMenu label={`Actions for ${p.displayName}`} onEdit={() => onEdit(p)} onDelete={() => setDeleting(p)} testId={`provider-menu-${p.id}`} />
+          <RowMenu
+            label={`Actions for ${p.displayName}`}
+            onEdit={() => onEdit(p)}
+            onDelete={() => setDeleting(p)}
+            testId={`provider-menu-${p.id}`}
+          />
         ),
       },
     ],
-    [onEdit],
+    [onEdit]
   );
   const del = useMutation({
     mutationFn: (id: string) => api().admin.deleteProvider(id),
@@ -92,17 +166,38 @@ function Providers({ onEdit }: { onEdit: (p: AdminProvider | "new") => void }) {
       id="providers"
       description="API keys live in the server's PROVIDER_KEYS secret, keyed by the provider slug. They are never shown or stored here."
       actions={
-        <Button variant="outline" size="sm" onClick={() => onEdit("new")} data-testid="provider-add">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onEdit("new")}
+          data-testid="provider-add"
+        >
           Add provider
         </Button>
       }
     >
-      <DataTable caption="Providers" rows={q.data ?? []} columns={columns} rowKey={(p) => p.id} onRowClick={(p) => onEdit(p)} loading={q.isPending} error={q.error} onRetry={() => void q.refetch()} skeletonRows={3} empty={{ title: "No providers yet. Add one to start adding models." }} testId="providers-table" />
+      <DataTable
+        caption="Providers"
+        rows={q.data ?? []}
+        columns={columns}
+        rowKey={(p) => p.id}
+        onRowClick={(p) => onEdit(p)}
+        loading={q.isPending}
+        error={q.error}
+        onRetry={() => void q.refetch()}
+        skeletonRows={3}
+        empty={{ title: "No providers yet. Add one to start adding models." }}
+        testId="providers-table"
+      />
       <ConfirmDialog
         open={!!deleting}
         onOpenChange={(o) => !o && setDeleting(null)}
         title={`Delete ${deleting?.displayName ?? "provider"}?`}
-        description={deleting?.modelCount ? `Its ${deleting.modelCount} ${deleting.modelCount === 1 ? "model is" : "models are"} deleted too, with their usage history. To hide it instead, turn it off.` : "It has no models."}
+        description={
+          deleting?.modelCount
+            ? `Its ${deleting.modelCount} ${deleting.modelCount === 1 ? "model is" : "models are"} deleted too, with their usage history. To hide it instead, turn it off.`
+            : "It has no models."
+        }
         confirmLabel="Delete provider"
         destructive
         onConfirm={() => del.mutateAsync(deleting!.id)}
@@ -111,7 +206,19 @@ function Providers({ onEdit }: { onEdit: (p: AdminProvider | "new") => void }) {
   );
 }
 
-function RowMenu({ label, onEdit, onDelete, onTest, testId }: { label: string; onEdit: () => void; onDelete: () => void; onTest?: () => void; testId?: string }) {
+function RowMenu({
+  label,
+  onEdit,
+  onDelete,
+  onTest,
+  testId,
+}: {
+  label: string;
+  onEdit: () => void;
+  onDelete: () => void;
+  onTest?: () => void;
+  testId?: string;
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -133,18 +240,40 @@ function RowMenu({ label, onEdit, onDelete, onTest, testId }: { label: string; o
 
 const PROVIDER_KINDS = Object.keys(PROVIDER_KIND_LABEL) as ProviderKind[];
 
-function ProviderDialog({ value, onClose }: { value: AdminProvider | "new" | null; onClose: () => void }) {
+function ProviderDialog({
+  value,
+  onClose,
+}: {
+  value: AdminProvider | "new" | null;
+  onClose: () => void;
+}) {
   const id = useId();
   const qc = useQueryClient();
   const isNew = value === "new";
   const existing = value && value !== "new" ? value : null;
-  const blank = { id: "", kind: "OPENAI" as ProviderKind, displayName: "", baseUrl: "", enabled: true };
+  const blank = {
+    id: "",
+    kind: "OPENAI" as ProviderKind,
+    displayName: "",
+    baseUrl: "",
+    enabled: true,
+  };
   const [f, setF] = useState(blank);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     if (!value) return;
     setError(null);
-    setF(existing ? { id: existing.id, kind: existing.kind, displayName: existing.displayName, baseUrl: existing.baseUrl ?? "", enabled: existing.enabled } : blank);
+    setF(
+      existing
+        ? {
+            id: existing.id,
+            kind: existing.kind,
+            displayName: existing.displayName,
+            baseUrl: existing.baseUrl ?? "",
+            enabled: existing.enabled,
+          }
+        : blank
+    );
   }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
   const slugOk = !isNew || SLUG_RE.test(f.id);
   const urlOk = !f.baseUrl.trim() || /^https?:\/\/\S+$/i.test(f.baseUrl.trim());
@@ -152,8 +281,15 @@ function ProviderDialog({ value, onClose }: { value: AdminProvider | "new" | nul
   const ok = slugOk && urlOk && !urlNeeded && f.displayName.trim().length > 0;
   const save = useMutation({
     mutationFn: () => {
-      const body = { kind: f.kind, displayName: f.displayName.trim(), baseUrl: f.baseUrl.trim() || null, enabled: f.enabled };
-      return isNew ? api().admin.createProvider({ id: f.id, ...body }) : api().admin.updateProvider(existing!.id, body);
+      const body = {
+        kind: f.kind,
+        displayName: f.displayName.trim(),
+        baseUrl: f.baseUrl.trim() || null,
+        enabled: f.enabled,
+      };
+      return isNew
+        ? api().admin.createProvider({ id: f.id, ...body })
+        : api().admin.updateProvider(existing!.id, body);
     },
     ...adminMutation({ inline: true }),
     onError: (e) => setError(adminErrorMessage(e)),
@@ -174,34 +310,87 @@ function ProviderDialog({ value, onClose }: { value: AdminProvider | "new" | nul
           }}
         >
           <DialogHeader>
-            <DialogTitle>{isNew ? "Add a provider" : `Edit ${existing?.displayName ?? "provider"}`}</DialogTitle>
-            <DialogDescription>The key goes in the server&apos;s PROVIDER_KEYS secret under this slug, then restart the API.</DialogDescription>
+            <DialogTitle>
+              {isNew ? "Add a provider" : `Edit ${existing?.displayName ?? "provider"}`}
+            </DialogTitle>
+            <DialogDescription>
+              The key goes in the server&apos;s PROVIDER_KEYS secret under this slug, then restart
+              the API.
+            </DialogDescription>
           </DialogHeader>
           <DialogBody className="space-y-4">
-            <Field label="Slug" htmlFor={`${id}-slug`} hint={isNew ? "Lowercase letters, digits and hyphens. It cannot change later." : "The slug cannot change."} error={!slugOk && f.id ? "Use 3 to 40 lowercase letters, digits and hyphens." : undefined}>
-              <Input id={`${id}-slug`} value={f.id} onChange={(e) => setF((x) => ({ ...x, id: e.target.value.toLowerCase() }))} disabled={!isNew} autoComplete="off" className="font-mono" data-testid="provider-slug" />
+            <Field
+              label="Slug"
+              htmlFor={`${id}-slug`}
+              hint={
+                isNew
+                  ? "Lowercase letters, digits and hyphens. It cannot change later."
+                  : "The slug cannot change."
+              }
+              error={
+                !slugOk && f.id ? "Use 3 to 40 lowercase letters, digits and hyphens." : undefined
+              }
+            >
+              <Input
+                id={`${id}-slug`}
+                value={f.id}
+                onChange={(e) => setF((x) => ({ ...x, id: e.target.value.toLowerCase() }))}
+                disabled={!isNew}
+                autoComplete="off"
+                className="font-mono"
+                data-testid="provider-slug"
+              />
             </Field>
             <Field label="Kind" htmlFor={`${id}-kind`}>
-              <Select id={`${id}-kind`} value={f.kind} onValueChange={(v) => setF((x) => ({ ...x, kind: v as ProviderKind }))} options={PROVIDER_KINDS.map((k) => ({ value: k, label: PROVIDER_KIND_LABEL[k] }))} data-testid="provider-kind" />
+              <Select
+                id={`${id}-kind`}
+                value={f.kind}
+                onValueChange={(v) => setF((x) => ({ ...x, kind: v as ProviderKind }))}
+                options={PROVIDER_KINDS.map((k) => ({ value: k, label: PROVIDER_KIND_LABEL[k] }))}
+                data-testid="provider-kind"
+              />
             </Field>
             <Field label="Display name" htmlFor={`${id}-name`}>
-              <Input id={`${id}-name`} value={f.displayName} maxLength={60} onChange={(e) => setF((x) => ({ ...x, displayName: e.target.value }))} data-testid="provider-name" />
+              <Input
+                id={`${id}-name`}
+                value={f.displayName}
+                maxLength={60}
+                onChange={(e) => setF((x) => ({ ...x, displayName: e.target.value }))}
+                data-testid="provider-name"
+              />
             </Field>
             <Field
               label="Base URL"
               htmlFor={`${id}-url`}
               optional={f.kind !== "OPENAI_COMPATIBLE"}
-              hint={f.kind === "OPENAI_COMPATIBLE" ? "Required: the server's OpenAI-style endpoint, such as http://localhost:11434/v1." : "Leave empty to use the provider's own endpoint."}
+              hint={
+                f.kind === "OPENAI_COMPATIBLE"
+                  ? "Required: the server's OpenAI-style endpoint, such as http://localhost:11434/v1."
+                  : "Leave empty to use the provider's own endpoint."
+              }
               error={!urlOk ? "Use an http or https URL." : undefined}
             >
-              <Input id={`${id}-url`} value={f.baseUrl} maxLength={300} onChange={(e) => setF((x) => ({ ...x, baseUrl: e.target.value }))} className="font-mono" data-testid="provider-url" />
+              <Input
+                id={`${id}-url`}
+                value={f.baseUrl}
+                maxLength={300}
+                onChange={(e) => setF((x) => ({ ...x, baseUrl: e.target.value }))}
+                className="font-mono"
+                data-testid="provider-url"
+              />
             </Field>
             <label className="flex items-center justify-between gap-4 text-[14px]">
               <span>
                 <span className="font-medium">Enabled</span>
-                <span className="block text-[13px] text-muted-foreground">Turned off, none of its models can be used.</span>
+                <span className="block text-[13px] text-muted-foreground">
+                  Turned off, none of its models can be used.
+                </span>
               </span>
-              <Switch checked={f.enabled} onCheckedChange={(v) => setF((x) => ({ ...x, enabled: v }))} data-testid="provider-enabled" />
+              <Switch
+                checked={f.enabled}
+                onCheckedChange={(v) => setF((x) => ({ ...x, enabled: v }))}
+                data-testid="provider-enabled"
+              />
             </label>
             {error ? (
               <p role="alert" className="text-[13px] font-medium text-danger">
@@ -213,7 +402,12 @@ function ProviderDialog({ value, onClose }: { value: AdminProvider | "new" | nul
             <Button type="button" variant="ghost" onClick={onClose} disabled={save.isPending}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!ok} loading={save.isPending} data-testid="provider-save">
+            <Button
+              type="submit"
+              disabled={!ok}
+              loading={save.isPending}
+              data-testid="provider-save"
+            >
               {isNew ? "Add provider" : "Save"}
             </Button>
           </DialogFooter>
@@ -226,11 +420,17 @@ function ProviderDialog({ value, onClose }: { value: AdminProvider | "new" | nul
 // ─── Models ─────────────────────────────────────────────────────────────────
 
 /** "$2.50 in, $10 out per 1M tokens" or "$0.06 a minute": prices as one line of type. */
-export function priceLine(m: Pick<AdminModel, "kind" | "inputUsdPerMtok" | "outputUsdPerMtok" | "usdPerMinute">): string {
+export function priceLine(
+  m: Pick<AdminModel, "kind" | "inputUsdPerMtok" | "outputUsdPerMtok" | "usdPerMinute">
+): string {
   const parts: string[] = [];
-  if (m.kind === "REALTIME" && m.usdPerMinute !== null) parts.push(`${formatUsd(m.usdPerMinute)} a minute`);
+  if (m.kind === "REALTIME" && m.usdPerMinute !== null)
+    parts.push(`${formatUsd(m.usdPerMinute)} a minute`);
   if (m.inputUsdPerMtok !== null || m.outputUsdPerMtok !== null) {
-    const io = [m.inputUsdPerMtok !== null ? `${formatUsd(m.inputUsdPerMtok)} in` : null, m.outputUsdPerMtok !== null ? `${formatUsd(m.outputUsdPerMtok)} out` : null].filter(Boolean);
+    const io = [
+      m.inputUsdPerMtok !== null ? `${formatUsd(m.inputUsdPerMtok)} in` : null,
+      m.outputUsdPerMtok !== null ? `${formatUsd(m.outputUsdPerMtok)} out` : null,
+    ].filter(Boolean);
     parts.push(`${io.join(", ")} per 1M tokens`);
   }
   return parts.length ? parts.join(" · ") : "No price set";
@@ -261,22 +461,56 @@ function Models({ onEdit }: { onEdit: (m: AdminModel | { kind: ModelKind }) => v
         <div className="min-w-0">
           <p className="font-medium text-foreground">
             {m.displayName}
-            {m.isDefault ? <span className="ml-2 text-[12.5px] font-normal text-muted-foreground">Default</span> : null}
+            {m.isDefault ? (
+              <span className="ml-2 text-[12.5px] font-normal text-muted-foreground">Default</span>
+            ) : null}
           </p>
           <p className="truncate font-mono text-[12px] text-muted-foreground">{m.modelRef}</p>
-          {m.kind === "REALTIME" ? <p className="truncate text-[12.5px] text-muted-foreground">{m.voices.length ? `Voices: ${m.voices.join(", ")}` : "No voices listed"}</p> : null}
+          {m.kind === "REALTIME" ? (
+            <p className="truncate text-[12.5px] text-muted-foreground">
+              {m.voices.length ? `Voices: ${m.voices.join(", ")}` : "No voices listed"}
+            </p>
+          ) : null}
         </div>
       ),
     },
-    { key: "provider", header: "Provider", cell: (m) => <span className="text-muted-foreground">{providerName(m.providerId)}</span>, hideBelow: "sm" },
-    { key: "price", header: "Price", cell: (m) => <span className="text-muted-foreground">{priceLine(m)}</span>, hideBelow: "lg" },
-    { key: "enabled", header: "Enabled", cell: (m) => (m.enabled ? <span className="text-foreground">On</span> : <span className="text-muted-foreground">Off</span>), hideBelow: "sm" },
+    {
+      key: "provider",
+      header: "Provider",
+      cell: (m) => <span className="text-muted-foreground">{providerName(m.providerId)}</span>,
+      hideBelow: "sm",
+    },
+    {
+      key: "price",
+      header: "Price",
+      cell: (m) => <span className="text-muted-foreground">{priceLine(m)}</span>,
+      hideBelow: "lg",
+    },
+    {
+      key: "enabled",
+      header: "Enabled",
+      cell: (m) =>
+        m.enabled ? (
+          <span className="text-foreground">On</span>
+        ) : (
+          <span className="text-muted-foreground">Off</span>
+        ),
+      hideBelow: "sm",
+    },
     {
       key: "menu",
       header: <span className="sr-only">Actions</span>,
       align: "right",
       className: "w-10",
-      cell: (m) => <RowMenu label={`Actions for ${m.displayName}`} onEdit={() => onEdit(m)} onTest={() => setTesting(m)} onDelete={() => setDeleting(m)} testId={`model-menu-${m.modelRef}`} />,
+      cell: (m) => (
+        <RowMenu
+          label={`Actions for ${m.displayName}`}
+          onEdit={() => onEdit(m)}
+          onTest={() => setTesting(m)}
+          onDelete={() => setDeleting(m)}
+          testId={`model-menu-${m.modelRef}`}
+        />
+      ),
     },
   ];
   if (q.isError && !q.data) return <ErrorState error={q.error} onRetry={() => void q.refetch()} />;
@@ -289,12 +523,27 @@ function Models({ onEdit }: { onEdit: (m: AdminModel | { kind: ModelKind }) => v
           title={k.label}
           description={k.description}
           actions={
-            <Button variant="ghost" size="sm" onClick={() => onEdit({ kind: k.kind })} data-testid={`model-add-${k.kind.toLowerCase()}`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit({ kind: k.kind })}
+              data-testid={`model-add-${k.kind.toLowerCase()}`}
+            >
               Add
             </Button>
           }
         >
-          <DataTable caption={`${k.label} models`} rows={groups[k.kind]} columns={columns} rowKey={(m) => m.id} onRowClick={(m) => onEdit(m)} loading={q.isPending} skeletonRows={2} empty={{ title: `No ${k.label.toLowerCase()} models yet.` }} testId={`models-${k.kind.toLowerCase()}`} />
+          <DataTable
+            caption={`${k.label} models`}
+            rows={groups[k.kind]}
+            columns={columns}
+            rowKey={(m) => m.id}
+            onRowClick={(m) => onEdit(m)}
+            loading={q.isPending}
+            skeletonRows={2}
+            empty={{ title: `No ${k.label.toLowerCase()} models yet.` }}
+            testId={`models-${k.kind.toLowerCase()}`}
+          />
         </AdminSection>
       ))}
       <ConfirmDialog
@@ -312,7 +561,10 @@ function Models({ onEdit }: { onEdit: (m: AdminModel | { kind: ModelKind }) => v
 }
 
 function TestDialog({ model, onClose }: { model: AdminModel | null; onClose: () => void }) {
-  const test = useMutation<ModelTestResult, unknown, string>({ mutationFn: (id) => api().admin.testModel(id), meta: { silent: true } });
+  const test = useMutation<ModelTestResult, unknown, string>({
+    mutationFn: (id) => api().admin.testModel(id),
+    meta: { silent: true },
+  });
   const { mutate, reset } = test;
   useEffect(() => {
     if (model) mutate(model.id);
@@ -326,7 +578,9 @@ function TestDialog({ model, onClose }: { model: AdminModel | null; onClose: () 
         <DialogHeader>
           <DialogTitle>Test {model?.displayName}</DialogTitle>
           <DialogDescription>
-            {voice ? "Mints one short-lived voice credential through the provider, to check the key, the model id and the voice." : "One tiny request through the provider, to check the key and the model id."}
+            {voice
+              ? "Mints one short-lived voice credential through the provider, to check the key, the model id and the voice."
+              : "One tiny request through the provider, to check the key and the model id."}
           </DialogDescription>
         </DialogHeader>
         <DialogBody aria-live="polite">
@@ -347,7 +601,11 @@ function TestDialog({ model, onClose }: { model: AdminModel | null; onClose: () 
           ) : null}
         </DialogBody>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => model && mutate(model.id)} disabled={test.isPending}>
+          <Button
+            variant="ghost"
+            onClick={() => model && mutate(model.id)}
+            disabled={test.isPending}
+          >
             Run again
           </Button>
           <Button onClick={onClose}>Done</Button>
@@ -357,7 +615,15 @@ function TestDialog({ model, onClose }: { model: AdminModel | null; onClose: () 
   );
 }
 
-type ModelDraft = Omit<ModelInput, "maxOutputTokens" | "sortOrder" | "voices" | "inputUsdPerMtok" | "outputUsdPerMtok" | "usdPerMinute"> & {
+type ModelDraft = Omit<
+  ModelInput,
+  | "maxOutputTokens"
+  | "sortOrder"
+  | "voices"
+  | "inputUsdPerMtok"
+  | "outputUsdPerMtok"
+  | "usdPerMinute"
+> & {
   maxOutputTokens: string;
   sortOrder: string;
   /** Voice names as typed, separated by commas or spaces. */
@@ -403,20 +669,25 @@ const toDraft = (m: AdminModel | { kind: ModelKind }, providerId: string): Model
 /** Field errors for a model draft, matching the API's limits. */
 export function modelDraftErrors(d: ModelDraft): Partial<Record<keyof ModelDraft, string>> {
   const e: Partial<Record<keyof ModelDraft, string>> = {};
-  const int = (s: string, min: number, max: number) => /^\d+$/.test(s.trim()) && Number(s) >= min && Number(s) <= max;
+  const int = (s: string, min: number, max: number) =>
+    /^\d+$/.test(s.trim()) && Number(s) >= min && Number(s) <= max;
   if (!d.providerId) e.providerId = "Pick a provider.";
   if (!d.modelRef.trim()) e.modelRef = "Enter the provider's model id.";
   if (!d.displayName.trim()) e.displayName = "Give it a name people will see.";
   if (!int(d.maxOutputTokens, 16, 1_000_000)) e.maxOutputTokens = "Between 16 and 1,000,000.";
   if (!int(d.sortOrder, 0, 10_000)) e.sortOrder = "Between 0 and 10,000.";
-  if (parsePrice(d.inputUsdPerMtok) === undefined) e.inputUsdPerMtok = "A price in dollars, or leave it empty.";
-  if (parsePrice(d.outputUsdPerMtok) === undefined) e.outputUsdPerMtok = "A price in dollars, or leave it empty.";
+  if (parsePrice(d.inputUsdPerMtok) === undefined)
+    e.inputUsdPerMtok = "A price in dollars, or leave it empty.";
+  if (parsePrice(d.outputUsdPerMtok) === undefined)
+    e.outputUsdPerMtok = "A price in dollars, or leave it empty.";
   if (d.kind === "REALTIME") {
     const perMinute = parsePrice(d.usdPerMinute);
-    if (perMinute === undefined || (perMinute !== null && perMinute > 100)) e.usdPerMinute = "Up to $100 a minute, or leave it empty.";
+    if (perMinute === undefined || (perMinute !== null && perMinute > 100))
+      e.usdPerMinute = "Up to $100 a minute, or leave it empty.";
     const voices = parseVoices(d.voices);
     if (voices.length > 20) e.voices = "Up to 20 voices.";
-    else if (voices.some((v) => v.length > 40)) e.voices = "Each voice name is 40 characters or fewer.";
+    else if (voices.some((v) => v.length > 40))
+      e.voices = "Each voice name is 40 characters or fewer.";
   }
   return e;
 }
@@ -441,7 +712,13 @@ export function modelDraftBody(d: ModelDraft): ModelInput {
   };
 }
 
-function ModelDialog({ value, onClose }: { value: AdminModel | { kind: ModelKind } | null; onClose: () => void }) {
+function ModelDialog({
+  value,
+  onClose,
+}: {
+  value: AdminModel | { kind: ModelKind } | null;
+  onClose: () => void;
+}) {
   const id = useId();
   const qc = useQueryClient();
   const providers = useQuery({ queryKey: ak.providers, queryFn: () => api().admin.providers() });
@@ -469,7 +746,8 @@ function ModelDialog({ value, onClose }: { value: AdminModel | { kind: ModelKind
       onClose();
     },
   });
-  const set = <K extends keyof ModelDraft>(k: K, v: ModelDraft[K]) => setD((x) => (x ? { ...x, [k]: v } : x));
+  const set = <K extends keyof ModelDraft>(k: K, v: ModelDraft[K]) =>
+    setD((x) => (x ? { ...x, [k]: v } : x));
   const err = (k: keyof ModelDraft, touched: boolean) => (touched ? errs[k] : undefined);
   const realtime = d?.kind === "REALTIME";
   return (
@@ -484,71 +762,224 @@ function ModelDialog({ value, onClose }: { value: AdminModel | { kind: ModelKind
             }}
           >
             <DialogHeader>
-              <DialogTitle>{existing ? `Edit ${existing.displayName}` : realtime ? "Add a voice model" : "Add a text model"}</DialogTitle>
+              <DialogTitle>
+                {existing
+                  ? `Edit ${existing.displayName}`
+                  : realtime
+                    ? "Add a voice model"
+                    : "Add a text model"}
+              </DialogTitle>
             </DialogHeader>
             <DialogBody className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Provider" htmlFor={`${id}-p`} error={err("providerId", !!providers.data)}>
-                  <Select id={`${id}-p`} value={d.providerId || undefined} placeholder="Pick a provider" onValueChange={(v) => set("providerId", v)} options={(providers.data ?? []).map((p) => ({ value: p.id, label: p.displayName }))} data-testid="model-provider" />
+                <Field
+                  label="Provider"
+                  htmlFor={`${id}-p`}
+                  error={err("providerId", !!providers.data)}
+                >
+                  <Select
+                    id={`${id}-p`}
+                    value={d.providerId || undefined}
+                    placeholder="Pick a provider"
+                    onValueChange={(v) => set("providerId", v)}
+                    options={(providers.data ?? []).map((p) => ({
+                      value: p.id,
+                      label: p.displayName,
+                    }))}
+                    data-testid="model-provider"
+                  />
                 </Field>
                 <Field label="Kind" htmlFor={`${id}-k`}>
-                  <Select id={`${id}-k`} value={d.kind} onValueChange={(v) => set("kind", v as ModelKind)} options={MODEL_KINDS.map((k) => ({ value: k.kind, label: k.label }))} data-testid="model-kind" />
+                  <Select
+                    id={`${id}-k`}
+                    value={d.kind}
+                    onValueChange={(v) => set("kind", v as ModelKind)}
+                    options={MODEL_KINDS.map((k) => ({ value: k.kind, label: k.label }))}
+                    data-testid="model-kind"
+                  />
                 </Field>
-                <Field label="Model id" htmlFor={`${id}-ref`} hint={realtime ? "Exactly as the provider names it, such as gpt-realtime." : "Exactly as the provider names it, such as gpt-4o-mini."} error={err("modelRef", d.modelRef !== "")}>
-                  <Input id={`${id}-ref`} value={d.modelRef} maxLength={120} onChange={(e) => set("modelRef", e.target.value)} className="font-mono" autoComplete="off" data-testid="model-ref" />
+                <Field
+                  label="Model id"
+                  htmlFor={`${id}-ref`}
+                  hint={
+                    realtime
+                      ? "Exactly as the provider names it, such as gpt-realtime."
+                      : "Exactly as the provider names it, such as gpt-4o-mini."
+                  }
+                  error={err("modelRef", d.modelRef !== "")}
+                >
+                  <Input
+                    id={`${id}-ref`}
+                    value={d.modelRef}
+                    maxLength={120}
+                    onChange={(e) => set("modelRef", e.target.value)}
+                    className="font-mono"
+                    autoComplete="off"
+                    data-testid="model-ref"
+                  />
                 </Field>
-                <Field label="Display name" htmlFor={`${id}-name`} error={err("displayName", d.displayName !== "")}>
-                  <Input id={`${id}-name`} value={d.displayName} maxLength={60} onChange={(e) => set("displayName", e.target.value)} data-testid="model-name" />
+                <Field
+                  label="Display name"
+                  htmlFor={`${id}-name`}
+                  error={err("displayName", d.displayName !== "")}
+                >
+                  <Input
+                    id={`${id}-name`}
+                    value={d.displayName}
+                    maxLength={60}
+                    onChange={(e) => set("displayName", e.target.value)}
+                    data-testid="model-name"
+                  />
                 </Field>
               </div>
-              <Field label="Description" htmlFor={`${id}-desc`} optional hint={realtime ? "One line shown where people pick a voice model." : "One line for admins."}>
-                <Textarea id={`${id}-desc`} rows={2} maxLength={200} value={d.description} onChange={(e) => set("description", e.target.value)} data-testid="model-description" />
+              <Field
+                label="Description"
+                htmlFor={`${id}-desc`}
+                optional
+                hint={
+                  realtime
+                    ? "One line shown where people pick a voice model."
+                    : "One line for admins."
+                }
+              >
+                <Textarea
+                  id={`${id}-desc`}
+                  rows={2}
+                  maxLength={200}
+                  value={d.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  data-testid="model-description"
+                />
               </Field>
               {realtime ? (
-                <Field label="Voices" htmlFor={`${id}-voices`} error={errs.voices} hint="The voice names the provider offers for this model, separated by commas. The first is the default.">
-                  <Input id={`${id}-voices`} value={d.voices} placeholder="alloy, verse, coral" onChange={(e) => set("voices", e.target.value)} className="font-mono" autoComplete="off" data-testid="model-voices" />
+                <Field
+                  label="Voices"
+                  htmlFor={`${id}-voices`}
+                  error={errs.voices}
+                  hint="The voice names the provider offers for this model, separated by commas. The first is the default."
+                >
+                  <Input
+                    id={`${id}-voices`}
+                    value={d.voices}
+                    placeholder="alloy, verse, coral"
+                    onChange={(e) => set("voices", e.target.value)}
+                    className="font-mono"
+                    autoComplete="off"
+                    data-testid="model-voices"
+                  />
                 </Field>
               ) : null}
               <div className="grid gap-4 sm:grid-cols-3">
-                <Field label="Input, per 1M tokens" htmlFor={`${id}-in`} optional error={errs.inputUsdPerMtok}>
-                  <Input id={`${id}-in`} inputMode="decimal" placeholder="$" value={d.inputUsdPerMtok} onChange={(e) => set("inputUsdPerMtok", e.target.value)} data-testid="model-price-in" />
+                <Field
+                  label="Input, per 1M tokens"
+                  htmlFor={`${id}-in`}
+                  optional
+                  error={errs.inputUsdPerMtok}
+                >
+                  <Input
+                    id={`${id}-in`}
+                    inputMode="decimal"
+                    placeholder="$"
+                    value={d.inputUsdPerMtok}
+                    onChange={(e) => set("inputUsdPerMtok", e.target.value)}
+                    data-testid="model-price-in"
+                  />
                 </Field>
-                <Field label="Output, per 1M tokens" htmlFor={`${id}-outp`} optional error={errs.outputUsdPerMtok}>
-                  <Input id={`${id}-outp`} inputMode="decimal" placeholder="$" value={d.outputUsdPerMtok} onChange={(e) => set("outputUsdPerMtok", e.target.value)} data-testid="model-price-out" />
+                <Field
+                  label="Output, per 1M tokens"
+                  htmlFor={`${id}-outp`}
+                  optional
+                  error={errs.outputUsdPerMtok}
+                >
+                  <Input
+                    id={`${id}-outp`}
+                    inputMode="decimal"
+                    placeholder="$"
+                    value={d.outputUsdPerMtok}
+                    onChange={(e) => set("outputUsdPerMtok", e.target.value)}
+                    data-testid="model-price-out"
+                  />
                 </Field>
                 {realtime ? (
-                  <Field label="Per minute of voice" htmlFor={`${id}-min`} optional error={errs.usdPerMinute}>
-                    <Input id={`${id}-min`} inputMode="decimal" placeholder="$" value={d.usdPerMinute} onChange={(e) => set("usdPerMinute", e.target.value)} data-testid="model-price-minute" />
+                  <Field
+                    label="Per minute of voice"
+                    htmlFor={`${id}-min`}
+                    optional
+                    error={errs.usdPerMinute}
+                  >
+                    <Input
+                      id={`${id}-min`}
+                      inputMode="decimal"
+                      placeholder="$"
+                      value={d.usdPerMinute}
+                      onChange={(e) => set("usdPerMinute", e.target.value)}
+                      data-testid="model-price-minute"
+                    />
                   </Field>
                 ) : null}
               </div>
-              <p className="-mt-2 text-[13px] text-muted-foreground">Prices in US dollars, only for the cost estimate on the overview. Nobody is charged.</p>
+              <p className="-mt-2 text-[13px] text-muted-foreground">
+                Prices in US dollars, only for the cost estimate on the overview. Nobody is charged.
+              </p>
               <div className="grid gap-4 sm:grid-cols-3">
                 {!realtime ? (
-                  <Field label="Max output tokens" htmlFor={`${id}-out`} error={errs.maxOutputTokens}>
-                    <Input id={`${id}-out`} inputMode="numeric" value={d.maxOutputTokens} onChange={(e) => set("maxOutputTokens", e.target.value)} data-testid="model-max-output" />
+                  <Field
+                    label="Max output tokens"
+                    htmlFor={`${id}-out`}
+                    error={errs.maxOutputTokens}
+                  >
+                    <Input
+                      id={`${id}-out`}
+                      inputMode="numeric"
+                      value={d.maxOutputTokens}
+                      onChange={(e) => set("maxOutputTokens", e.target.value)}
+                      data-testid="model-max-output"
+                    />
                   </Field>
                 ) : null}
-                <Field label="Sort order" htmlFor={`${id}-sort`} error={errs.sortOrder} hint="Lower comes first.">
-                  <Input id={`${id}-sort`} inputMode="numeric" value={d.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} data-testid="model-sort" />
+                <Field
+                  label="Sort order"
+                  htmlFor={`${id}-sort`}
+                  error={errs.sortOrder}
+                  hint="Lower comes first."
+                >
+                  <Input
+                    id={`${id}-sort`}
+                    inputMode="numeric"
+                    value={d.sortOrder}
+                    onChange={(e) => set("sortOrder", e.target.value)}
+                    data-testid="model-sort"
+                  />
                 </Field>
               </div>
               <div className="space-y-3 border-t border-border pt-4">
                 <label className="flex items-center justify-between gap-4 text-[14px]">
                   <span>
                     <span className="font-medium">Enabled</span>
-                    <span className="block text-[13px] text-muted-foreground">{realtime ? "People can pick it for an interview." : "The server can use it."}</span>
+                    <span className="block text-[13px] text-muted-foreground">
+                      {realtime ? "People can pick it for an interview." : "The server can use it."}
+                    </span>
                   </span>
-                  <Switch checked={d.enabled} onCheckedChange={(v) => set("enabled", v)} data-testid="model-enabled" />
+                  <Switch
+                    checked={d.enabled}
+                    onCheckedChange={(v) => set("enabled", v)}
+                    data-testid="model-enabled"
+                  />
                 </label>
                 <label className="flex items-center justify-between gap-4 text-[14px]">
                   <span>
                     <span className="font-medium">Default</span>
                     <span className="block text-[13px] text-muted-foreground">
-                      {realtime ? "Runs interviews when nobody picks a voice model. One default per kind." : "Writes plans and scores answers. One default per kind."}
+                      {realtime
+                        ? "Runs interviews when nobody picks a voice model. One default per kind."
+                        : "Writes plans and scores answers. One default per kind."}
                     </span>
                   </span>
-                  <Switch checked={d.isDefault} onCheckedChange={(v) => set("isDefault", v)} data-testid="model-default" />
+                  <Switch
+                    checked={d.isDefault}
+                    onCheckedChange={(v) => set("isDefault", v)}
+                    data-testid="model-default"
+                  />
                 </label>
               </div>
               {error ? (
@@ -561,7 +992,12 @@ function ModelDialog({ value, onClose }: { value: AdminModel | { kind: ModelKind
               <Button type="button" variant="ghost" onClick={onClose} disabled={save.isPending}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={!ok} loading={save.isPending} data-testid="model-save">
+              <Button
+                type="submit"
+                disabled={!ok}
+                loading={save.isPending}
+                data-testid="model-save"
+              >
                 {existing ? "Save" : "Add model"}
               </Button>
             </DialogFooter>

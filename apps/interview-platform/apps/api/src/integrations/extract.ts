@@ -7,7 +7,10 @@
 import mammoth from "mammoth";
 import { extractText, getDocumentProxy } from "unpdf";
 
-export const RESUME_MIME_TYPES = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"] as const;
+export const RESUME_MIME_TYPES = [
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+] as const;
 export type ResumeType = "pdf" | "docx";
 
 /** Longest resume text handed to a model; anything past it is a few pages of noise. */

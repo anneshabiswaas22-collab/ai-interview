@@ -48,7 +48,15 @@ async function usableRows(): Promise<{ model: ModelRow; provider: ProviderRow }[
     .selectFrom("models as m")
     .innerJoin("providers as p", "p.id", "m.provider_id")
     .selectAll("m")
-    .select(["p.id as p_id", "p.kind as p_kind", "p.display_name as p_display_name", "p.base_url as p_base_url", "p.enabled as p_enabled", "p.created_at as p_created_at", "p.updated_at as p_updated_at"])
+    .select([
+      "p.id as p_id",
+      "p.kind as p_kind",
+      "p.display_name as p_display_name",
+      "p.base_url as p_base_url",
+      "p.enabled as p_enabled",
+      "p.created_at as p_created_at",
+      "p.updated_at as p_updated_at",
+    ])
     .where("m.enabled", "=", true)
     .where("p.enabled", "=", true)
     .orderBy("m.sort_order")
@@ -56,8 +64,25 @@ async function usableRows(): Promise<{ model: ModelRow; provider: ProviderRow }[
     .execute();
   const out = rows
     .map((r) => {
-      const provider: ProviderRow = { id: r.p_id, kind: r.p_kind, display_name: r.p_display_name, base_url: r.p_base_url, enabled: r.p_enabled, created_at: r.p_created_at, updated_at: r.p_updated_at };
-      const { p_id: _a, p_kind: _b, p_display_name: _c, p_base_url: _d, p_enabled: _e, p_created_at: _f, p_updated_at: _g, ...model } = r;
+      const provider: ProviderRow = {
+        id: r.p_id,
+        kind: r.p_kind,
+        display_name: r.p_display_name,
+        base_url: r.p_base_url,
+        enabled: r.p_enabled,
+        created_at: r.p_created_at,
+        updated_at: r.p_updated_at,
+      };
+      const {
+        p_id: _a,
+        p_kind: _b,
+        p_display_name: _c,
+        p_base_url: _d,
+        p_enabled: _e,
+        p_created_at: _f,
+        p_updated_at: _g,
+        ...model
+      } = r;
       return { model: model as ModelRow, provider };
     })
     .filter((r) => endpointFor(r.provider) !== null);
@@ -87,7 +112,9 @@ export function toRealtimeOption(m: ModelRow, p: ProviderRow): RealtimeModelOpti
 /** The realtime models a candidate may pick from. */
 export async function realtimeOptions(): Promise<RealtimeModelOption[]> {
   const rows = await usableRows();
-  return rows.filter((r) => r.model.kind === "REALTIME" && realtimeProviderOf(r.provider.kind)).map((r) => toRealtimeOption(r.model, r.provider));
+  return rows
+    .filter((r) => r.model.kind === "REALTIME" && realtimeProviderOf(r.provider.kind))
+    .map((r) => toRealtimeOption(r.model, r.provider));
 }
 
 function pickDefault<T extends { model: ModelRow }>(rows: T[]): T | null {
@@ -95,7 +122,13 @@ function pickDefault<T extends { model: ModelRow }>(rows: T[]): T | null {
 }
 
 function resolved(r: { model: ModelRow; provider: ProviderRow }): ResolvedModel {
-  return { model: r.model, provider: r.provider, kind: r.provider.kind, endpoint: endpointFor(r.provider)!, adapter: adapterFor(r.provider.kind) };
+  return {
+    model: r.model,
+    provider: r.provider,
+    kind: r.provider.kind,
+    endpoint: endpointFor(r.provider)!,
+    adapter: adapterFor(r.provider.kind),
+  };
 }
 
 /**
@@ -104,23 +137,42 @@ function resolved(r: { model: ModelRow; provider: ProviderRow }): ResolvedModel 
  */
 export async function resolveTextModel(requested?: string | null): Promise<ResolvedModel | null> {
   const rows = (await usableRows()).filter((r) => r.model.kind === "TEXT");
-  const r = (requested ? rows.find((x) => x.model.id === requested) : undefined) ?? pickDefault(rows);
+  const r =
+    (requested ? rows.find((x) => x.model.id === requested) : undefined) ?? pickDefault(rows);
   return r ? resolved(r) : null;
 }
 
 /** The realtime model for a live session: asked for, else the user's default, else the deployment default. */
-export async function resolveRealtimeModel(requested: string | null | undefined, userDefault?: string | null): Promise<ResolvedModel | null> {
-  const rows = (await usableRows()).filter((r) => r.model.kind === "REALTIME" && realtimeProviderOf(r.provider.kind));
-  const pick = (id: string | null | undefined) => (id ? rows.find((r) => r.model.id === id) : undefined);
+export async function resolveRealtimeModel(
+  requested: string | null | undefined,
+  userDefault?: string | null
+): Promise<ResolvedModel | null> {
+  const rows = (await usableRows()).filter(
+    (r) => r.model.kind === "REALTIME" && realtimeProviderOf(r.provider.kind)
+  );
+  const pick = (id: string | null | undefined) =>
+    id ? rows.find((r) => r.model.id === id) : undefined;
   const r = pick(requested) ?? pick(userDefault) ?? pickDefault(rows);
   return r ? resolved(r) : null;
 }
 
 /** A model by id whatever its state (admin test calls, presenters). */
-export async function findModel(id: string): Promise<{ model: ModelRow; provider: ProviderRow } | null> {
-  const row = await db.selectFrom("models as m").innerJoin("providers as p", "p.id", "m.provider_id").selectAll("m").select(["p.kind as p_kind"]).where("m.id", "=", id).executeTakeFirst();
+export async function findModel(
+  id: string
+): Promise<{ model: ModelRow; provider: ProviderRow } | null> {
+  const row = await db
+    .selectFrom("models as m")
+    .innerJoin("providers as p", "p.id", "m.provider_id")
+    .selectAll("m")
+    .select(["p.kind as p_kind"])
+    .where("m.id", "=", id)
+    .executeTakeFirst();
   if (!row) return null;
-  const provider = await db.selectFrom("providers").selectAll().where("id", "=", row.provider_id).executeTakeFirstOrThrow();
+  const provider = await db
+    .selectFrom("providers")
+    .selectAll()
+    .where("id", "=", row.provider_id)
+    .executeTakeFirstOrThrow();
   const { p_kind: _k, ...model } = row;
   return { model: model as ModelRow, provider };
 }

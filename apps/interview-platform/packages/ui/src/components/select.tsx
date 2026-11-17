@@ -41,7 +41,7 @@ export function Select({
         data-testid={testId}
         className={cn(
           "flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 text-sm text-foreground shadow-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:opacity-60 data-[placeholder]:text-subtle-foreground",
-          className,
+          className
         )}
       >
         <SelectPrimitive.Value placeholder={placeholder} />
@@ -77,16 +77,17 @@ export function Select({
 }
 
 /** A plain native select, for long lists (timezones) where native search beats a custom list. */
-export const NativeSelect = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(
-  ({ className, ...props }, ref) => (
-    <select
-      ref={ref}
-      className={cn(
-        "h-10 w-full rounded-md border border-input bg-card px-3 text-sm text-foreground shadow-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
-        className,
-      )}
-      {...props}
-    />
-  ),
-);
+export const NativeSelect = React.forwardRef<
+  HTMLSelectElement,
+  React.SelectHTMLAttributes<HTMLSelectElement>
+>(({ className, ...props }, ref) => (
+  <select
+    ref={ref}
+    className={cn(
+      "h-10 w-full rounded-md border border-input bg-card px-3 text-sm text-foreground shadow-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
+      className
+    )}
+    {...props}
+  />
+));
 NativeSelect.displayName = "NativeSelect";

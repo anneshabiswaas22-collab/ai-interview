@@ -9,7 +9,10 @@
 import type { MailMessage } from "./mailer";
 
 export function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string);
+  return value.replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string
+  );
 }
 
 export function layout(network: string, title: string, bodyHtml: string): string {
@@ -33,16 +36,29 @@ export function verifyEmail(network: string, to: string, name: string, link: str
     to,
     subject,
     text: `Hi ${name},\n\nConfirm your email address to finish setting up your account:\n${link}\n\nThe link expires in 24 hours.`,
-    html: layout(network, "Confirm your email", `<p>Hi ${escapeHtml(name)},</p><p>Confirm your email address to finish setting up your account.</p>${button(link, "Confirm email")}<p style="font-size:13px;color:#64748b">The link expires in 24 hours. If you did not sign up, ignore this email.</p>`),
+    html: layout(
+      network,
+      "Confirm your email",
+      `<p>Hi ${escapeHtml(name)},</p><p>Confirm your email address to finish setting up your account.</p>${button(link, "Confirm email")}<p style="font-size:13px;color:#64748b">The link expires in 24 hours. If you did not sign up, ignore this email.</p>`
+    ),
   };
 }
 
-export function resetPassword(network: string, to: string, name: string, link: string): MailMessage {
+export function resetPassword(
+  network: string,
+  to: string,
+  name: string,
+  link: string
+): MailMessage {
   return {
     to,
     subject: `Reset your ${network} password`,
     text: `Hi ${name},\n\nReset your password here:\n${link}\n\nThe link expires in 1 hour. If you did not ask for this, ignore this email.`,
-    html: layout(network, "Reset your password", `<p>Hi ${escapeHtml(name)},</p><p>Someone asked to reset the password on your account.</p>${button(link, "Choose a new password")}<p style="font-size:13px;color:#64748b">The link expires in 1 hour. If it was not you, ignore this email; your password is unchanged.</p>`),
+    html: layout(
+      network,
+      "Reset your password",
+      `<p>Hi ${escapeHtml(name)},</p><p>Someone asked to reset the password on your account.</p>${button(link, "Choose a new password")}<p style="font-size:13px;color:#64748b">The link expires in 1 hour. If it was not you, ignore this email; your password is unchanged.</p>`
+    ),
   };
 }
 
@@ -51,6 +67,10 @@ export function adminWelcome(network: string, to: string, name: string, link: st
     to,
     subject: `Set your ${network} administrator password`,
     text: `Hi ${name},\n\nAn administrator account was created for you. Choose your password here:\n${link}\n\nThe link expires in 1 hour.`,
-    html: layout(network, "Set your administrator password", `<p>Hi ${escapeHtml(name)},</p><p>An administrator account was created for you.</p>${button(link, "Choose a password")}<p style="font-size:13px;color:#64748b">The link expires in 1 hour.</p>`),
+    html: layout(
+      network,
+      "Set your administrator password",
+      `<p>Hi ${escapeHtml(name)},</p><p>An administrator account was created for you.</p>${button(link, "Choose a password")}<p style="font-size:13px;color:#64748b">The link expires in 1 hour.</p>`
+    ),
   };
 }

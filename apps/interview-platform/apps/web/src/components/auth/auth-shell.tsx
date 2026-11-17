@@ -11,7 +11,10 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
       <main id="main" className="flex flex-1 flex-col items-center justify-center px-4 py-10">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
           <Wordmark />
-          <p className="max-w-[360px] text-[13.5px] text-muted-foreground">{name} is your private AI assistant: any model, web search with sources, files, images and memory.</p>
+          <p className="max-w-[360px] text-[13.5px] text-muted-foreground">
+            {name} is your private AI assistant: any model, web search with sources, files, images
+            and memory.
+          </p>
         </div>
         {/* Forms are not wrapped in cards (DESIGN.md rule 2): a calm column on the page ground. */}
         <div className="w-full max-w-[400px] border-t border-border pt-8">{children}</div>
@@ -28,16 +31,32 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function AuthHeading({ title, description }: { title: string; description?: React.ReactNode }) {
+export function AuthHeading({
+  title,
+  description,
+}: {
+  title: string;
+  description?: React.ReactNode;
+}) {
   return (
     <div className="mb-6">
-      <h1 className="font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.02em]">{title}</h1>
-      {description ? <p className="mt-1.5 text-[14.5px] text-muted-foreground">{description}</p> : null}
+      <h1 className="font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.02em]">
+        {title}
+      </h1>
+      {description ? (
+        <p className="mt-1.5 text-[14.5px] text-muted-foreground">{description}</p>
+      ) : null}
     </div>
   );
 }
 
-export function FormAlert({ tone = "danger", children }: { tone?: "danger" | "success" | "info"; children: React.ReactNode }) {
+export function FormAlert({
+  tone = "danger",
+  children,
+}: {
+  tone?: "danger" | "success" | "info";
+  children: React.ReactNode;
+}) {
   const cls =
     tone === "danger"
       ? "border-danger/20 bg-danger-soft text-danger-soft-foreground"

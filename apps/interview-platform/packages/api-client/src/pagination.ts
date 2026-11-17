@@ -27,7 +27,10 @@ export function flattenAll<T>(pages: readonly Page<T>[] | undefined): T[] {
  * Walk a cursor-paginated endpoint until it is exhausted or `max` items are
  * collected. For small lists that a screen needs in full.
  */
-export async function collectPages<T>(fetchPage: (cursor: string | undefined) => Promise<Page<T>>, max = 500): Promise<T[]> {
+export async function collectPages<T>(
+  fetchPage: (cursor: string | undefined) => Promise<Page<T>>,
+  max = 500
+): Promise<T[]> {
   const out: T[] = [];
   let cursor: string | undefined;
   for (let guard = 0; guard < 100; guard++) {

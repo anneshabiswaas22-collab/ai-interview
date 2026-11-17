@@ -23,12 +23,22 @@ export const TRANSCRIPTION_LANGUAGES: { code: string; name: string }[] = [
 
 /** The language list, with a saved code that is not on it kept as its own entry so the select never lies. */
 export function languageOptions(current: string): { code: string; name: string }[] {
-  return TRANSCRIPTION_LANGUAGES.some((l) => l.code === current) ? TRANSCRIPTION_LANGUAGES : [...TRANSCRIPTION_LANGUAGES, { code: current, name: current.toUpperCase() }];
+  return TRANSCRIPTION_LANGUAGES.some((l) => l.code === current)
+    ? TRANSCRIPTION_LANGUAGES
+    : [...TRANSCRIPTION_LANGUAGES, { code: current, name: current.toUpperCase() }];
 }
 
 /** The voice model that runs your interviews: your pick while it is still offered, else the deployment's default, else the first. */
-export function effectiveModel(models: readonly RealtimeModelOption[], prefs: Pick<Preferences, "defaultRealtimeModelId">): RealtimeModelOption | null {
-  return models.find((m) => m.id === prefs.defaultRealtimeModelId) ?? models.find((m) => m.isDefault) ?? models[0] ?? null;
+export function effectiveModel(
+  models: readonly RealtimeModelOption[],
+  prefs: Pick<Preferences, "defaultRealtimeModelId">
+): RealtimeModelOption | null {
+  return (
+    models.find((m) => m.id === prefs.defaultRealtimeModelId) ??
+    models.find((m) => m.isDefault) ??
+    models[0] ??
+    null
+  );
 }
 
 /** The voice the room will use with this model: yours when the model offers it, else the model's first (as the server does). */
@@ -38,7 +48,11 @@ export function effectiveVoice(model: RealtimeModelOption | null, voice: string)
 }
 
 /** The preference change for picking a model: the voice follows when the new model does not offer it. */
-export function modelPatch(models: readonly RealtimeModelOption[], id: string | null, voice: string): Partial<Preferences> {
+export function modelPatch(
+  models: readonly RealtimeModelOption[],
+  id: string | null,
+  voice: string
+): Partial<Preferences> {
   const next = effectiveModel(models, { defaultRealtimeModelId: id });
   const v = effectiveVoice(next, voice);
   return v === voice ? { defaultRealtimeModelId: id } : { defaultRealtimeModelId: id, voice: v };
@@ -50,7 +64,11 @@ export function voiceLabel(v: string): string {
 }
 
 /** "No expiry", "Expired" or "Expires Mar 4, 2026". */
-export function expiryLabel(s: Pick<ShareSummary, "expiresAt">, now = Date.now(), locale?: string): string {
+export function expiryLabel(
+  s: Pick<ShareSummary, "expiresAt">,
+  now = Date.now(),
+  locale?: string
+): string {
   if (!s.expiresAt) return "No expiry";
   const t = new Date(s.expiresAt);
   if (Number.isNaN(t.getTime())) return "No expiry";

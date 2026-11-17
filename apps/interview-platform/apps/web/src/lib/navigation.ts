@@ -10,7 +10,8 @@ export function safeNext(raw: string | null | undefined, fallback = "/"): string
   if (!v.startsWith("/") || v.startsWith("//") || v.startsWith("/\\")) return fallback;
   if (/[\u0000-\u001f]/.test(v)) return fallback;
   // Do not bounce back into the auth pages.
-  if (/^\/(login|signup|verify-email|forgot-password|reset-password)(\/|\?|$)/.test(v)) return fallback;
+  if (/^\/(login|signup|verify-email|forgot-password|reset-password)(\/|\?|$)/.test(v))
+    return fallback;
   return v;
 }
 
@@ -37,7 +38,8 @@ export function takeAfterVerify(now = Date.now()): string {
     window.localStorage.removeItem(AFTER_VERIFY_KEY);
     if (!raw) return "/";
     const v = JSON.parse(raw) as { next?: unknown; at?: unknown };
-    if (typeof v.next !== "string" || typeof v.at !== "number" || now - v.at > AFTER_VERIFY_TTL_MS) return "/";
+    if (typeof v.next !== "string" || typeof v.at !== "number" || now - v.at > AFTER_VERIFY_TTL_MS)
+      return "/";
     return safeNext(v.next);
   } catch {
     return "/";

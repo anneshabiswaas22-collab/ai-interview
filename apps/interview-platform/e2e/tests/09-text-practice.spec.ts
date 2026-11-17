@@ -1,11 +1,24 @@
 import { expect, test } from "@playwright/test";
 import { as, jdInterview, newUser, pageFor, waitForScores } from "../helpers";
 
-test("text practice asks for consent, survives a reload, and opens the report", async ({ browser, request }) => {
+test("text practice asks for consent, survives a reload, and opens the report", async ({
+  browser,
+  request,
+}) => {
   const user = await newUser(request);
   const iv = await jdInterview(request, user);
   const questions = ["Tell me about a project you built.", "How did you measure the result?"];
-  await as(request, user, "PATCH", `/interviews/${iv.id}`, { proctoring: true, plan: [{ name: "Practice", focus: "", description: "", questions: questions.map((text) => ({ text, code: false, language: null })) }] });
+  await as(request, user, "PATCH", `/interviews/${iv.id}`, {
+    proctoring: true,
+    plan: [
+      {
+        name: "Practice",
+        focus: "",
+        description: "",
+        questions: questions.map((text) => ({ text, code: false, language: null })),
+      },
+    ],
+  });
   const page = await pageFor(browser, user, `/i/${iv.id}`);
   await page.getByRole("button", { name: "Practice by typing" }).click();
   await expect(page.getByRole("button", { name: "Start text practice" })).toBeDisabled();

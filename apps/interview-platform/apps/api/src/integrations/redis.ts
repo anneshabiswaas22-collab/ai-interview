@@ -26,7 +26,12 @@ export function redisConnection(): Redis {
 /** Queue producers fail fast so committed work can remain in the database outbox. */
 export function redisProducerConnection(url = config.REDIS_URL): Redis {
   // The queue registry owns and closes this connection.
-  return new Redis(url, { ...base, maxRetriesPerRequest: 1, enableOfflineQueue: false, retryStrategy: (n) => (n <= 2 ? n * 100 : null) });
+  return new Redis(url, {
+    ...base,
+    maxRetriesPerRequest: 1,
+    enableOfflineQueue: false,
+    retryStrategy: (n) => (n <= 2 ? n * 100 : null),
+  });
 }
 
 /** A fresh client owned by the caller (a BullMQ queue or worker). */
@@ -41,13 +46,19 @@ export function newRedisClient(): Redis {
  * so ioredis's ready check (an INFO) must be off; channels are re-subscribed after a reconnect.
  */
 export function newSubscriberClient(): Redis {
-  const conn = new Redis(config.REDIS_URL, { lazyConnect: false, enableReadyCheck: false, autoResubscribe: true });
+  const conn = new Redis(config.REDIS_URL, {
+    lazyConnect: false,
+    enableReadyCheck: false,
+    autoResubscribe: true,
+  });
   extra.push(conn);
   return conn;
 }
 
 export async function closeRedis(): Promise<void> {
-  await Promise.all([shared, ...extra].filter(Boolean).map((c) => (c as Redis).quit().catch(() => undefined)));
+  await Promise.all(
+    [shared, ...extra].filter(Boolean).map((c) => (c as Redis).quit().catch(() => undefined))
+  );
   shared = null;
   extra.length = 0;
 }

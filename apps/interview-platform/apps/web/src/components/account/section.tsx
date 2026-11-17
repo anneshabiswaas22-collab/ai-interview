@@ -21,9 +21,14 @@ export function AccountSection({
   testId?: string;
 }) {
   return (
-    <section className={cn("border-b border-border py-8 first:pt-0 last:border-b-0", className)} data-testid={testId}>
+    <section
+      className={cn("border-b border-border py-8 first:pt-0 last:border-b-0", className)}
+      data-testid={testId}
+    >
       <h2 className="font-display text-[20px] font-semibold tracking-[-0.01em]">{title}</h2>
-      {description ? <p className="mt-1 max-w-[620px] text-[14px] text-muted-foreground">{description}</p> : null}
+      {description ? (
+        <p className="mt-1 max-w-[620px] text-[14px] text-muted-foreground">{description}</p>
+      ) : null}
       {children ? <div className="mt-5">{children}</div> : null}
       {actions ? <div className="mt-5 flex flex-wrap items-center gap-2">{actions}</div> : null}
     </section>
@@ -34,8 +39,12 @@ export function AccountSection({
 export function SectionTitle({ title, lead }: { title: string; lead?: ReactNode }) {
   return (
     <div className="mb-6">
-      <h1 className="font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.02em]">{title}</h1>
-      {lead ? <p className="mt-1.5 max-w-[620px] text-[14.5px] text-muted-foreground">{lead}</p> : null}
+      <h1 className="font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.02em]">
+        {title}
+      </h1>
+      {lead ? (
+        <p className="mt-1.5 max-w-[620px] text-[14.5px] text-muted-foreground">{lead}</p>
+      ) : null}
     </div>
   );
 }

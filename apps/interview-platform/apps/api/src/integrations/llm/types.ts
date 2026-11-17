@@ -4,7 +4,8 @@
  * layer knows which provider answered.
  */
 
-export type LlmPart = { type: "text"; text: string } | { type: "image"; data: string; mimeType: string };
+export type LlmPart =
+  { type: "text"; text: string } | { type: "image"; data: string; mimeType: string };
 
 export interface LlmToolCall {
   id: string;

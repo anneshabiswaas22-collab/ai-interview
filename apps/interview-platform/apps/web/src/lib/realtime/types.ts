@@ -34,4 +34,5 @@ export interface RealtimeTransport {
   close(): void;
 }
 
-export const BLOCKED_NETWORK = "The voice connection could not be opened. This is usually a VPN, firewall or network that blocks real-time audio; try another network (a phone hotspot works well) and retry.";
+export const BLOCKED_NETWORK =
+  "The voice connection could not be opened. This is usually a VPN, firewall or network that blocks real-time audio; try another network (a phone hotspot works well) and retry.";

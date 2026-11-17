@@ -39,12 +39,15 @@ export async function generateJson<S extends z.ZodTypeAny>(call: JsonCall<S>): P
             { role: "system", content: call.system },
             { role: "user", content: [{ type: "text", text: call.user }] },
           ],
-          maxOutputTokens: Math.min(call.maxOutputTokens ?? 8192, call.model.model.max_output_tokens),
+          maxOutputTokens: Math.min(
+            call.maxOutputTokens ?? 8192,
+            call.model.model.max_output_tokens
+          ),
           temperature: call.temperature,
           json: true,
           signal: call.signal,
         },
-        call.model.endpoint,
+        call.model.endpoint
       )) {
         if (ev.type === "text") text += ev.text;
         else if (ev.type === "usage") {
@@ -58,10 +61,23 @@ export async function generateJson<S extends z.ZodTypeAny>(call: JsonCall<S>): P
     }
     throw new ModelOutputError("The model did not return the expected format");
   } catch (err) {
-    if (!(err instanceof ModelOutputError)) captureError(err, { where: "interview.ai", provider: call.model.endpoint.provider });
-    throw err instanceof ModelOutputError ? err : new ModelOutputError(lastError ? "The model did not return the expected format" : "The model could not be reached");
+    if (!(err instanceof ModelOutputError))
+      captureError(err, { where: "interview.ai", provider: call.model.endpoint.provider });
+    throw err instanceof ModelOutputError
+      ? err
+      : new ModelOutputError(
+          lastError
+            ? "The model did not return the expected format"
+            : "The model could not be reached"
+        );
   } finally {
-    await recordUsage({ userId: call.userId, modelId: call.model.model.id, calls, inputTokens, outputTokens }).catch((e) => captureError(e, { where: "interview.ai.usage" }));
+    await recordUsage({
+      userId: call.userId,
+      modelId: call.model.model.id,
+      calls,
+      inputTokens,
+      outputTokens,
+    }).catch((e) => captureError(e, { where: "interview.ai.usage" }));
   }
 }
 

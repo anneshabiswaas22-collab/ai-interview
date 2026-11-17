@@ -4,7 +4,11 @@ import type { AuthResult } from "@open-conversation/types";
 import { refreshDelay, session } from "@/lib/session";
 import { me } from "../fixtures";
 
-const result = (token: string, expiresIn = 900): AuthResult => ({ accessToken: token, expiresIn, user: me });
+const result = (token: string, expiresIn = 900): AuthResult => ({
+  accessToken: token,
+  expiresIn,
+  user: me,
+});
 
 afterEach(() => session.clear());
 
@@ -54,14 +58,34 @@ describe("refresh flow with the app session", () => {
       const auth = (init.headers as Record<string, string>).Authorization;
       if (url.endsWith("/auth/refresh")) {
         return refreshOk
-          ? new Response(JSON.stringify(result(`t${fetchMock.mock.calls.length}`)), { status: 200, headers: { "content-type": "application/json" } })
-          : new Response(JSON.stringify({ error: "Session expired", code: "SESSION_EXPIRED" }), { status: 401, headers: { "content-type": "application/json" } });
+          ? new Response(JSON.stringify(result(`t${fetchMock.mock.calls.length}`)), {
+              status: 200,
+              headers: { "content-type": "application/json" },
+            })
+          : new Response(JSON.stringify({ error: "Session expired", code: "SESSION_EXPIRED" }), {
+              status: 401,
+              headers: { "content-type": "application/json" },
+            });
       }
-      if (auth === "Bearer stale") return new Response(JSON.stringify({ error: "x", code: "TOKEN_INVALID" }), { status: 401, headers: { "content-type": "application/json" } });
-      return new Response(JSON.stringify(me), { status: 200, headers: { "content-type": "application/json" } });
+      if (auth === "Bearer stale")
+        return new Response(JSON.stringify({ error: "x", code: "TOKEN_INVALID" }), {
+          status: 401,
+          headers: { "content-type": "application/json" },
+        });
+      return new Response(JSON.stringify(me), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
     });
     const onSignedOut = vi.fn(() => session.clear());
-    const client = createApiClient({ baseUrl: "/api", getAccessToken: session.getToken, onRefresh: (r) => session.apply(r), onSignedOut, fetch: fetchMock as unknown as typeof fetch, crossTabLock: (fn) => fn() });
+    const client = createApiClient({
+      baseUrl: "/api",
+      getAccessToken: session.getToken,
+      onRefresh: (r) => session.apply(r),
+      onSignedOut,
+      fetch: fetchMock as unknown as typeof fetch,
+      crossTabLock: (fn) => fn(),
+    });
 
     await client.refreshSession();
     expect(session.getSnapshot().status).toBe("signed-in");
@@ -69,7 +93,9 @@ describe("refresh flow with the app session", () => {
     session.apply(result("stale"));
     await expect(client.auth.me()).resolves.toMatchObject({ id: "me" });
     expect(session.getToken()).not.toBe("stale");
-    expect(fetchMock.mock.calls.every(([, init]) => (init as RequestInit).credentials !== "omit")).toBe(true);
+    expect(
+      fetchMock.mock.calls.every(([, init]) => (init as RequestInit).credentials !== "omit")
+    ).toBe(true);
 
     refreshOk = false;
     session.apply(result("stale"));

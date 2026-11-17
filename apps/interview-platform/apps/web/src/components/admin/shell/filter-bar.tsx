@@ -23,25 +23,69 @@ export interface FilterBarProps<V extends string> {
 
 /** Underline tabs on the left, one search field (and optional controls) on the right. */
 export function FilterBar<V extends string>({
-  tabs, tab, onTabChange, tabsLabel = "Filter", search, onSearchChange, searchPlaceholder = "Search", debounceMs = 300, children, className, testId = "filter-bar",
+  tabs,
+  tab,
+  onTabChange,
+  tabsLabel = "Filter",
+  search,
+  onSearchChange,
+  searchPlaceholder = "Search",
+  debounceMs = 300,
+  children,
+  className,
+  testId = "filter-bar",
 }: FilterBarProps<V>) {
   return (
-    <div className={cn("flex flex-col gap-3 border-b border-border md:flex-row md:items-end md:justify-between", className)} data-testid={testId}>
+    <div
+      className={cn(
+        "flex flex-col gap-3 border-b border-border md:flex-row md:items-end md:justify-between",
+        className
+      )}
+      data-testid={testId}
+    >
       {tabs && tab !== undefined ? (
-        <UnderlineTabs tabs={tabs} value={tab} onChange={onTabChange} label={tabsLabel} className="min-w-0 border-b-0" />
+        <UnderlineTabs
+          tabs={tabs}
+          value={tab}
+          onChange={onTabChange}
+          label={tabsLabel}
+          className="min-w-0 border-b-0"
+        />
       ) : (
         <span />
       )}
       <div className="flex flex-wrap items-center gap-2 pb-2.5">
         {children}
-        {onSearchChange ? <SearchInput value={search ?? ""} onChange={onSearchChange} placeholder={searchPlaceholder} debounceMs={debounceMs} testId={`${testId}-search`} /> : null}
+        {onSearchChange ? (
+          <SearchInput
+            value={search ?? ""}
+            onChange={onSearchChange}
+            placeholder={searchPlaceholder}
+            debounceMs={debounceMs}
+            testId={`${testId}-search`}
+          />
+        ) : null}
       </div>
     </div>
   );
 }
 
 /** A search field that keeps its own text and reports it debounced. */
-export function SearchInput({ value, onChange, placeholder, debounceMs = 300, testId, className }: { value: string; onChange: (v: string) => void; placeholder: string; debounceMs?: number; testId?: string; className?: string }) {
+export function SearchInput({
+  value,
+  onChange,
+  placeholder,
+  debounceMs = 300,
+  testId,
+  className,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  debounceMs?: number;
+  testId?: string;
+  className?: string;
+}) {
   const [text, setText] = useState(value);
   const last = useRef(value);
   useEffect(() => {
@@ -61,7 +105,10 @@ export function SearchInput({ value, onChange, placeholder, debounceMs = 300, te
   }, [text, debounceMs, onChange]);
   return (
     <div className={cn("relative w-full sm:w-64", className)}>
-      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground" aria-hidden />
+      <Search
+        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-subtle-foreground"
+        aria-hidden
+      />
       <input
         type="search"
         value={text}

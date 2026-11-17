@@ -19,7 +19,11 @@ interface ShellState {
   open: () => void;
 }
 
-const ShellContext = createContext<ShellState>({ collapsed: false, mobile: false, open: () => undefined });
+const ShellContext = createContext<ShellState>({
+  collapsed: false,
+  mobile: false,
+  open: () => undefined,
+});
 export const useShell = () => useContext(ShellContext);
 
 function useIsMobile(): boolean {
@@ -56,17 +60,33 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <RequireAuth>
-      <ShellContext.Provider value={{ collapsed, mobile, open: () => (mobile ? setSheet(true) : setCollapsedSaved(false)) }}>
+      <ShellContext.Provider
+        value={{
+          collapsed,
+          mobile,
+          open: () => (mobile ? setSheet(true) : setCollapsedSaved(false)),
+        }}
+      >
         <div className="flex h-dvh overflow-hidden">
           {!mobile ? (
-            <aside className={cn("shrink-0 border-r border-border transition-[width] duration-200", collapsed ? "w-0 overflow-hidden border-r-0" : "w-[272px]")}>
+            <aside
+              className={cn(
+                "shrink-0 border-r border-border transition-[width] duration-200",
+                collapsed ? "w-0 overflow-hidden border-r-0" : "w-[272px]"
+              )}
+            >
               <div className="h-full w-[272px]">
                 <Sidebar onCollapse={() => setCollapsedSaved(true)} />
               </div>
             </aside>
           ) : (
             <Sheet open={sheet} onOpenChange={setSheet}>
-              <SheetContent side="left" width="max-w-[300px]" className="w-[86vw] p-0" aria-label="Interviews">
+              <SheetContent
+                side="left"
+                width="max-w-[300px]"
+                className="w-[86vw] p-0"
+                aria-label="Interviews"
+              >
                 <Sidebar onNavigate={() => setSheet(false)} />
               </SheetContent>
             </Sheet>
@@ -86,11 +106,18 @@ export function PageBar({ title, actions }: { title?: ReactNode; actions?: React
   return (
     <div className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-transparent bg-background/90 px-4 backdrop-blur sm:px-6">
       {collapsed || mobile ? (
-        <button type="button" onClick={open} aria-label="Open sidebar" className="-ml-1 inline-flex size-9 items-center justify-center rounded-lg text-subtle-foreground hover:bg-muted hover:text-foreground">
+        <button
+          type="button"
+          onClick={open}
+          aria-label="Open sidebar"
+          className="-ml-1 inline-flex size-9 items-center justify-center rounded-lg text-subtle-foreground hover:bg-muted hover:text-foreground"
+        >
           <Menu className="size-[18px]" />
         </button>
       ) : null}
-      <div className="min-w-0 flex-1 truncate text-[14px] font-medium text-muted-foreground">{title}</div>
+      <div className="min-w-0 flex-1 truncate text-[14px] font-medium text-muted-foreground">
+        {title}
+      </div>
       {actions}
     </div>
   );

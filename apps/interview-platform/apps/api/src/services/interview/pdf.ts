@@ -25,7 +25,11 @@ function latin(text: string): string {
 
 export function renderReportPdf(report: InterviewReport, appName: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", margin: 56, info: { Title: latin(report.interview.title), Producer: latin(appName) } });
+    const doc = new PDFDocument({
+      size: "A4",
+      margin: 56,
+      info: { Title: latin(report.interview.title), Producer: latin(appName) },
+    });
     const chunks: Buffer[] = [];
     doc.on("data", (c: Buffer) => chunks.push(c));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
@@ -34,7 +38,12 @@ export function renderReportPdf(report: InterviewReport, appName: string): Promi
     const width = doc.page.width - 112;
     const rule = () => {
       doc.moveDown(0.6);
-      doc.strokeColor(RULE).lineWidth(0.5).moveTo(56, doc.y).lineTo(56 + width, doc.y).stroke();
+      doc
+        .strokeColor(RULE)
+        .lineWidth(0.5)
+        .moveTo(56, doc.y)
+        .lineTo(56 + width, doc.y)
+        .stroke();
       doc.moveDown(0.6);
     };
 
@@ -42,22 +51,44 @@ export function renderReportPdf(report: InterviewReport, appName: string): Promi
     doc.moveDown(0.3);
     doc.fillColor(INK).font("Helvetica-Bold").fontSize(20).text(latin(report.interview.title));
     doc.font("Helvetica").fontSize(10).fillColor(MUTED);
-    const facts = [report.candidateName, report.interview.role, report.interview.company, new Date(report.interview.createdAt).toUTCString().slice(5, 16)].filter(Boolean).join("  |  ");
+    const facts = [
+      report.candidateName,
+      report.interview.role,
+      report.interview.company,
+      new Date(report.interview.createdAt).toUTCString().slice(5, 16),
+    ]
+      .filter(Boolean)
+      .join("  |  ");
     doc.text(latin(facts));
     rule();
 
     doc.fillColor(INK).font("Helvetica-Bold").fontSize(11).text("Overall");
     doc.font("Helvetica").fontSize(10).fillColor(INK);
-    doc.text(`Overall ${rating(report.overallRating)}    Domain knowledge ${rating(report.domainRating)}    Communication ${rating(report.communicationRating)}`);
-    doc.fillColor(MUTED).text("Practice feedback can be inaccurate and is not a validated hiring decision.");
-    doc.text(`${report.interview.answeredCount} of ${report.interview.questionCount} questions answered, ${Math.round(report.voiceSeconds / 60)} min of live voice`);
+    doc.text(
+      `Overall ${rating(report.overallRating)}    Domain knowledge ${rating(report.domainRating)}    Communication ${rating(report.communicationRating)}`
+    );
+    doc
+      .fillColor(MUTED)
+      .text("Practice feedback can be inaccurate and is not a validated hiring decision.");
+    doc.text(
+      `${report.interview.answeredCount} of ${report.interview.questionCount} questions answered, ${Math.round(report.voiceSeconds / 60)} min of live voice`
+    );
     rule();
 
     doc.fillColor(INK).font("Helvetica-Bold").fontSize(11).text("Rounds");
     doc.moveDown(0.3);
     for (const r of report.rounds) {
-      doc.font("Helvetica-Bold").fontSize(10).fillColor(INK).text(latin(r.name), { continued: true });
-      doc.font("Helvetica").fillColor(MUTED).text(`   overall ${rating(r.overallRating)}, domain ${rating(r.domainRating)}, communication ${rating(r.communicationRating)}, ${r.answeredCount}/${r.questionCount} answered`);
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(10)
+        .fillColor(INK)
+        .text(latin(r.name), { continued: true });
+      doc
+        .font("Helvetica")
+        .fillColor(MUTED)
+        .text(
+          `   overall ${rating(r.overallRating)}, domain ${rating(r.domainRating)}, communication ${rating(r.communicationRating)}, ${r.answeredCount}/${r.questionCount} answered`
+        );
     }
     rule();
 
@@ -66,17 +97,34 @@ export function renderReportPdf(report: InterviewReport, appName: string): Promi
       if (q.round !== currentRound) {
         currentRound = q.round;
         doc.moveDown(0.4);
-        doc.fillColor(INK).font("Helvetica-Bold").fontSize(12).text(latin(report.rounds[q.round]?.name ?? `Round ${q.round + 1}`));
+        doc
+          .fillColor(INK)
+          .font("Helvetica-Bold")
+          .fontSize(12)
+          .text(latin(report.rounds[q.round]?.name ?? `Round ${q.round + 1}`));
         doc.moveDown(0.3);
       }
-      doc.font("Helvetica-Bold").fontSize(10).fillColor(INK).text(latin(`Q${q.question + 1}. ${q.text}`), { width });
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(10)
+        .fillColor(INK)
+        .text(latin(`Q${q.question + 1}. ${q.text}`), { width });
       const a = q.answer;
       doc.font("Helvetica").fontSize(9.5).fillColor(MUTED);
       if (!a) doc.text("Not answered.");
-      else if (a.status !== "SCORED") doc.text(a.status === "FAILED" ? "Could not be scored." : "Being scored.");
+      else if (a.status !== "SCORED")
+        doc.text(a.status === "FAILED" ? "Could not be scored." : "Being scored.");
       else {
-        doc.text(`Domain ${rating(a.domainRating)}, communication ${rating(a.communicationRating)}`);
-        doc.text(a.evaluationSource === "simulated" ? "Simulated demo feedback, not an assessment of ability." : a.evaluationSource === "configured_provider" ? "Provider-generated feedback." : "Feedback source unknown.");
+        doc.text(
+          `Domain ${rating(a.domainRating)}, communication ${rating(a.communicationRating)}`
+        );
+        doc.text(
+          a.evaluationSource === "simulated"
+            ? "Simulated demo feedback, not an assessment of ability."
+            : a.evaluationSource === "configured_provider"
+              ? "Provider-generated feedback."
+              : "Feedback source unknown."
+        );
         const f = a.feedback;
         if (f) {
           doc.fillColor(INK);
@@ -89,7 +137,14 @@ export function renderReportPdf(report: InterviewReport, appName: string): Promi
           list("Strengths", f.strengths);
           list("To improve", f.weaknesses);
           list("Try next time", f.suggestions);
-          if (f.correctedSnippet) doc.moveDown(0.2).font("Courier").fontSize(8.5).text(latin(f.correctedSnippet), { width }).font("Helvetica").fontSize(9.5);
+          if (f.correctedSnippet)
+            doc
+              .moveDown(0.2)
+              .font("Courier")
+              .fontSize(8.5)
+              .text(latin(f.correctedSnippet), { width })
+              .font("Helvetica")
+              .fontSize(9.5);
         }
       }
       doc.moveDown(0.7);
@@ -99,7 +154,8 @@ export function renderReportPdf(report: InterviewReport, appName: string): Promi
       rule();
       doc.fillColor(INK).font("Helvetica-Bold").fontSize(11).text("Proctoring");
       doc.font("Helvetica").fontSize(9.5).fillColor(MUTED);
-      for (const e of report.proctoring.events.slice(0, 100)) doc.text(`${e.occurredAt.slice(11, 19)} UTC  ${e.kind.replace(/_/g, " ").toLowerCase()}`);
+      for (const e of report.proctoring.events.slice(0, 100))
+        doc.text(`${e.occurredAt.slice(11, 19)} UTC  ${e.kind.replace(/_/g, " ").toLowerCase()}`);
     }
     doc.end();
   });

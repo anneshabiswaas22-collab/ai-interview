@@ -15,7 +15,10 @@ const VERSION = "2023-06-01";
 
 export const anthropic: LlmAdapter = {
   async *stream(req: LlmRequest, endpoint: Endpoint): AsyncGenerator<LlmEvent> {
-    const system = req.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
+    const system = req.messages
+      .filter((m) => m.role === "system")
+      .map((m) => m.content)
+      .join("\n\n");
     const body: Record<string, unknown> = {
       model: req.model,
       max_tokens: req.maxOutputTokens,
@@ -24,14 +27,28 @@ export const anthropic: LlmAdapter = {
     };
     if (system) body.system = system;
     if (req.temperature !== undefined) body.temperature = req.temperature;
-    if (req.tools?.length) body.tools = req.tools.map((t) => ({ name: t.name, description: t.description, input_schema: t.parameters }));
+    if (req.tools?.length)
+      body.tools = req.tools.map((t) => ({
+        name: t.name,
+        description: t.description,
+        input_schema: t.parameters,
+      }));
 
-    const res = await providerFetch(endpoint.provider, `${endpoint.baseUrl.replace(/\/$/, "")}/v1/messages`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "text/event-stream", "anthropic-version": VERSION, ...(endpoint.apiKey ? { "x-api-key": endpoint.apiKey } : {}) },
-      body: JSON.stringify(body),
-      signal: withTimeout(req.signal, 180_000),
-    });
+    const res = await providerFetch(
+      endpoint.provider,
+      `${endpoint.baseUrl.replace(/\/$/, "")}/v1/messages`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+          "anthropic-version": VERSION,
+          ...(endpoint.apiKey ? { "x-api-key": endpoint.apiKey } : {}),
+        },
+        body: JSON.stringify(body),
+        signal: withTimeout(req.signal, 180_000),
+      }
+    );
 
     const blocks = new Map<number, { id: string; name: string; json: string }>();
     let input = 0;
@@ -50,11 +67,18 @@ export const anthropic: LlmAdapter = {
           output = e.message?.usage?.output_tokens ?? 0;
           break;
         case "content_block_start":
-          if (e.content_block?.type === "tool_use") blocks.set(e.index ?? 0, { id: e.content_block.id ?? "", name: e.content_block.name ?? "", json: "" });
+          if (e.content_block?.type === "tool_use")
+            blocks.set(e.index ?? 0, {
+              id: e.content_block.id ?? "",
+              name: e.content_block.name ?? "",
+              json: "",
+            });
           break;
         case "content_block_delta":
-          if (e.delta?.type === "text_delta" && e.delta.text) yield { type: "text", text: e.delta.text };
-          else if (e.delta?.type === "thinking_delta" && e.delta.thinking) yield { type: "reasoning", text: e.delta.thinking };
+          if (e.delta?.type === "text_delta" && e.delta.text)
+            yield { type: "text", text: e.delta.text };
+          else if (e.delta?.type === "thinking_delta" && e.delta.thinking)
+            yield { type: "reasoning", text: e.delta.thinking };
           else if (e.delta?.type === "input_json_delta") {
             const b = blocks.get(e.index ?? 0);
             if (b) b.json += e.delta.partial_json ?? "";
@@ -82,7 +106,13 @@ interface AnthropicEvent {
   index?: number;
   message?: { usage?: { input_tokens?: number; output_tokens?: number } };
   content_block?: { type: string; id?: string; name?: string };
-  delta?: { type?: string; text?: string; thinking?: string; partial_json?: string; stop_reason?: string };
+  delta?: {
+    type?: string;
+    text?: string;
+    thinking?: string;
+    partial_json?: string;
+    stop_reason?: string;
+  };
   usage?: { output_tokens?: number };
 }
 
@@ -108,12 +138,17 @@ export function toWire(messages: LlmMessage[]): { role: "user" | "assistant"; co
     if (m.role === "user") {
       push(
         "user",
-        m.content.map((p) => (p.type === "text" ? { type: "text", text: p.text } : { type: "image", source: { type: "base64", media_type: p.mimeType, data: p.data } })),
+        m.content.map((p) =>
+          p.type === "text"
+            ? { type: "text", text: p.text }
+            : { type: "image", source: { type: "base64", media_type: p.mimeType, data: p.data } }
+        )
       );
     } else if (m.role === "assistant") {
       const blocks: Block[] = [];
       if (m.content) blocks.push({ type: "text", text: m.content });
-      for (const c of m.toolCalls ?? []) blocks.push({ type: "tool_use", id: c.id, name: c.name, input: safeJson(c.arguments) });
+      for (const c of m.toolCalls ?? [])
+        blocks.push({ type: "tool_use", id: c.id, name: c.name, input: safeJson(c.arguments) });
       if (blocks.length) push("assistant", blocks);
     } else if (m.role === "tool") {
       push("user", [{ type: "tool_result", tool_use_id: m.toolCallId, content: m.content }]);

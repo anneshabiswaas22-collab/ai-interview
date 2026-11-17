@@ -10,14 +10,23 @@ import { actorOf } from "../middleware/http";
 import * as interviews from "../services/interview/interview.service";
 import * as live from "../services/interview/live.service";
 import * as textPractice from "../services/interview/text-practice.service";
-import { CODE_LANGUAGES, MAX_JOB_DESCRIPTION_CHARS, MAX_QUESTION_CHARS, MAX_QUESTIONS_PER_ROUND, MAX_ROUNDS } from "../services/interview/plan";
+import {
+  CODE_LANGUAGES,
+  MAX_JOB_DESCRIPTION_CHARS,
+  MAX_QUESTION_CHARS,
+  MAX_QUESTIONS_PER_ROUND,
+  MAX_ROUNDS,
+} from "../services/interview/plan";
 import { renderReportPdf } from "../services/interview/pdf";
 import { getReport } from "../services/interview/report.service";
 import * as shares from "../services/share.service";
 import { appName, getSettings } from "../services/settings.service";
 
 /** The resume, in memory only (never written to disk). */
-export const resumeUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: config.MAX_RESUME_MB * 1024 * 1024, files: 1, fields: 4 } }).single("file");
+export const resumeUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: config.MAX_RESUME_MB * 1024 * 1024, files: 1, fields: 4 },
+}).single("file");
 
 const planInput = z
   .array(
@@ -26,18 +35,32 @@ const planInput = z
       focus: z.string().max(300).default(""),
       description: z.string().max(1000).default(""),
       questions: z
-        .array(z.object({ text: text(MAX_QUESTION_CHARS, 5), code: z.boolean().default(false), language: z.enum(CODE_LANGUAGES).nullable().default(null) }))
+        .array(
+          z.object({
+            text: text(MAX_QUESTION_CHARS, 5),
+            code: z.boolean().default(false),
+            language: z.enum(CODE_LANGUAGES).nullable().default(null),
+          })
+        )
         .min(1)
         .max(MAX_QUESTIONS_PER_ROUND),
-    }),
+    })
   )
   .min(1)
   .max(MAX_ROUNDS);
 
-const position = z.object({ round: z.number().int().min(0).max(MAX_ROUNDS), question: z.number().int().min(0).max(MAX_QUESTIONS_PER_ROUND) });
+const position = z.object({
+  round: z.number().int().min(0).max(MAX_ROUNDS),
+  question: z.number().int().min(0).max(MAX_QUESTIONS_PER_ROUND),
+});
 
 export async function list(req: Request, res: Response) {
-  const q = parse(pageQuery.extend({ status: z.enum(["PLANNING", "PLAN_FAILED", "READY", "IN_PROGRESS", "COMPLETED"]).optional() }), req.query);
+  const q = parse(
+    pageQuery.extend({
+      status: z.enum(["PLANNING", "PLAN_FAILED", "READY", "IN_PROGRESS", "COMPLETED"]).optional(),
+    }),
+    req.query
+  );
   res.json(await interviews.listInterviews(actorOf(req), q));
 }
 
@@ -50,19 +73,45 @@ export async function fromResume(req: Request, res: Response) {
   const file = req.file;
   if (!file) throw badRequest("Choose a resume to upload", "FILE_REQUIRED");
   const body = parse(z.object({ proctoring: z.enum(["true", "false"]).optional() }), req.body);
-  res.status(201).json(await interviews.createFromResume(actorOf(req), { data: file.buffer, name: file.originalname }, { proctoring: body.proctoring === "true" }));
+  res
+    .status(201)
+    .json(
+      await interviews.createFromResume(
+        actorOf(req),
+        { data: file.buffer, name: file.originalname },
+        { proctoring: body.proctoring === "true" }
+      )
+    );
 }
 
 export async function fromJobDescription(req: Request, res: Response) {
   const body = parse(
-    z.object({ company: text(120, 1), role: text(120, 2), jobDescription: text(MAX_JOB_DESCRIPTION_CHARS, 80), proctoring: z.boolean().optional() }).strict(),
-    req.body,
+    z
+      .object({
+        company: text(120, 1),
+        role: text(120, 2),
+        jobDescription: text(MAX_JOB_DESCRIPTION_CHARS, 80),
+        proctoring: z.boolean().optional(),
+      })
+      .strict(),
+    req.body
   );
   res.status(201).json(await interviews.createFromJobDescription(actorOf(req), body));
 }
 
 export async function update(req: Request, res: Response) {
-  const body = parse(z.object({ title: text(160, 1), plan: planInput, proctoring: z.boolean(), realtimeModelId: id().nullable() }).partial().strict(), req.body);
+  const body = parse(
+    z
+      .object({
+        title: text(160, 1),
+        plan: planInput,
+        proctoring: z.boolean(),
+        realtimeModelId: id().nullable(),
+      })
+      .partial()
+      .strict(),
+    req.body
+  );
   res.json(await interviews.updateInterview(actorOf(req), parse(idParam, req.params).id, body));
 }
 
@@ -92,9 +141,23 @@ export async function startTextPractice(req: Request, res: Response) {
 }
 
 export async function answerTextPractice(req: Request, res: Response) {
-  const body = parse(z.object({ requestId: z.string().uuid(), expectedVersion: z.number().int().positive(), text: text(8000, 1).refine((s) => !s.includes("\u0000"), "must not contain a null character") }).strict(), req.body);
+  const body = parse(
+    z
+      .object({
+        requestId: z.string().uuid(),
+        expectedVersion: z.number().int().positive(),
+        text: text(8000, 1).refine(
+          (s) => !s.includes("\u0000"),
+          "must not contain a null character"
+        ),
+      })
+      .strict(),
+    req.body
+  );
   res.setHeader("Cache-Control", "no-store");
-  res.json(await textPractice.answerTextPractice(actorOf(req), parse(idParam, req.params).id, body));
+  res.json(
+    await textPractice.answerTextPractice(actorOf(req), parse(idParam, req.params).id, body)
+  );
 }
 
 export async function startLive(req: Request, res: Response) {
@@ -113,15 +176,22 @@ export async function answer(req: Request, res: Response) {
   const body = parse(
     position
       .extend({
-        transcript: z.array(z.object({ role: z.enum(["interviewer", "candidate"]), text: z.string().max(8000) })).max(400).optional(),
+        transcript: z
+          .array(
+            z.object({ role: z.enum(["interviewer", "candidate"]), text: z.string().max(8000) })
+          )
+          .max(400)
+          .optional(),
         code: z.string().max(40_000).optional(),
         language: z.enum(CODE_LANGUAGES).optional(),
         advance: z.boolean().optional(),
       })
       .strict(),
-    req.body,
+    req.body
   );
-  res.status(202).json(await interviews.submitAnswer(actorOf(req), parse(idParam, req.params).id, body));
+  res
+    .status(202)
+    .json(await interviews.submitAnswer(actorOf(req), parse(idParam, req.params).id, body));
 }
 
 export async function proctorEvents(req: Request, res: Response) {
@@ -131,19 +201,28 @@ export async function proctorEvents(req: Request, res: Response) {
         events: z
           .array(
             z.object({
-              kind: z.enum(["NO_FACE", "MULTIPLE_FACES", "FACE_BACK", "TAB_HIDDEN", "TAB_VISIBLE", "CAMERA_OFF"]),
+              kind: z.enum([
+                "NO_FACE",
+                "MULTIPLE_FACES",
+                "FACE_BACK",
+                "TAB_HIDDEN",
+                "TAB_VISIBLE",
+                "CAMERA_OFF",
+              ]),
               occurredAt: z.string().datetime(),
               round: z.number().int().min(0).max(MAX_ROUNDS).optional(),
               question: z.number().int().min(0).max(MAX_QUESTIONS_PER_ROUND).optional(),
-            }),
+            })
           )
           .min(1)
           .max(100),
       })
       .strict(),
-    req.body,
+    req.body
   );
-  res.json(await interviews.recordProctorEvents(actorOf(req), parse(idParam, req.params).id, body.events));
+  res.json(
+    await interviews.recordProctorEvents(actorOf(req), parse(idParam, req.params).id, body.events)
+  );
 }
 
 export async function report(req: Request, res: Response) {
@@ -155,7 +234,12 @@ export async function reportPdf(req: Request, res: Response) {
   if (!(await getSettings()).features.pdfExport) throw notFound();
   const r = await getReport(actorOf(req), parse(idParam, req.params).id);
   const pdf = await renderReportPdf(r, await appName());
-  const name = r.interview.title.replace(/[^A-Za-z0-9 _-]/g, "").trim().replace(/\s+/g, "-").slice(0, 60) || "interview";
+  const name =
+    r.interview.title
+      .replace(/[^A-Za-z0-9 _-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .slice(0, 60) || "interview";
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", `attachment; filename="${name}-report.pdf"`);
   res.setHeader("Cache-Control", "no-store");
@@ -167,12 +251,21 @@ export async function reportPdf(req: Request, res: Response) {
 /** A malformed share id is just a link that does not exist. */
 function shareId(req: Request): string {
   const v = String(req.params.id ?? "");
-  if (!shares.SHARE_ID.test(v)) throw notFound("This link does not exist or was removed", "SHARE_NOT_FOUND");
+  if (!shares.SHARE_ID.test(v))
+    throw notFound("This link does not exist or was removed", "SHARE_NOT_FOUND");
   return v;
 }
 
 export async function createShare(req: Request, res: Response) {
-  const body = parse(z.object({ includeTranscript: z.boolean().optional(), expiresInDays: z.number().int().min(1).max(365).nullable().optional() }).strict(), req.body);
+  const body = parse(
+    z
+      .object({
+        includeTranscript: z.boolean().optional(),
+        expiresInDays: z.number().int().min(1).max(365).nullable().optional(),
+      })
+      .strict(),
+    req.body
+  );
   res.status(201).json(await shares.createShare(actorOf(req), parse(idParam, req.params).id, body));
 }
 
@@ -207,7 +300,10 @@ export async function relayOpenAiSdp(req: Request, res: Response) {
   const credential = auth.match(/^Bearer\s+(ek_[A-Za-z0-9_-]{8,400})$/)?.[1];
   const claim = credential ? await live.claimRelay(credential) : null;
   if (!credential || !claim) {
-    res.status(401).json({ error: "This voice session is not valid or has expired", code: "REALTIME_SESSION_INVALID" });
+    res.status(401).json({
+      error: "This voice session is not valid or has expired",
+      code: "REALTIME_SESSION_INVALID",
+    });
     return;
   }
   const offer = typeof req.body === "string" ? req.body : "";
@@ -225,9 +321,14 @@ export async function relayOpenAiSdp(req: Request, res: Response) {
     if (upstream.ok && callId) await live.rememberCall(claim.sessionId, callId);
     if (location) res.setHeader("Location", location);
     res.setHeader("Access-Control-Expose-Headers", "Location");
-    res.status(upstream.ok ? upstream.status : 502).type("application/sdp").send(upstream.ok ? answer : "");
+    res
+      .status(upstream.ok ? upstream.status : 502)
+      .type("application/sdp")
+      .send(upstream.ok ? answer : "");
   } catch (err) {
     captureError(err, { where: "realtime.relay" });
-    res.status(502).json({ error: "The voice service could not be reached", code: "REALTIME_UNAVAILABLE" });
+    res
+      .status(502)
+      .json({ error: "The voice service could not be reached", code: "REALTIME_UNAVAILABLE" });
   }
 }

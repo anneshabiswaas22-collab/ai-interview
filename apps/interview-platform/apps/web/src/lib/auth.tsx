@@ -1,6 +1,15 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useSyncExternalStore, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@open-conversation/ui";
@@ -62,10 +71,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       onSessionEnded(() => {
         wipe();
         toast.info({ title: "Your session ended", description: "Sign in again to continue." });
-        const next = pathRef.current && pathRef.current !== "/login" ? `?next=${encodeURIComponent(pathRef.current)}` : "";
+        const next =
+          pathRef.current && pathRef.current !== "/login"
+            ? `?next=${encodeURIComponent(pathRef.current)}`
+            : "";
         router.replace(`/login${next}`);
       }),
-    [router, wipe],
+    [router, wipe]
   );
 
   // Proactive refresh shortly before the access token expires.
@@ -90,20 +102,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Coming back to a tab after the token expired (timers are throttled in background tabs).
   useEffect(() => {
     const onVisible = () => {
-      if (document.visibilityState !== "visible" || session.getSnapshot().status !== "signed-in") return;
-      if (session.getExpiresAt() - Date.now() < 60_000) void api().refreshSession().catch(() => undefined);
+      if (document.visibilityState !== "visible" || session.getSnapshot().status !== "signed-in")
+        return;
+      if (session.getExpiresAt() - Date.now() < 60_000)
+        void api()
+          .refreshSession()
+          .catch(() => undefined);
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, []);
 
-  const login = useCallback(async (loginId: string, password: string, second?: SecondFactor): Promise<LoginOutcome> => {
-    const factor = typeof second === "string" ? (second ? { totp: second } : {}) : second?.recoveryCode ? { recoveryCode: second.recoveryCode } : {};
-    const result = await api().auth.login({ login: loginId, password, ...factor });
-    if ("totpRequired" in result) return { ok: false, totpRequired: true };
-    session.apply(result);
-    return { ok: true, user: result.user };
-  }, []);
+  const login = useCallback(
+    async (loginId: string, password: string, second?: SecondFactor): Promise<LoginOutcome> => {
+      const factor =
+        typeof second === "string"
+          ? second
+            ? { totp: second }
+            : {}
+          : second?.recoveryCode
+            ? { recoveryCode: second.recoveryCode }
+            : {};
+      const result = await api().auth.login({ login: loginId, password, ...factor });
+      if ("totpRequired" in result) return { ok: false, totpRequired: true };
+      session.apply(result);
+      return { ok: true, user: result.user };
+    },
+    []
+  );
 
   const acceptSession = useCallback((result: AuthResult) => session.apply(result), []);
 
@@ -119,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       wipe();
       if (!opts.silent) router.push("/login");
     },
-    [router, wipe],
+    [router, wipe]
   );
 
   const reloadMe = useCallback(async () => {
@@ -137,7 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       reloadMe,
       setUser: session.setUser,
     }),
-    [snap, login, acceptSession, logout, reloadMe],
+    [snap, login, acceptSession, logout, reloadMe]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

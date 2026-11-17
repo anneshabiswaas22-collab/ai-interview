@@ -3,9 +3,29 @@
 import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Check, LogOut, Monitor, Moon, PanelLeftClose, Plus, Settings, Shield, Sun } from "lucide-react";
+import {
+  Check,
+  LogOut,
+  Monitor,
+  Moon,
+  PanelLeftClose,
+  Plus,
+  Settings,
+  Shield,
+  Sun,
+} from "lucide-react";
 import type { InterviewSummary } from "@open-conversation/types";
-import { Avatar, cn, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Tooltip } from "@open-conversation/ui";
+import {
+  Avatar,
+  cn,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Tooltip,
+} from "@open-conversation/ui";
 import { LogoMark } from "@/components/common/wordmark";
 import { useAuth } from "@/lib/auth";
 import { groupByDate, useInterviews, useUsage } from "@/lib/interviews/queries";
@@ -19,10 +39,15 @@ function Row({ iv, active }: { iv: InterviewSummary; active: boolean }) {
       href={`/i/${iv.id}`}
       aria-current={active ? "page" : undefined}
       title={iv.title}
-      className={cn("flex items-baseline gap-2 rounded-lg px-2.5 py-1.5 text-[14px]", active ? "bg-muted" : "hover:bg-muted/70")}
+      className={cn(
+        "flex items-baseline gap-2 rounded-lg px-2.5 py-1.5 text-[14px]",
+        active ? "bg-muted" : "hover:bg-muted/70"
+      )}
     >
       <span className="min-w-0 flex-1 truncate">{iv.title}</span>
-      <span className="shrink-0 text-[12px] tabular-nums text-subtle-foreground">{iv.overallScore !== null ? iv.overallScore : statusWord(iv.status, true)}</span>
+      <span className="shrink-0 text-[12px] tabular-nums text-subtle-foreground">
+        {iv.overallScore !== null ? iv.overallScore : statusWord(iv.status, true)}
+      </span>
     </Link>
   );
 }
@@ -32,18 +57,31 @@ function UsageLines() {
   const { data } = useUsage();
   if (!data) return null;
   const lines = [
-    data.interviews.limit !== null ? `${data.interviews.used} of ${data.interviews.limit} interviews` : null,
-    data.voiceMinutes.limit !== null ? `${data.voiceMinutes.used} of ${data.voiceMinutes.limit} voice minutes` : null,
+    data.interviews.limit !== null
+      ? `${data.interviews.used} of ${data.interviews.limit} interviews`
+      : null,
+    data.voiceMinutes.limit !== null
+      ? `${data.voiceMinutes.used} of ${data.voiceMinutes.limit} voice minutes`
+      : null,
   ].filter(Boolean);
   if (!lines.length) return null;
   return (
-    <p className="px-4 pb-2 text-[12px] leading-5 text-subtle-foreground" title={`Resets ${new Date(data.resetsAt).toLocaleDateString()}`}>
+    <p
+      className="px-4 pb-2 text-[12px] leading-5 text-subtle-foreground"
+      title={`Resets ${new Date(data.resetsAt).toLocaleDateString()}`}
+    >
       This month: {lines.join(", ")}
     </p>
   );
 }
 
-export function Sidebar({ onCollapse, onNavigate }: { onCollapse?: () => void; onNavigate?: () => void }) {
+export function Sidebar({
+  onCollapse,
+  onNavigate,
+}: {
+  onCollapse?: () => void;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const name = useProductName();
@@ -59,7 +97,8 @@ export function Sidebar({ onCollapse, onNavigate }: { onCollapse?: () => void; o
     const el = sentinel.current;
     if (!el) return;
     const io = new IntersectionObserver((entries) => {
-      if (entries[0]?.isIntersecting && list.hasNextPage && !list.isFetchingNextPage) void list.fetchNextPage();
+      if (entries[0]?.isIntersecting && list.hasNextPage && !list.isFetchingNextPage)
+        void list.fetchNextPage();
     });
     io.observe(el);
     return () => io.disconnect();
@@ -77,20 +116,38 @@ export function Sidebar({ onCollapse, onNavigate }: { onCollapse?: () => void; o
   return (
     <nav aria-label="Interviews" className="flex h-full flex-col bg-ground-2/60">
       <div className="flex items-center justify-between px-3 pb-2 pt-3">
-        <Link href="/" className="flex min-w-0 items-center gap-2 rounded-md" aria-label={`${name} home`}>
+        <Link
+          href="/"
+          className="flex min-w-0 items-center gap-2 rounded-md"
+          aria-label={`${name} home`}
+        >
           <LogoMark className="size-7" />
-          <span className="truncate font-display text-[14px] font-semibold tracking-[-0.01em]">{name}</span>
+          <span className="truncate font-display text-[14px] font-semibold tracking-[-0.01em]">
+            {name}
+          </span>
         </Link>
         {onCollapse ? (
           <Tooltip content="Close sidebar">
-            <button type="button" onClick={onCollapse} aria-label="Close sidebar" className="inline-flex size-8 items-center justify-center rounded-lg text-subtle-foreground hover:bg-muted hover:text-foreground">
+            <button
+              type="button"
+              onClick={onCollapse}
+              aria-label="Close sidebar"
+              className="inline-flex size-8 items-center justify-center rounded-lg text-subtle-foreground hover:bg-muted hover:text-foreground"
+            >
               <PanelLeftClose className="size-[18px]" />
             </button>
           </Tooltip>
         ) : null}
       </div>
       <div className="px-2">
-        <Link href="/new" data-testid="new-interview" className={cn("flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[14px] font-medium hover:bg-muted", pathname === "/new" && "bg-muted")}>
+        <Link
+          href="/new"
+          data-testid="new-interview"
+          className={cn(
+            "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[14px] font-medium hover:bg-muted",
+            pathname === "/new" && "bg-muted"
+          )}
+        >
           <Plus className="size-[18px]" /> New interview
         </Link>
       </div>
@@ -98,7 +155,9 @@ export function Sidebar({ onCollapse, onNavigate }: { onCollapse?: () => void; o
       <div className="mt-3 min-h-0 flex-1 overflow-y-auto px-2 pb-4 scrollbar-thin">
         {groups.map((g) => (
           <section key={g.label} className="mb-4">
-            <h2 className="px-2.5 pb-1 text-[12px] font-semibold uppercase tracking-[0.06em] text-subtle-foreground">{g.label}</h2>
+            <h2 className="px-2.5 pb-1 text-[12px] font-semibold uppercase tracking-[0.06em] text-subtle-foreground">
+              {g.label}
+            </h2>
             {g.items.map((iv) => (
               <Row key={iv.id} iv={iv} active={iv.id === activeId} />
             ))}
@@ -107,11 +166,19 @@ export function Sidebar({ onCollapse, onNavigate }: { onCollapse?: () => void; o
         {list.isLoading ? (
           <div className="space-y-2 px-2.5">
             {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="h-4 animate-pulse rounded bg-muted" style={{ width: `${55 + ((i * 17) % 40)}%` }} />
+              <div
+                key={i}
+                className="h-4 animate-pulse rounded bg-muted"
+                style={{ width: `${55 + ((i * 17) % 40)}%` }}
+              />
             ))}
           </div>
         ) : null}
-        {!list.isLoading && !items.length ? <p className="px-2.5 text-[13px] text-subtle-foreground">Your interviews will appear here.</p> : null}
+        {!list.isLoading && !items.length ? (
+          <p className="px-2.5 text-[13px] text-subtle-foreground">
+            Your interviews will appear here.
+          </p>
+        ) : null}
         <div ref={sentinel} className="h-4" />
       </div>
 
@@ -119,11 +186,18 @@ export function Sidebar({ onCollapse, onNavigate }: { onCollapse?: () => void; o
         <UsageLines />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button type="button" data-testid="account-menu" aria-label="Account menu" className="mx-2 mb-2 flex w-[calc(100%-1rem)] items-center gap-2.5 rounded-lg px-2 py-2 text-left hover:bg-muted">
+            <button
+              type="button"
+              data-testid="account-menu"
+              aria-label="Account menu"
+              className="mx-2 mb-2 flex w-[calc(100%-1rem)] items-center gap-2.5 rounded-lg px-2 py-2 text-left hover:bg-muted"
+            >
               <Avatar name={user?.displayName ?? "?"} size="sm" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[14px] font-medium">{user?.displayName}</span>
-                <span className="block truncate text-[12px] text-subtle-foreground">{user?.email}</span>
+                <span className="block truncate text-[12px] text-subtle-foreground">
+                  {user?.email}
+                </span>
               </span>
             </button>
           </DropdownMenuTrigger>
@@ -137,7 +211,9 @@ export function Sidebar({ onCollapse, onNavigate }: { onCollapse?: () => void; o
               </DropdownMenuItem>
             ) : null}
             <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-[12px] font-semibold uppercase tracking-[0.06em] text-subtle-foreground">Theme</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-[12px] font-semibold uppercase tracking-[0.06em] text-subtle-foreground">
+              Theme
+            </DropdownMenuLabel>
             {(
               [
                 ["system", "System", Monitor],

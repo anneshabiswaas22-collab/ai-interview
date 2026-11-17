@@ -17,9 +17,15 @@ const DETECT_EVERY_MS = 1500;
 /** A state must hold this long before it becomes an event (a turned head is not "no face"). */
 const SETTLE_MS = 3000;
 
-export function useFaceCheck(video: RefObject<HTMLVideoElement | null>, active: boolean): FaceState {
+export function useFaceCheck(
+  video: RefObject<HTMLVideoElement | null>,
+  active: boolean
+): FaceState {
   const [state, setState] = useState<FaceState>("off");
-  const detector = useRef<{ detectForVideo: (v: HTMLVideoElement, t: number) => { detections: unknown[] }; close: () => void } | null>(null);
+  const detector = useRef<{
+    detectForVideo: (v: HTMLVideoElement, t: number) => { detections: unknown[] };
+    close: () => void;
+  } | null>(null);
   const failed = useRef(false);
 
   useEffect(() => {
@@ -67,19 +73,34 @@ export function useFaceCheck(video: RefObject<HTMLVideoElement | null>, active: 
  * Turns face states and tab visibility into events and sends them every 10 s (and when
  * the page hides). Returns how many times the candidate left the tab.
  */
-export function useProctorEvents(interviewId: string, active: boolean, face: FaceState, where: { round: number; question: number }, cameraOff = false): { tabStrikes: number } {
+export function useProctorEvents(
+  interviewId: string,
+  active: boolean,
+  face: FaceState,
+  where: { round: number; question: number },
+  cameraOff = false
+): { tabStrikes: number } {
   const queue = useRef<ProctorEventInput[]>([]);
   const [tabStrikes, setTabStrikes] = useState(0);
   const whereRef = useRef(where);
   whereRef.current = where;
 
-  const push = (kind: ProctorEventKind) => queue.current.push({ kind, occurredAt: new Date().toISOString(), round: whereRef.current.round, question: whereRef.current.question });
+  const push = (kind: ProctorEventKind) =>
+    queue.current.push({
+      kind,
+      occurredAt: new Date().toISOString(),
+      round: whereRef.current.round,
+      question: whereRef.current.question,
+    });
 
   useEffect(() => {
     if (!active) return;
     const flush = () => {
       const batch = queue.current.splice(0, 100);
-      if (batch.length) void api().interviews.proctorEvents(interviewId, batch).catch(() => queue.current.unshift(...batch));
+      if (batch.length)
+        void api()
+          .interviews.proctorEvents(interviewId, batch)
+          .catch(() => queue.current.unshift(...batch));
     };
     const onVis = () => {
       if (document.hidden) {

@@ -71,7 +71,11 @@ function sesClient(): SESv2Client {
 }
 
 async function buildMime(from: string, msg: MailMessage): Promise<Buffer> {
-  const composer = nodemailer.createTransport({ streamTransport: true, buffer: true, newline: "unix" });
+  const composer = nodemailer.createTransport({
+    streamTransport: true,
+    buffer: true,
+    newline: "unix",
+  });
   const info = await composer.sendMail({ from, ...msg });
   return info.message as Buffer;
 }
@@ -97,7 +101,7 @@ export async function sendMail(msg: MailMessage): Promise<MailResult> {
           Destination: { ToAddresses: [msg.to] },
           Content: { Raw: { Data: raw } },
           ConfigurationSetName: config.SES_CONFIGURATION_SET || undefined,
-        }),
+        })
       );
       record();
       return { delivered: true, mode };

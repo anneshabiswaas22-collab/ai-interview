@@ -1,11 +1,15 @@
 import { expect, test } from "@playwright/test";
 import { answerBox, JD, newUser, pageFor, waitForScores } from "../helpers";
 
-test("plan from a job description, edit a question, answer it by typing, end, and read the scored report", async ({ browser, request }) => {
+test("plan from a job description, edit a question, answer it by typing, end, and read the scored report", async ({
+  browser,
+  request,
+}) => {
   const user = await newUser(request);
   const page = await pageFor(browser, user, "/new?from=jd");
   const edited = "Tell me about the backend system you are proudest of and why.";
-  const answer = "I built a billing service in Python that handles a million invoices a month on Postgres.";
+  const answer =
+    "I built a billing service in Python that handles a million invoices a month on Postgres.";
 
   await test.step("create from a job description and see the plan", async () => {
     await page.locator("#company").fill(JD.company);
@@ -14,7 +18,9 @@ test("plan from a job description, edit a question, answer it by typing, end, an
     await page.getByRole("button", { name: "Prepare my interview" }).click();
     await expect(page).toHaveURL(/\/i\/[0-9A-Z]{26}$/);
     await expect(page.getByText("Ready to start")).toBeVisible({ timeout: 60_000 });
-    await expect(page.getByRole("heading", { level: 1, name: `${JD.role} at ${JD.company}` })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: `${JD.role} at ${JD.company}` })
+    ).toBeVisible();
     expect(await page.getByRole("heading", { level: 3 }).count()).toBeGreaterThanOrEqual(3);
   });
 
@@ -44,7 +50,9 @@ test("plan from a job description, edit a question, answer it by typing, end, an
 
   await test.step("Next question moves on to question 1.2", async () => {
     await page.getByTestId("next-question").click();
-    await expect(page.getByTestId("transcript").getByText("Question 1.2")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("transcript").getByText("Question 1.2")).toBeVisible({
+      timeout: 20_000,
+    });
     await expect(answerBox(page)).toBeEnabled();
   });
 

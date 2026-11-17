@@ -23,7 +23,15 @@ import { usePreferences, useRealtimeModels, useShares, useUsage } from "@/lib/in
 import { useAppMeta } from "@/lib/meta";
 import { qk } from "@/lib/query-keys";
 import { useTheme, type ThemePref } from "@/lib/stores/theme";
-import { effectiveModel, effectiveVoice, expiryLabel, languageOptions, modelPatch, viewsLabel, voiceLabel } from "./settings-lib";
+import {
+  effectiveModel,
+  effectiveVoice,
+  expiryLabel,
+  languageOptions,
+  modelPatch,
+  viewsLabel,
+  voiceLabel,
+} from "./settings-lib";
 
 type Tab = "interviews" | "shares" | "appearance" | "account";
 const TABS: { value: Tab; label: string }[] = [
@@ -33,9 +41,24 @@ const TABS: { value: Tab; label: string }[] = [
   { value: "account", label: "Account" },
 ];
 
-function Row({ title, description, htmlFor, children, testId }: { title: string; description?: React.ReactNode; htmlFor?: string; children: React.ReactNode; testId?: string }) {
+function Row({
+  title,
+  description,
+  htmlFor,
+  children,
+  testId,
+}: {
+  title: string;
+  description?: React.ReactNode;
+  htmlFor?: string;
+  children: React.ReactNode;
+  testId?: string;
+}) {
   return (
-    <div className="flex flex-col gap-3 border-b border-border py-5 sm:flex-row sm:items-center sm:justify-between" data-testid={testId}>
+    <div
+      className="flex flex-col gap-3 border-b border-border py-5 sm:flex-row sm:items-center sm:justify-between"
+      data-testid={testId}
+    >
       <div className="min-w-0">
         {htmlFor ? (
           <label htmlFor={htmlFor} className="text-[14.5px] font-medium">
@@ -44,7 +67,9 @@ function Row({ title, description, htmlFor, children, testId }: { title: string;
         ) : (
           <p className="text-[14.5px] font-medium">{title}</p>
         )}
-        {description ? <p className="mt-0.5 max-w-md text-[13.5px] text-muted-foreground">{description}</p> : null}
+        {description ? (
+          <p className="mt-0.5 max-w-md text-[13.5px] text-muted-foreground">{description}</p>
+        ) : null}
       </div>
       <div className="shrink-0">{children}</div>
     </div>
@@ -75,7 +100,10 @@ function RowsSkeleton({ rows = 4 }: { rows?: number }) {
   return (
     <div aria-busy>
       {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className="flex items-center justify-between gap-6 border-b border-border py-5">
+        <div
+          key={i}
+          className="flex items-center justify-between gap-6 border-b border-border py-5"
+        >
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-40" />
             <Skeleton className="h-3.5 w-64 max-w-full" />
@@ -96,7 +124,15 @@ function InterviewPreferences() {
   const meta = useAppMeta();
   const save = usePrefsMutation();
   const p = prefs.data;
-  if (prefs.isError && !p) return <ErrorState error={prefs.error} onRetry={() => void prefs.refetch()} compact className="py-5" />;
+  if (prefs.isError && !p)
+    return (
+      <ErrorState
+        error={prefs.error}
+        onRetry={() => void prefs.refetch()}
+        compact
+        className="py-5"
+      />
+    );
   if (!p || models.isPending) return <RowsSkeleton />;
   const list = models.data ?? [];
   const model = effectiveModel(list, p);
@@ -107,16 +143,26 @@ function InterviewPreferences() {
 
   return (
     <div data-testid="settings-interviews">
-      <Row title="Voice model" htmlFor="pref-model" description="Runs the live interview. You can still pick another one when you start.">
+      <Row
+        title="Voice model"
+        htmlFor="pref-model"
+        description="Runs the live interview. You can still pick another one when you start."
+      >
         {list.length ? (
           <NativeSelect
             id="pref-model"
-            value={p.defaultRealtimeModelId && list.some((m) => m.id === p.defaultRealtimeModelId) ? p.defaultRealtimeModelId : ""}
+            value={
+              p.defaultRealtimeModelId && list.some((m) => m.id === p.defaultRealtimeModelId)
+                ? p.defaultRealtimeModelId
+                : ""
+            }
             onChange={(e) => save.mutate(modelPatch(list, e.target.value || null, p.voice))}
             className="w-64"
             data-testid="pref-model"
           >
-            <option value="">{fallback ? `The default (${fallback.displayName})` : "The default"}</option>
+            <option value="">
+              {fallback ? `The default (${fallback.displayName})` : "The default"}
+            </option>
             {list.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.displayName}
@@ -128,8 +174,18 @@ function InterviewPreferences() {
         )}
       </Row>
       {model && model.voices.length ? (
-        <Row title="Voice" htmlFor="pref-voice" description={`How ${interviewer} sounds. The voices offered by ${model.displayName}.`}>
-          <NativeSelect id="pref-voice" value={voice} onChange={(e) => save.mutate({ voice: e.target.value })} className="w-64" data-testid="pref-voice">
+        <Row
+          title="Voice"
+          htmlFor="pref-voice"
+          description={`How ${interviewer} sounds. The voices offered by ${model.displayName}.`}
+        >
+          <NativeSelect
+            id="pref-voice"
+            value={voice}
+            onChange={(e) => save.mutate({ voice: e.target.value })}
+            className="w-64"
+            data-testid="pref-voice"
+          >
             {model.voices.map((v) => (
               <option key={v} value={v}>
                 {voiceLabel(v)}
@@ -138,8 +194,18 @@ function InterviewPreferences() {
           </NativeSelect>
         </Row>
       ) : null}
-      <Row title="Transcription language" htmlFor="pref-language" description="The language you answer in, for the transcript and the scoring. Detecting it works for most people.">
-        <NativeSelect id="pref-language" value={p.transcriptionLanguage} onChange={(e) => save.mutate({ transcriptionLanguage: e.target.value })} className="w-64" data-testid="pref-language">
+      <Row
+        title="Transcription language"
+        htmlFor="pref-language"
+        description="The language you answer in, for the transcript and the scoring. Detecting it works for most people."
+      >
+        <NativeSelect
+          id="pref-language"
+          value={p.transcriptionLanguage}
+          onChange={(e) => save.mutate({ transcriptionLanguage: e.target.value })}
+          className="w-64"
+          data-testid="pref-language"
+        >
           {languageOptions(p.transcriptionLanguage).map((l) => (
             <option key={l.code} value={l.code}>
               {l.name}
@@ -148,16 +214,34 @@ function InterviewPreferences() {
         </NativeSelect>
       </Row>
       {meta.data?.features.proctoring !== false ? (
-        <Row title="Proctoring on by default" description="New interviews start with camera and tab checks turned on. What they notice appears only in your own report.">
-          <Switch checked={p.proctoringDefault} onCheckedChange={(v) => save.mutate({ proctoringDefault: v })} aria-label="Proctoring on by default" data-testid="pref-proctoring" />
+        <Row
+          title="Proctoring on by default"
+          description="New interviews start with camera and tab checks turned on. What they notice appears only in your own report."
+        >
+          <Switch
+            checked={p.proctoringDefault}
+            onCheckedChange={(v) => save.mutate({ proctoringDefault: v })}
+            aria-label="Proctoring on by default"
+            data-testid="pref-proctoring"
+          />
         </Row>
       ) : null}
       {u ? (
-        <Row title="This month" description={`Resets on ${new Date(u.resetsAt).toLocaleDateString(undefined, { month: "long", day: "numeric" })}. A live session runs up to ${u.maxSessionMinutes} minutes.`} testId="settings-usage">
+        <Row
+          title="This month"
+          description={`Resets on ${new Date(u.resetsAt).toLocaleDateString(undefined, { month: "long", day: "numeric" })}. A live session runs up to ${u.maxSessionMinutes} minutes.`}
+          testId="settings-usage"
+        >
           <div className="text-right text-[13.5px] tabular-nums">
-            <p>{u.interviews.limit === null ? `${u.interviews.used.toLocaleString()} interviews` : `${u.interviews.used.toLocaleString()} of ${u.interviews.limit.toLocaleString()} interviews`}</p>
+            <p>
+              {u.interviews.limit === null
+                ? `${u.interviews.used.toLocaleString()} interviews`
+                : `${u.interviews.used.toLocaleString()} of ${u.interviews.limit.toLocaleString()} interviews`}
+            </p>
             <p className="text-muted-foreground">
-              {u.voiceMinutes.limit === null ? `${u.voiceMinutes.used.toLocaleString()} voice minutes` : `${u.voiceMinutes.used.toLocaleString()} of ${u.voiceMinutes.limit.toLocaleString()} voice minutes`}
+              {u.voiceMinutes.limit === null
+                ? `${u.voiceMinutes.used.toLocaleString()} voice minutes`
+                : `${u.voiceMinutes.used.toLocaleString()} of ${u.voiceMinutes.limit.toLocaleString()} voice minutes`}
             </p>
           </div>
         </Row>
@@ -187,9 +271,17 @@ function SharedLinks() {
   return (
     <div className="py-5" data-testid="settings-shares">
       <p className="text-[14.5px] font-medium">Shared links</p>
-      <p className="mt-0.5 max-w-xl text-[13.5px] text-muted-foreground">Anyone with a link can read that report. Transcripts are included only where you chose to include them.</p>
+      <p className="mt-0.5 max-w-xl text-[13.5px] text-muted-foreground">
+        Anyone with a link can read that report. Transcripts are included only where you chose to
+        include them.
+      </p>
       {shares.isError && !shares.data ? (
-        <ErrorState error={shares.error} onRetry={() => void shares.refetch()} compact className="mt-3" />
+        <ErrorState
+          error={shares.error}
+          onRetry={() => void shares.refetch()}
+          compact
+          className="mt-3"
+        />
       ) : !shares.data ? (
         <div className="mt-3 space-y-2" aria-busy>
           {[0, 1, 2].map((i) => (
@@ -197,31 +289,61 @@ function SharedLinks() {
           ))}
         </div>
       ) : (
-        <ul className="mt-3 divide-y divide-border border-y border-border" data-testid="shares-list">
+        <ul
+          className="mt-3 divide-y divide-border border-y border-border"
+          data-testid="shares-list"
+        >
           {shares.data.map((s) => (
-            <li key={s.id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:gap-3" data-testid={`share-${s.id}`}>
+            <li
+              key={s.id}
+              className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:gap-3"
+              data-testid={`share-${s.id}`}
+            >
               <div className="min-w-0 flex-1">
-                <a href={s.url} target="_blank" rel="noopener noreferrer" className="inline-flex max-w-full items-center gap-1 text-[14.5px] font-medium hover:underline">
+                <a
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex max-w-full items-center gap-1 text-[14.5px] font-medium hover:underline"
+                >
                   <span className="truncate">{s.interviewTitle || "Untitled interview"}</span>
                   <ArrowUpRight className="size-3.5 shrink-0 text-subtle-foreground" aria-hidden />
                 </a>
                 <p className="text-[13px] text-muted-foreground">
-                  {[s.includeTranscript ? "Transcript included" : "Scores only, no transcript", viewsLabel(s.viewCount), expiryLabel(s)].join(" · ")}
+                  {[
+                    s.includeTranscript ? "Transcript included" : "Scores only, no transcript",
+                    viewsLabel(s.viewCount),
+                    expiryLabel(s),
+                  ].join(" · ")}
                 </p>
               </div>
-              <Button size="sm" variant="ghost" className="self-start sm:self-center" onClick={() => setRevoking(s)} data-testid={`share-revoke-${s.id}`}>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="self-start sm:self-center"
+                onClick={() => setRevoking(s)}
+                data-testid={`share-revoke-${s.id}`}
+              >
                 Revoke
               </Button>
             </li>
           ))}
-          {!shares.data.length ? <li className="py-3 text-[14px] text-subtle-foreground">No shared links. Share a report from its page.</li> : null}
+          {!shares.data.length ? (
+            <li className="py-3 text-[14px] text-subtle-foreground">
+              No shared links. Share a report from its page.
+            </li>
+          ) : null}
         </ul>
       )}
       <ConfirmDialog
         open={!!revoking}
         onOpenChange={(o) => !o && setRevoking(null)}
         title="Revoke this link?"
-        description={revoking ? `The link to "${revoking.interviewTitle || "Untitled interview"}" stops working for everyone. The interview and its report stay with you.` : undefined}
+        description={
+          revoking
+            ? `The link to "${revoking.interviewTitle || "Untitled interview"}" stops working for everyone. The interview and its report stay with you.`
+            : undefined
+        }
         confirmLabel="Revoke link"
         destructive
         onConfirm={() => {
@@ -240,8 +362,18 @@ function Appearance() {
   const { pref, setPref } = useTheme();
   return (
     <div data-testid="settings-appearance">
-      <Row title="Theme" htmlFor="pref-theme" description="System follows your device's light or dark setting. Saved on this device only.">
-        <NativeSelect id="pref-theme" value={pref} onChange={(e) => setPref(e.target.value as ThemePref)} className="w-40" data-testid="pref-theme">
+      <Row
+        title="Theme"
+        htmlFor="pref-theme"
+        description="System follows your device's light or dark setting. Saved on this device only."
+      >
+        <NativeSelect
+          id="pref-theme"
+          value={pref}
+          onChange={(e) => setPref(e.target.value as ThemePref)}
+          className="w-40"
+          data-testid="pref-theme"
+        >
           <option value="system">System</option>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
@@ -279,14 +411,29 @@ function Profile() {
     >
       <h2 className="font-display text-[20px] font-semibold tracking-[-0.01em]">Profile</h2>
       <p className="mt-1 max-w-[620px] text-[14px] text-muted-foreground">
-        Your name appears in the room and on your reports, including shared ones. You sign in as <span className="text-foreground">{me.email}</span>.
+        Your name appears in the room and on your reports, including shared ones. You sign in as{" "}
+        <span className="text-foreground">{me.email}</span>.
       </p>
       <label htmlFor="profile-name" className="mt-5 block text-[13px] font-medium">
         Display name
       </label>
       <div className="mt-1.5 flex gap-2">
-        <Input id="profile-name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} autoComplete="name" className="max-w-xs" data-testid="profile-name" />
-        <Button type="submit" variant="outline" disabled={!dirty} loading={save.isPending} data-testid="profile-save">
+        <Input
+          id="profile-name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={80}
+          autoComplete="name"
+          className="max-w-xs"
+          data-testid="profile-name"
+        />
+        <Button
+          type="submit"
+          variant="outline"
+          disabled={!dirty}
+          loading={save.isPending}
+          data-testid="profile-save"
+        >
           Save
         </Button>
       </div>
@@ -301,7 +448,13 @@ export function SettingsView() {
       <PageBar />
       <div className="mx-auto w-full max-w-[860px] px-4 pb-20 sm:px-6">
         <h1 className="font-display text-[30px] font-semibold tracking-[-0.02em]">Settings</h1>
-        <UnderlineTabs tabs={TABS} value={tab} onChange={setTab} label="Settings sections" className="mt-6" />
+        <UnderlineTabs
+          tabs={TABS}
+          value={tab}
+          onChange={setTab}
+          label="Settings sections"
+          className="mt-6"
+        />
         <div role="tabpanel" aria-label={TABS.find((t) => t.value === tab)?.label} className="mt-2">
           {tab === "interviews" ? <InterviewPreferences /> : null}
           {tab === "shares" ? <SharedLinks /> : null}

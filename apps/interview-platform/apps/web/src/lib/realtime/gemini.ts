@@ -16,7 +16,8 @@ const OUT_RATE = 24_000;
 
 function toBase64(bytes: Uint8Array): string {
   let s = "";
-  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  for (let i = 0; i < bytes.length; i += 0x8000)
+    s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
   return btoa(s);
 }
 
@@ -59,7 +60,8 @@ export function geminiTransport(): RealtimeTransport {
     if (!ctx) return;
     const bin = atob(b64);
     const pcm = new Int16Array(bin.length / 2);
-    for (let i = 0; i < pcm.length; i++) pcm[i] = (bin.charCodeAt(i * 2) | (bin.charCodeAt(i * 2 + 1) << 8)) << 16 >> 16;
+    for (let i = 0; i < pcm.length; i++)
+      pcm[i] = ((bin.charCodeAt(i * 2) | (bin.charCodeAt(i * 2 + 1) << 8)) << 16) >> 16;
     const buf = ctx.createBuffer(1, pcm.length, OUT_RATE);
     const ch = buf.getChannelData(0);
     for (let i = 0; i < pcm.length; i++) ch[i] = pcm[i]! / 0x8000;
@@ -85,7 +87,8 @@ export function geminiTransport(): RealtimeTransport {
   const onMessage = (m: LiveServerMessage) => {
     const sc = m.serverContent;
     if (sc?.interrupted) stopPlayback();
-    for (const part of sc?.modelTurn?.parts ?? []) if (part.inlineData?.data) play(part.inlineData.data);
+    for (const part of sc?.modelTurn?.parts ?? [])
+      if (part.inlineData?.data) play(part.inlineData.data);
     if (sc?.inputTranscription?.text) {
       candidateLine += sc.inputTranscription.text;
       emit({ type: "speaking", who: "candidate", on: true });
@@ -97,12 +100,15 @@ export function geminiTransport(): RealtimeTransport {
       emit({ type: "line", role: "interviewer", text: interviewerLine, partial: true });
     }
     if (sc?.turnComplete) {
-      if (interviewerLine.trim()) emit({ type: "line", role: "interviewer", text: interviewerLine.trim() });
+      if (interviewerLine.trim())
+        emit({ type: "line", role: "interviewer", text: interviewerLine.trim() });
       interviewerLine = "";
     }
     for (const call of m.toolCall?.functionCalls ?? []) {
       if (call.name === "end_question") {
-        session?.sendToolResponse({ functionResponses: [{ id: call.id, name: call.name, response: { ok: true } }] });
+        session?.sendToolResponse({
+          functionResponses: [{ id: call.id, name: call.name, response: { ok: true } }],
+        });
         flushCandidate();
         emit({ type: "end_question" });
       }
@@ -115,7 +121,10 @@ export function geminiTransport(): RealtimeTransport {
       emit({ type: "stage", stage: "connecting" });
       ctx = new AudioContext();
       await ctx.resume();
-      const ai = new GoogleGenAI({ apiKey: grant.credential, httpOptions: { apiVersion: "v1alpha" } });
+      const ai = new GoogleGenAI({
+        apiKey: grant.credential,
+        httpOptions: { apiVersion: "v1alpha" },
+      });
       const opened = new Promise<void>((resolve, reject) => {
         void ai.live
           .connect({
@@ -124,31 +133,48 @@ export function geminiTransport(): RealtimeTransport {
             callbacks: {
               onopen: () => resolve(),
               onmessage: onMessage,
-              onerror: () => (emit({ type: "error", message: BLOCKED_NETWORK }), reject(new Error(BLOCKED_NETWORK))),
+              onerror: () => (
+                emit({ type: "error", message: BLOCKED_NETWORK }),
+                reject(new Error(BLOCKED_NETWORK))
+              ),
               onclose: () => emit({ type: "stage", stage: "closed" }),
             },
           })
           .then((s) => (session = s))
           .catch(reject);
       });
-      await Promise.race([opened, new Promise((_, reject) => setTimeout(() => reject(new Error(BLOCKED_NETWORK)), 15_000))]);
+      await Promise.race([
+        opened,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(BLOCKED_NETWORK)), 15_000)),
+      ]);
       if (mic) {
         source = ctx.createMediaStreamSource(mic);
         processor = ctx.createScriptProcessor(4096, 1, 1);
         processor.onaudioprocess = (e) => {
           if (muted || !session) return;
           const pcm = downsample(e.inputBuffer.getChannelData(0), ctx!.sampleRate);
-          session.sendRealtimeInput({ audio: { data: toBase64(new Uint8Array(pcm.buffer)), mimeType: `audio/pcm;rate=${IN_RATE}` } });
+          session.sendRealtimeInput({
+            audio: {
+              data: toBase64(new Uint8Array(pcm.buffer)),
+              mimeType: `audio/pcm;rate=${IN_RATE}`,
+            },
+          });
         };
         source.connect(processor);
         processor.connect(ctx.destination);
       }
       emit({ type: "stage", stage: "live" });
       // The interviewer speaks first.
-      session?.sendClientContent({ turns: [{ role: "user", parts: [{ text: "(The candidate has joined and is ready.)" }] }], turnComplete: true });
+      session?.sendClientContent({
+        turns: [{ role: "user", parts: [{ text: "(The candidate has joined and is ready.)" }] }],
+        turnComplete: true,
+      });
     },
     sendText(text) {
-      session?.sendClientContent({ turns: [{ role: "user", parts: [{ text }] }], turnComplete: true });
+      session?.sendClientContent({
+        turns: [{ role: "user", parts: [{ text }] }],
+        turnComplete: true,
+      });
       emit({ type: "line", role: "candidate", text });
     },
     setMuted(m) {

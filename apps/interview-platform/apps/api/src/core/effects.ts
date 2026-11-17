@@ -44,7 +44,9 @@ export class Effects {
 }
 
 /** Run `fn` in a transaction and flush its effects only after a successful commit. */
-export async function withTransaction<T>(fn: (trx: Transaction<DB>, fx: Effects) => Promise<T>): Promise<T> {
+export async function withTransaction<T>(
+  fn: (trx: Transaction<DB>, fx: Effects) => Promise<T>
+): Promise<T> {
   const fx = new Effects();
   const result = await db.transaction().execute((trx) => fn(trx, fx));
   await fx.flush();

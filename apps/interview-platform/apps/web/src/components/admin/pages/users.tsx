@@ -6,7 +6,14 @@ import { flattenPages, nextCursor } from "@open-conversation/api-client";
 import { Select } from "@open-conversation/ui";
 import type { AdminUserRow, UserRole, UserStatus } from "@open-conversation/types";
 import { api } from "@/lib/api";
-import { ROLE_LABEL, STATUS_LABEL, STATUS_TONE, formatCount, formatMinutes, shortDate } from "@/lib/admin";
+import {
+  ROLE_LABEL,
+  STATUS_LABEL,
+  STATUS_TONE,
+  formatCount,
+  formatMinutes,
+  shortDate,
+} from "@/lib/admin";
 import { TimeAgo } from "@/components/common/time-ago";
 import { AdminPage, DataTable, FilterBar, StatusText, useUrlState, type Column } from "../shell";
 import { ak, PersonAvatar } from "./common";
@@ -21,7 +28,8 @@ const STATUS_TABS: { value: "all" | UserStatus; label: string }[] = [
   { value: "DEACTIVATED", label: "Erased" },
 ];
 
-const isStatus = (v: string): v is UserStatus => STATUS_TABS.some((t) => t.value === v && v !== "all");
+const isStatus = (v: string): v is UserStatus =>
+  STATUS_TABS.some((t) => t.value === v && v !== "all");
 const isRole = (v: string): v is UserRole => v === "USER" || v === "ADMIN";
 
 export function AdminUsers() {
@@ -35,10 +43,15 @@ export function AdminUsers() {
   const open = url.get("open") || null;
   const f = { q, status, role, tierId };
 
-  const tiers = useQuery({ queryKey: ak.tiers, queryFn: () => api().admin.tiers(), staleTime: 60_000 });
+  const tiers = useQuery({
+    queryKey: ak.tiers,
+    queryFn: () => api().admin.tiers(),
+    staleTime: 60_000,
+  });
   const list = useInfiniteQuery({
     queryKey: ak.users(f),
-    queryFn: ({ pageParam }) => api().admin.users({ q: q || undefined, status, role, tierId, cursor: pageParam, limit: 30 }),
+    queryFn: ({ pageParam }) =>
+      api().admin.users({ q: q || undefined, status, role, tierId, cursor: pageParam, limit: 30 }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: nextCursor,
     placeholderData: (p) => p,
@@ -61,25 +74,73 @@ export function AdminUsers() {
         ),
         className: "max-w-[260px] sm:max-w-none",
       },
-      { key: "status", header: "Status", cell: (u) => <StatusText tone={STATUS_TONE[u.status]}>{STATUS_LABEL[u.status]}</StatusText>, hideBelow: "sm" },
-      { key: "role", header: "Role", cell: (u) => <span className={u.role === "ADMIN" ? "font-medium text-foreground" : "text-muted-foreground"}>{ROLE_LABEL[u.role]}</span>, hideBelow: "md" },
-      { key: "tier", header: "Tier", cell: (u) => <span className="text-muted-foreground">{u.quotaTier?.name ?? "Default"}</span>, hideBelow: "lg" },
-      { key: "interviews", header: "Interviews this month", align: "right", cell: (u) => formatCount(u.interviewsThisMonth) },
-      { key: "voice", header: "Voice this month", align: "right", cell: (u) => formatMinutes(u.voiceMinutesThisMonth), hideBelow: "sm" },
+      {
+        key: "status",
+        header: "Status",
+        cell: (u) => <StatusText tone={STATUS_TONE[u.status]}>{STATUS_LABEL[u.status]}</StatusText>,
+        hideBelow: "sm",
+      },
+      {
+        key: "role",
+        header: "Role",
+        cell: (u) => (
+          <span
+            className={u.role === "ADMIN" ? "font-medium text-foreground" : "text-muted-foreground"}
+          >
+            {ROLE_LABEL[u.role]}
+          </span>
+        ),
+        hideBelow: "md",
+      },
+      {
+        key: "tier",
+        header: "Tier",
+        cell: (u) => (
+          <span className="text-muted-foreground">{u.quotaTier?.name ?? "Default"}</span>
+        ),
+        hideBelow: "lg",
+      },
+      {
+        key: "interviews",
+        header: "Interviews this month",
+        align: "right",
+        cell: (u) => formatCount(u.interviewsThisMonth),
+      },
+      {
+        key: "voice",
+        header: "Voice this month",
+        align: "right",
+        cell: (u) => formatMinutes(u.voiceMinutesThisMonth),
+        hideBelow: "sm",
+      },
       {
         key: "seen",
         header: "Last seen",
         align: "right",
-        cell: (u) => (u.lastSeenAt ? <TimeAgo value={u.lastSeenAt} className="text-muted-foreground" /> : <span className="text-subtle-foreground">Never</span>),
+        cell: (u) =>
+          u.lastSeenAt ? (
+            <TimeAgo value={u.lastSeenAt} className="text-muted-foreground" />
+          ) : (
+            <span className="text-subtle-foreground">Never</span>
+          ),
         hideBelow: "md",
       },
-      { key: "joined", header: "Joined", align: "right", cell: (u) => <span className="text-muted-foreground">{shortDate(u.createdAt)}</span>, hideBelow: "lg" },
+      {
+        key: "joined",
+        header: "Joined",
+        align: "right",
+        cell: (u) => <span className="text-muted-foreground">{shortDate(u.createdAt)}</span>,
+        hideBelow: "lg",
+      },
     ],
-    [],
+    []
   );
 
   const filtered = !!(q || status || role || tierId);
-  const tierOptions = [{ value: "all", label: "Any tier" }, ...(tiers.data ?? []).map((t) => ({ value: t.id, label: t.name }))];
+  const tierOptions = [
+    { value: "all", label: "Any tier" },
+    ...(tiers.data ?? []).map((t) => ({ value: t.id, label: t.name })),
+  ];
 
   return (
     <AdminPage
@@ -108,7 +169,14 @@ export function AdminUsers() {
             className="h-9 w-[124px]"
             data-testid="users-role"
           />
-          <Select aria-label="Tier" value={tierId ?? "all"} onValueChange={(v) => url.set({ tier: v === "all" ? null : v })} options={tierOptions} className="h-9 w-[136px]" data-testid="users-tier" />
+          <Select
+            aria-label="Tier"
+            value={tierId ?? "all"}
+            onValueChange={(v) => url.set({ tier: v === "all" ? null : v })}
+            options={tierOptions}
+            className="h-9 w-[136px]"
+            data-testid="users-tier"
+          />
         </FilterBar>
       }
       testId="admin-users"

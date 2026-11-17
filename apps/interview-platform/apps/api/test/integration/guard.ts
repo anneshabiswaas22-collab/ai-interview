@@ -1,9 +1,13 @@
 /** Refuse to run against anything that is not obviously a disposable test database. */
 export function testDatabaseUrl(): string {
   const url = process.env.TEST_DATABASE_URL;
-  if (!url) throw new Error("Set TEST_DATABASE_URL (for example postgres://conv:conv@localhost:5512/conv_test)");
+  if (!url)
+    throw new Error(
+      "Set TEST_DATABASE_URL (for example postgres://conv:conv@localhost:5512/conv_test)"
+    );
   const name = new URL(url).pathname.replace(/^\//, "");
-  if (!name.endsWith("_test")) throw new Error(`TEST_DATABASE_URL must name a database ending in _test (got "${name}")`);
+  if (!name.endsWith("_test"))
+    throw new Error(`TEST_DATABASE_URL must name a database ending in _test (got "${name}")`);
   return url;
 }
 

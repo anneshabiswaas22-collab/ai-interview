@@ -33,8 +33,17 @@ export function signAccessToken(userId: string, tokenVersion: number): string {
 
 export function verifyAccessToken(token: string): AccessClaims | null {
   try {
-    const decoded = jwt.verify(token, config.JWT_SECRET, { audience: AUDIENCE, issuer: ISSUER, algorithms: ["HS256"] });
-    if (typeof decoded !== "object" || typeof decoded.sub !== "string" || typeof decoded.ver !== "number") return null;
+    const decoded = jwt.verify(token, config.JWT_SECRET, {
+      audience: AUDIENCE,
+      issuer: ISSUER,
+      algorithms: ["HS256"],
+    });
+    if (
+      typeof decoded !== "object" ||
+      typeof decoded.sub !== "string" ||
+      typeof decoded.ver !== "number"
+    )
+      return null;
     return { sub: decoded.sub, ver: decoded.ver };
   } catch {
     return null;

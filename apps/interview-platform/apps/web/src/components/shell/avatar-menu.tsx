@@ -23,7 +23,12 @@ export function AvatarMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button type="button" aria-label="Account menu" data-testid="avatar-menu" className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+        <button
+          type="button"
+          aria-label="Account menu"
+          data-testid="avatar-menu"
+          className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
           <Avatar name={me.displayName} seed={me.id} size="sm" />
         </button>
       </DropdownMenuTrigger>

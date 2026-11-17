@@ -12,8 +12,18 @@ describe("data export", () => {
     expect(exportFileName("a/b")).toBe("a_b-export.json");
   });
   it("explains the daily limit on 429", () => {
-    expect(exportErrorMessage(new ApiError({ status: 429, code: "RATE_LIMITED", message: "x" }), fallback)).toBe("You can export 3 times a day. Try again tomorrow.");
-    expect(exportErrorMessage(new ApiError({ status: 500, code: "SERVER_ERROR", message: "x" }), fallback)).toBe("fallback");
+    expect(
+      exportErrorMessage(
+        new ApiError({ status: 429, code: "RATE_LIMITED", message: "x" }),
+        fallback
+      )
+    ).toBe("You can export 3 times a day. Try again tomorrow.");
+    expect(
+      exportErrorMessage(
+        new ApiError({ status: 500, code: "SERVER_ERROR", message: "x" }),
+        fallback
+      )
+    ).toBe("fallback");
   });
 });
 

@@ -29,7 +29,10 @@ let textArrayOids: Set<number> | null = null;
 /** text[] (OID 1009): citext[] values are text arrays on the wire. */
 const textArray = pg.types.getTypeParser(1009 as Parameters<typeof pg.types.getTypeParser>[0]);
 const types = {
-  getTypeParser: ((oid: number, format?: "text" | "binary") => (textArrayOids?.has(oid) ? textArray : pg.types.getTypeParser(oid, format as "text"))) as typeof pg.types.getTypeParser,
+  getTypeParser: ((oid: number, format?: "text" | "binary") =>
+    textArrayOids?.has(oid)
+      ? textArray
+      : pg.types.getTypeParser(oid, format as "text")) as typeof pg.types.getTypeParser,
 };
 
 export const pool = new pg.Pool({
@@ -46,7 +49,9 @@ export type Executor = Kysely<DB> | Transaction<DB>;
 
 export async function initDbTypes(): Promise<void> {
   if (textArrayOids !== null) return;
-  const r = await pool.query<{ oid: number }>("SELECT to_regtype('citext[]')::oid AS oid UNION SELECT typarray AS oid FROM pg_type WHERE typtype = 'e' AND typarray <> 0");
+  const r = await pool.query<{ oid: number }>(
+    "SELECT to_regtype('citext[]')::oid AS oid UNION SELECT typarray AS oid FROM pg_type WHERE typtype = 'e' AND typarray <> 0"
+  );
   textArrayOids = new Set(r.rows.filter((x) => x.oid).map((x) => Number(x.oid)));
 }
 

@@ -50,7 +50,11 @@ const rand = mulberry32(20261028);
 export async function seedDemo(): Promise<void> {
   if (config.NODE_ENV === "production") throw new Error("demo:seed refuses to run in production");
   const password = config.DEMO_PASSWORD ?? crypto.randomBytes(9).toString("base64url");
-  const existing = await db.selectFrom("users").select("id").where("email", "=", ADMIN_EMAIL).executeTakeFirst();
+  const existing = await db
+    .selectFrom("users")
+    .select("id")
+    .where("email", "=", ADMIN_EMAIL)
+    .executeTakeFirst();
   if (existing) {
     printLogins(config.DEMO_PASSWORD ? password : null);
     return;
@@ -63,10 +67,29 @@ export async function seedDemo(): Promise<void> {
   const adminId = newId();
   await db
     .insertInto("users")
-    .values({ id: adminId, email: ADMIN_EMAIL, username: "admin", display_name: "Morgan Ellis", password_hash: hash, role: "ADMIN", status: "ACTIVE", email_verified_at: new Date(now - 40 * 24 * HOUR), created_at: new Date(now - 40 * 24 * HOUR) })
+    .values({
+      id: adminId,
+      email: ADMIN_EMAIL,
+      username: "admin",
+      display_name: "Morgan Ellis",
+      password_hash: hash,
+      role: "ADMIN",
+      status: "ACTIVE",
+      email_verified_at: new Date(now - 40 * 24 * HOUR),
+      created_at: new Date(now - 40 * 24 * HOUR),
+    })
     .execute();
   const coachingTier = newId();
-  await db.insertInto("quota_tiers").values({ id: coachingTier, name: "Coaching cohort", monthly_interviews: 30, monthly_voice_minutes: 600, max_session_minutes: 20 }).execute();
+  await db
+    .insertInto("quota_tiers")
+    .values({
+      id: coachingTier,
+      name: "Coaching cohort",
+      monthly_interviews: 30,
+      monthly_voice_minutes: 600,
+      max_session_minutes: 20,
+    })
+    .execute();
 
   const ids: Record<string, string> = {};
   for (const [i, p] of PEOPLE.entries()) {
@@ -90,18 +113,58 @@ export async function seedDemo(): Promise<void> {
       .execute();
   }
   const main = ids["priya-nair"]!;
-  await db.insertInto("user_preferences").values({ user_id: main, voice: "default", transcription_language: "en", proctoring_default: false, default_realtime_model_id: models.voice }).execute();
+  await db
+    .insertInto("user_preferences")
+    .values({
+      user_id: main,
+      voice: "default",
+      transcription_language: "en",
+      proctoring_default: false,
+      default_realtime_model_id: models.voice,
+    })
+    .execute();
 
   for (const iv of MAIN_INTERVIEWS) {
     const interviewId = await seedInterview(main, iv, models, now);
-    if (iv.share) await createShare({ id: main, username: "priya-nair", displayName: "Priya Nair", role: "USER", status: "ACTIVE" }, interviewId, { includeTranscript: true, expiresInDays: 30 });
+    if (iv.share)
+      await createShare(
+        {
+          id: main,
+          username: "priya-nair",
+          displayName: "Priya Nair",
+          role: "USER",
+          status: "ACTIVE",
+        },
+        interviewId,
+        { includeTranscript: true, expiresInDays: 30 }
+      );
   }
 
   for (const [n, username] of ["leo-marquez", "sam-kowalski", "amara-okafor"].entries()) {
     const o = OTHER_INTERVIEWS[n]!;
     const plan: PlanRound[] = [
-      { name: "Introduction & Background", focus: "Story and motivation", description: "Background and fit.", questions: o.scores.slice(0, 2).map((_, i) => ({ text: i ? "What are you looking for in your next team?" : "Please introduce yourself and walk me through your background.", code: false, language: null })) },
-      { name: `${o.domain} Depth`, focus: "Role depth", description: "Hands-on depth for the role.", questions: o.scores.slice(2).map((_, i) => ({ text: `Tell me about the hardest ${o.domain.toLowerCase()} problem you solved recently (${i + 1}).`, code: false, language: null })) },
+      {
+        name: "Introduction & Background",
+        focus: "Story and motivation",
+        description: "Background and fit.",
+        questions: o.scores.slice(0, 2).map((_, i) => ({
+          text: i
+            ? "What are you looking for in your next team?"
+            : "Please introduce yourself and walk me through your background.",
+          code: false,
+          language: null,
+        })),
+      },
+      {
+        name: `${o.domain} Depth`,
+        focus: "Role depth",
+        description: "Hands-on depth for the role.",
+        questions: o.scores.slice(2).map((_, i) => ({
+          text: `Tell me about the hardest ${o.domain.toLowerCase()} problem you solved recently (${i + 1}).`,
+          code: false,
+          language: null,
+        })),
+      },
     ];
     const answers = o.scores.map(([d, c], i) => ({
       round: i < 2 ? 0 : 1,
@@ -110,11 +173,39 @@ export async function seedDemo(): Promise<void> {
       communication: c,
       transcript: [
         { role: "interviewer" as const, text: "Thanks, tell me more." },
-        { role: "candidate" as const, text: "I worked on that end to end and measured the result." },
+        {
+          role: "candidate" as const,
+          text: "I worked on that end to end and measured the result.",
+        },
       ],
-      feedback: { analysis: "A clear answer with a concrete example. Add a measurable outcome to make it stronger.", strengths: ["Concrete example", "Clear structure"], weaknesses: ["No measurable outcome"], suggestions: ["Quantify the result"], correctedSnippet: null },
+      feedback: {
+        analysis:
+          "A clear answer with a concrete example. Add a measurable outcome to make it stronger.",
+        strengths: ["Concrete example", "Clear structure"],
+        weaknesses: ["No measurable outcome"],
+        suggestions: ["Quantify the result"],
+        correctedSnippet: null,
+      },
     }));
-    await seedInterview(ids[username]!, { title: o.title, source: "RESUME", company: null, role: o.role, domain: o.domain, summary: `${o.role} candidate.`, daysAgo: 3 + n * 4, status: "COMPLETED", proctoring: false, plan, answers, minutesPerQuestion: 3 }, models, now);
+    await seedInterview(
+      ids[username]!,
+      {
+        title: o.title,
+        source: "RESUME",
+        company: null,
+        role: o.role,
+        domain: o.domain,
+        summary: `${o.role} candidate.`,
+        daysAgo: 3 + n * 4,
+        status: "COMPLETED",
+        proctoring: false,
+        plan,
+        answers,
+        minutesPerQuestion: 3,
+      },
+      models,
+      now
+    );
   }
 
   // Thirty days of usage for the admin overview (the interviews above booked their own).
@@ -125,12 +216,25 @@ export async function seedDemo(): Promise<void> {
       const calls = 1 + Math.ceil(rand() * 10);
       await db
         .insertInto("usage_daily")
-        .values({ user_id: userId, day: sql<Date>`${day}::date`, model_id: models.text, calls, interviews: rand() < 0.5 ? 1 : 0, input_tokens: calls * 2500, output_tokens: calls * 900 })
+        .values({
+          user_id: userId,
+          day: sql<Date>`${day}::date`,
+          model_id: models.text,
+          calls,
+          interviews: rand() < 0.5 ? 1 : 0,
+          input_tokens: calls * 2500,
+          output_tokens: calls * 900,
+        })
         .onConflict((oc) => oc.doNothing())
         .execute();
       await db
         .insertInto("usage_daily")
-        .values({ user_id: userId, day: sql<Date>`${day}::date`, model_id: models.voice, voice_seconds: Math.floor(300 + rand() * 1500) })
+        .values({
+          user_id: userId,
+          day: sql<Date>`${day}::date`,
+          model_id: models.voice,
+          voice_seconds: Math.floor(300 + rand() * 1500),
+        })
         .onConflict((oc) => oc.doNothing())
         .execute();
     }
@@ -140,7 +244,12 @@ export async function seedDemo(): Promise<void> {
   await closeRedis();
 }
 
-async function seedInterview(userId: string, iv: DemoInterview, models: { text: string; voice: string }, now: number): Promise<string> {
+async function seedInterview(
+  userId: string,
+  iv: DemoInterview,
+  models: { text: string; voice: string },
+  now: number
+): Promise<string> {
   const created = new Date(now - iv.daysAgo * 24 * HOUR - 2 * HOUR);
   const id = newId();
   const answered = iv.answers.length;
@@ -165,12 +274,32 @@ async function seedInterview(userId: string, iv: DemoInterview, models: { text: 
       current_round: iv.status === "COMPLETED" && last ? last.round : 0,
       current_question: iv.status === "COMPLETED" && last ? last.question : 0,
       started_at: answered ? new Date(created.getTime() + 5 * 60_000) : null,
-      completed_at: iv.status === "COMPLETED" ? new Date(created.getTime() + (answered * iv.minutesPerQuestion + 8) * 60_000) : null,
+      completed_at:
+        iv.status === "COMPLETED"
+          ? new Date(created.getTime() + (answered * iv.minutesPerQuestion + 8) * 60_000)
+          : null,
       created_at: created,
       updated_at: created,
     })
     .execute();
-  await db.insertInto("usage_daily").values({ user_id: userId, day: sql<Date>`${created.toISOString().slice(0, 10)}::date`, model_id: models.text, calls: 1 + answered, interviews: 1, input_tokens: 4000 + answered * 1800, output_tokens: 3000 + answered * 600 }).onConflict((oc) => oc.columns(["user_id", "day", "model_id"]).doUpdateSet((eb) => ({ interviews: eb("usage_daily.interviews", "+", 1), calls: eb("usage_daily.calls", "+", eb.ref("excluded.calls")) }))).execute();
+  await db
+    .insertInto("usage_daily")
+    .values({
+      user_id: userId,
+      day: sql<Date>`${created.toISOString().slice(0, 10)}::date`,
+      model_id: models.text,
+      calls: 1 + answered,
+      interviews: 1,
+      input_tokens: 4000 + answered * 1800,
+      output_tokens: 3000 + answered * 600,
+    })
+    .onConflict((oc) =>
+      oc.columns(["user_id", "day", "model_id"]).doUpdateSet((eb) => ({
+        interviews: eb("usage_daily.interviews", "+", 1),
+        calls: eb("usage_daily.calls", "+", eb.ref("excluded.calls")),
+      }))
+    )
+    .execute();
 
   let at = created.getTime() + 5 * 60_000;
   let voiceSeconds = 0;
@@ -179,7 +308,21 @@ async function seedInterview(userId: string, iv: DemoInterview, models: { text: 
     voiceSeconds += seconds;
     await db
       .insertInto("live_sessions")
-      .values({ id: newId(), interview_id: id, user_id: userId, model_id: models.voice, provider_kind: "STUB", round_index: a.round, question_index: a.question, status: "ENDED", max_seconds: 900, seconds, created_at: new Date(at), expires_at: new Date(at + 1000 * 1100), ended_at: new Date(at + seconds * 1000) })
+      .values({
+        id: newId(),
+        interview_id: id,
+        user_id: userId,
+        model_id: models.voice,
+        provider_kind: "STUB",
+        round_index: a.round,
+        question_index: a.question,
+        status: "ENDED",
+        max_seconds: 900,
+        seconds,
+        created_at: new Date(at),
+        expires_at: new Date(at + 1000 * 1100),
+        ended_at: new Date(at + seconds * 1000),
+      })
       .execute();
     at += seconds * 1000;
     await db
@@ -204,7 +347,20 @@ async function seedInterview(userId: string, iv: DemoInterview, models: { text: 
       .execute();
   }
   if (voiceSeconds) {
-    await db.insertInto("usage_daily").values({ user_id: userId, day: sql<Date>`${created.toISOString().slice(0, 10)}::date`, model_id: models.voice, voice_seconds: voiceSeconds }).onConflict((oc) => oc.columns(["user_id", "day", "model_id"]).doUpdateSet((eb) => ({ voice_seconds: eb("usage_daily.voice_seconds", "+", eb.ref("excluded.voice_seconds")) }))).execute();
+    await db
+      .insertInto("usage_daily")
+      .values({
+        user_id: userId,
+        day: sql<Date>`${created.toISOString().slice(0, 10)}::date`,
+        model_id: models.voice,
+        voice_seconds: voiceSeconds,
+      })
+      .onConflict((oc) =>
+        oc.columns(["user_id", "day", "model_id"]).doUpdateSet((eb) => ({
+          voice_seconds: eb("usage_daily.voice_seconds", "+", eb.ref("excluded.voice_seconds")),
+        }))
+      )
+      .execute();
   }
   if (iv.proctoring && answered) {
     const start = created.getTime() + 5 * 60_000;
@@ -215,7 +371,17 @@ async function seedInterview(userId: string, iv: DemoInterview, models: { text: 
       ["FACE_BACK", 21.2],
     ];
     for (const [kind, minute] of events) {
-      await db.insertInto("proctor_events").values({ id: newId(), interview_id: id, kind: kind as "NO_FACE", round_index: 1, question_index: 0, occurred_at: new Date(start + minute * 60_000) }).execute();
+      await db
+        .insertInto("proctor_events")
+        .values({
+          id: newId(),
+          interview_id: id,
+          kind: kind as "NO_FACE",
+          round_index: 1,
+          question_index: 0,
+          occurred_at: new Date(start + minute * 60_000),
+        })
+        .execute();
     }
   }
   return id;
@@ -227,7 +393,9 @@ function printLogins(password: string | null): void {
     "  Demo accounts (all share one password):",
     `    admin     ${ADMIN_EMAIL}`,
     ...PEOPLE.map((p) => `    ${p.main ? "main     " : "user     "} ${p.email}`),
-    password ? "" : "  The password was printed when the demo was first seeded (DEMO_PASSWORD in deploy/compose/.env).",
+    password
+      ? ""
+      : "  The password was printed when the demo was first seeded (DEMO_PASSWORD in deploy/compose/.env).",
   ];
   process.stdout.write(`${lines.join("\n")}\n`);
 }

@@ -7,7 +7,10 @@ import { qk } from "./query-keys";
 import { productName } from "./runtime-env";
 
 /** The deployment's own name (set by an admin) wins over the image's PRODUCT_NAME. */
-export function resolveProductName(meta: Pick<AppMeta, "appName"> | null | undefined, fallback: string): string {
+export function resolveProductName(
+  meta: Pick<AppMeta, "appName"> | null | undefined,
+  fallback: string
+): string {
   const name = meta?.appName?.trim();
   return name || fallback;
 }

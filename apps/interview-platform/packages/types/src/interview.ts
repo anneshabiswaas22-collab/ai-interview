@@ -6,7 +6,8 @@ export type AnswerKind = "VOICE" | "TEXT" | "CODE";
 export type AnswerStatus = "SCORING" | "SCORED" | "FAILED";
 /** The realtime transport the browser opens. `stub` runs locally with no provider key. */
 export type RealtimeProvider = "openai" | "gemini" | "stub";
-export type ProctorEventKind = "NO_FACE" | "MULTIPLE_FACES" | "FACE_BACK" | "TAB_HIDDEN" | "TAB_VISIBLE" | "CAMERA_OFF";
+export type ProctorEventKind =
+  "NO_FACE" | "MULTIPLE_FACES" | "FACE_BACK" | "TAB_HIDDEN" | "TAB_VISIBLE" | "CAMERA_OFF";
 
 // ─── Plans ──────────────────────────────────────────────────────────────────
 
@@ -197,7 +198,15 @@ export interface InterviewReport {
   voiceSeconds: number;
   rounds: RoundReport[];
   questions: QuestionReport[];
-  proctoring: { enabled: boolean; events: { kind: ProctorEventKind; occurredAt: string; round: number | null; question: number | null }[] } | null;
+  proctoring: {
+    enabled: boolean;
+    events: {
+      kind: ProctorEventKind;
+      occurredAt: string;
+      round: number | null;
+      question: number | null;
+    }[];
+  } | null;
 }
 
 // ─── Shares ─────────────────────────────────────────────────────────────────

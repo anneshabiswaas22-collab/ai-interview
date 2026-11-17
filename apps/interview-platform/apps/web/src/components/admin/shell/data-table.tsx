@@ -52,7 +52,11 @@ export interface DataTableProps<T> {
   className?: string;
 }
 
-const HIDE = { sm: "hidden sm:table-cell", md: "hidden md:table-cell", lg: "hidden lg:table-cell" } as const;
+const HIDE = {
+  sm: "hidden sm:table-cell",
+  md: "hidden md:table-cell",
+  lg: "hidden lg:table-cell",
+} as const;
 
 /** Next sort for a header click: asc, desc, then off. */
 export function nextSort(cur: SortState | null | undefined, key: string): SortState | null {
@@ -60,7 +64,11 @@ export function nextSort(cur: SortState | null | undefined, key: string): SortSt
   return cur.dir === "asc" ? { key, dir: "desc" } : null;
 }
 
-export function sortRows<T>(rows: T[], sort: SortState | null | undefined, columns: Column<T>[]): T[] {
+export function sortRows<T>(
+  rows: T[],
+  sort: SortState | null | undefined,
+  columns: Column<T>[]
+): T[] {
   const col = sort ? columns.find((c) => c.key === sort.key) : undefined;
   if (!sort || !col?.sortValue) return rows;
   const get = col.sortValue;
@@ -71,7 +79,11 @@ export function sortRows<T>(rows: T[], sort: SortState | null | undefined, colum
     if (x === y) return 0;
     if (x === null) return 1;
     if (y === null) return -1;
-    return (typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y))) * m;
+    return (
+      (typeof x === "number" && typeof y === "number"
+        ? x - y
+        : String(x).localeCompare(String(y))) * m
+    );
   });
 }
 
@@ -79,8 +91,11 @@ export function sortRows<T>(rows: T[], sort: SortState | null | undefined, colum
 export function DataTable<T>(p: DataTableProps<T>) {
   const [localSort, setLocalSort] = useState<SortState | null>(null);
   const controlled = p.onSortChange !== undefined;
-  const sort = controlled ? p.sort ?? null : localSort;
-  const rows = useMemo(() => (controlled ? p.rows : sortRows(p.rows, localSort, p.columns)), [controlled, p.rows, localSort, p.columns]);
+  const sort = controlled ? (p.sort ?? null) : localSort;
+  const rows = useMemo(
+    () => (controlled ? p.rows : sortRows(p.rows, localSort, p.columns)),
+    [controlled, p.rows, localSort, p.columns]
+  );
   const setSort = (s: SortState | null) => (controlled ? p.onSortChange?.(s) : setLocalSort(s));
   const sortable = (c: Column<T>) => c.sortable ?? !!c.sortValue;
 
@@ -95,18 +110,42 @@ export function DataTable<T>(p: DataTableProps<T>) {
             <tr className="border-b border-border">
               {p.columns.map((c) => {
                 const active = sort?.key === c.key;
-                const aria = active ? (sort!.dir === "asc" ? "ascending" : "descending") : undefined;
+                const aria = active
+                  ? sort!.dir === "asc"
+                    ? "ascending"
+                    : "descending"
+                  : undefined;
                 return (
                   <th
                     key={c.key}
                     scope="col"
                     aria-sort={aria}
-                    className={cn("whitespace-nowrap py-2.5 pr-4 text-[12.5px] font-medium text-muted-foreground last:pr-0", c.align === "right" && "text-right", c.hideBelow && HIDE[c.hideBelow], c.className)}
+                    className={cn(
+                      "whitespace-nowrap py-2.5 pr-4 text-[12.5px] font-medium text-muted-foreground last:pr-0",
+                      c.align === "right" && "text-right",
+                      c.hideBelow && HIDE[c.hideBelow],
+                      c.className
+                    )}
                   >
                     {sortable(c) ? (
-                      <button type="button" onClick={() => setSort(nextSort(sort, c.key))} className={cn("inline-flex items-center gap-1 rounded-sm hover:text-foreground", active && "text-foreground")}>
+                      <button
+                        type="button"
+                        onClick={() => setSort(nextSort(sort, c.key))}
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-sm hover:text-foreground",
+                          active && "text-foreground"
+                        )}
+                      >
                         {c.header}
-                        {active ? sort!.dir === "asc" ? <ArrowUp className="size-3.5" aria-hidden /> : <ArrowDown className="size-3.5" aria-hidden /> : <ArrowUpDown className="size-3.5 opacity-50" aria-hidden />}
+                        {active ? (
+                          sort!.dir === "asc" ? (
+                            <ArrowUp className="size-3.5" aria-hidden />
+                          ) : (
+                            <ArrowDown className="size-3.5" aria-hidden />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-50" aria-hidden />
+                        )}
                       </button>
                     ) : (
                       c.header
@@ -121,8 +160,17 @@ export function DataTable<T>(p: DataTableProps<T>) {
               ? Array.from({ length: p.skeletonRows ?? 6 }, (_, i) => (
                   <tr key={i} className="border-b border-border" aria-hidden>
                     {p.columns.map((c, j) => (
-                      <td key={c.key} className={cn("py-3.5 pr-4 last:pr-0", c.hideBelow && HIDE[c.hideBelow])}>
-                        <Skeleton className={cn("h-4", j === 0 ? "w-40" : "w-16", c.align === "right" && "ml-auto")} />
+                      <td
+                        key={c.key}
+                        className={cn("py-3.5 pr-4 last:pr-0", c.hideBelow && HIDE[c.hideBelow])}
+                      >
+                        <Skeleton
+                          className={cn(
+                            "h-4",
+                            j === 0 ? "w-40" : "w-16",
+                            c.align === "right" && "ml-auto"
+                          )}
+                        />
                       </td>
                     ))}
                   </tr>
@@ -136,26 +184,48 @@ export function DataTable<T>(p: DataTableProps<T>) {
                       data-testid={p.rowTestId?.(row)}
                       aria-selected={p.selectedKey != null ? p.selectedKey === key : undefined}
                       tabIndex={clickable ? 0 : undefined}
-                      onClick={clickable ? (e) => {
-                        // Links and buttons inside a row keep their own behaviour.
-                        if ((e.target as HTMLElement).closest("a,button,input,label,[role=menuitem]")) return;
-                        p.onRowClick!(row);
-                      } : undefined}
-                      onKeyDown={clickable ? (e) => {
-                        if (e.target !== e.currentTarget) return;
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          p.onRowClick!(row);
-                        }
-                      } : undefined}
+                      onClick={
+                        clickable
+                          ? (e) => {
+                              // Links and buttons inside a row keep their own behaviour.
+                              if (
+                                (e.target as HTMLElement).closest(
+                                  "a,button,input,label,[role=menuitem]"
+                                )
+                              )
+                                return;
+                              p.onRowClick!(row);
+                            }
+                          : undefined
+                      }
+                      onKeyDown={
+                        clickable
+                          ? (e) => {
+                              if (e.target !== e.currentTarget) return;
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                p.onRowClick!(row);
+                              }
+                            }
+                          : undefined
+                      }
                       className={cn(
                         "border-b border-border align-middle transition-colors",
-                        clickable && "cursor-pointer hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none",
-                        p.selectedKey === key && "bg-primary/10",
+                        clickable &&
+                          "cursor-pointer hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none",
+                        p.selectedKey === key && "bg-primary/10"
                       )}
                     >
                       {p.columns.map((c) => (
-                        <td key={c.key} className={cn("py-3 pr-4 last:pr-0", c.align === "right" && "text-right tabular-nums", c.hideBelow && HIDE[c.hideBelow], c.className)}>
+                        <td
+                          key={c.key}
+                          className={cn(
+                            "py-3 pr-4 last:pr-0",
+                            c.align === "right" && "text-right tabular-nums",
+                            c.hideBelow && HIDE[c.hideBelow],
+                            c.className
+                          )}
+                        >
                           {c.cell(row)}
                         </td>
                       ))}
@@ -166,14 +236,25 @@ export function DataTable<T>(p: DataTableProps<T>) {
         </table>
       </div>
       {!p.loading && !p.rows.length ? (
-        <EmptyState compact icon={p.empty?.icon} title={p.empty?.title ?? "Nothing here yet"} description={p.empty?.description} action={p.empty?.action} />
+        <EmptyState
+          compact
+          icon={p.empty?.icon}
+          title={p.empty?.title ?? "Nothing here yet"}
+          description={p.empty?.description}
+          action={p.empty?.action}
+        />
       ) : null}
       {p.hasMore || p.loadingMore ? (
         <div className="flex justify-center py-4" aria-live="polite">
           {p.loadingMore ? (
             <Spinner />
           ) : (
-            <Button variant="ghost" size="sm" onClick={p.onLoadMore} data-testid={p.testId ? `${p.testId}-more` : "table-load-more"}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={p.onLoadMore}
+              data-testid={p.testId ? `${p.testId}-more` : "table-load-more"}
+            >
               Load more
             </Button>
           )}
@@ -192,7 +273,10 @@ export function pagedTable<T>(list: {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   fetchNextPage: () => unknown;
-}): Pick<DataTableProps<T>, "rows" | "loading" | "error" | "onRetry" | "hasMore" | "loadingMore" | "onLoadMore"> {
+}): Pick<
+  DataTableProps<T>,
+  "rows" | "loading" | "error" | "onRetry" | "hasMore" | "loadingMore" | "onLoadMore"
+> {
   return {
     rows: list.items,
     loading: list.isPending,

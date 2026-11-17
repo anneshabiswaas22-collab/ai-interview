@@ -37,9 +37,11 @@ export async function migrate({ statusOnly = false, log = console.log } = {}): P
       )`);
 
     const applied = new Map<string, string>(
-      (await client.query<{ name: string; checksum: string }>("SELECT name, checksum FROM schema_migrations")).rows.map(
-        (r) => [r.name, r.checksum]
-      )
+      (
+        await client.query<{ name: string; checksum: string }>(
+          "SELECT name, checksum FROM schema_migrations"
+        )
+      ).rows.map((r) => [r.name, r.checksum])
     );
     const files = (await readdir(MIGRATIONS_DIR)).filter((f) => /^\d{4}_.+\.sql$/.test(f)).sort();
 
@@ -48,7 +50,8 @@ export async function migrate({ statusOnly = false, log = console.log } = {}): P
       const checksum = createHash("sha256").update(sqlText).digest("hex");
       const prior = applied.get(file);
       if (prior) {
-        if (prior !== checksum) throw new Error(`${file} changed after it was applied; add a new migration instead`);
+        if (prior !== checksum)
+          throw new Error(`${file} changed after it was applied; add a new migration instead`);
         log(`  applied  ${file}`);
         continue;
       }
@@ -59,7 +62,10 @@ export async function migrate({ statusOnly = false, log = console.log } = {}): P
       await client.query("BEGIN");
       try {
         await client.query(sqlText);
-        await client.query("INSERT INTO schema_migrations (name, checksum) VALUES ($1, $2)", [file, checksum]);
+        await client.query("INSERT INTO schema_migrations (name, checksum) VALUES ($1, $2)", [
+          file,
+          checksum,
+        ]);
         await client.query("COMMIT");
         appliedNow.push(file);
         log(`  migrated ${file}`);

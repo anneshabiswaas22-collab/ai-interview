@@ -15,7 +15,10 @@ export const geminiLive: RealtimeAdapter = {
     const now = Date.now();
     const connectBy = new Date(now + req.connectTtlSeconds * 1000);
     const endBy = new Date(now + (req.connectTtlSeconds + req.maxSeconds) * 1000);
-    const ai = new GoogleGenAI({ apiKey, httpOptions: { apiVersion: "v1alpha", baseUrl: baseUrl.replace(/\/v1alpha\/?$/, "") } });
+    const ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: { apiVersion: "v1alpha", baseUrl: baseUrl.replace(/\/v1alpha\/?$/, "") },
+    });
     try {
       const token = await ai.authTokens.create({
         config: {
@@ -27,8 +30,22 @@ export const geminiLive: RealtimeAdapter = {
             config: {
               responseModalities: [Modality.AUDIO],
               systemInstruction: req.instructions,
-              tools: [{ functionDeclarations: [{ name: req.tool.name, description: req.tool.description } as FunctionDeclaration] }],
-              speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: req.voice } }, ...(req.transcriptionLanguage !== "auto" ? { languageCode: req.transcriptionLanguage } : {}) },
+              tools: [
+                {
+                  functionDeclarations: [
+                    {
+                      name: req.tool.name,
+                      description: req.tool.description,
+                    } as FunctionDeclaration,
+                  ],
+                },
+              ],
+              speechConfig: {
+                voiceConfig: { prebuiltVoiceConfig: { voiceName: req.voice } },
+                ...(req.transcriptionLanguage !== "auto"
+                  ? { languageCode: req.transcriptionLanguage }
+                  : {}),
+              },
               inputAudioTranscription: {},
               outputAudioTranscription: {},
             },
@@ -41,7 +58,10 @@ export const geminiLive: RealtimeAdapter = {
     } catch (err) {
       if (err instanceof RealtimeMintError) throw err;
       const status = (err as { status?: number }).status ?? null;
-      throw new RealtimeMintError(`The voice provider refused the session${status ? ` (HTTP ${status})` : ""}`, status);
+      throw new RealtimeMintError(
+        `The voice provider refused the session${status ? ` (HTTP ${status})` : ""}`,
+        status
+      );
     }
   },
 };

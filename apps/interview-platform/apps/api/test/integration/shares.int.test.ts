@@ -8,28 +8,49 @@ import type { Interview, SharedReport, ShareSummary } from "@open-conversation/t
 import { afterEach, describe, expect, test } from "vitest";
 import { db } from "../../src/db/kysely";
 import { DEFAULT_SETTINGS } from "../../src/services/settings.service";
-import { anon, as, createUser, jdInterview, resetSettings, setSettings, startLive, type TestUser } from "./harness";
+import {
+  anon,
+  as,
+  createUser,
+  jdInterview,
+  resetSettings,
+  setSettings,
+  startLive,
+  type TestUser,
+} from "./harness";
 
 afterEach(async () => {
   await resetSettings();
 });
 
-const ANSWER = "MARKER_SHARED_TRANSCRIPT: I rebuilt the billing pipeline on queues and cut failed charges by forty percent.";
+const ANSWER =
+  "MARKER_SHARED_TRANSCRIPT: I rebuilt the billing pipeline on queues and cut failed charges by forty percent.";
 const CODE = "def two_sum(nums, target):\n    seen = {}  # MARKER_SHARED_CODE\n    return [0, 1]";
 
 /** An interview with one voice answer and one code answer, finished. */
 async function answered(user: TestUser): Promise<Interview> {
   const iv = await jdInterview(user);
   await startLive(user, iv.id);
-  await as(user).post(`/api/interviews/${iv.id}/answers`).send({ round: 0, question: 0, transcript: [{ role: "candidate", text: ANSWER }] }).expect(202);
+  await as(user)
+    .post(`/api/interviews/${iv.id}/answers`)
+    .send({ round: 0, question: 0, transcript: [{ role: "candidate", text: ANSWER }] })
+    .expect(202);
   const r = iv.plan!.findIndex((x) => x.questions.some((q) => q.code));
-  await as(user).post(`/api/interviews/${iv.id}/answers`).send({ round: r, question: 0, code: CODE, language: "python" }).expect(202);
+  await as(user)
+    .post(`/api/interviews/${iv.id}/answers`)
+    .send({ round: r, question: 0, code: CODE, language: "python" })
+    .expect(202);
   await as(user).post(`/api/interviews/${iv.id}/complete`).send().expect(200);
   return iv;
 }
 
-async function share(user: TestUser, interviewId: string, body: object = {}): Promise<ShareSummary> {
-  return (await as(user).post(`/api/interviews/${interviewId}/shares`).send(body).expect(201)).body as ShareSummary;
+async function share(
+  user: TestUser,
+  interviewId: string,
+  body: object = {}
+): Promise<ShareSummary> {
+  return (await as(user).post(`/api/interviews/${interviewId}/shares`).send(body).expect(201))
+    .body as ShareSummary;
 }
 
 describe("creating links", () => {
@@ -37,7 +58,16 @@ describe("creating links", () => {
     const ada = await createUser();
     const iv = await jdInterview(ada);
     const s = await share(ada, iv.id);
-    expect(s).toEqual({ id: expect.stringMatching(/^[0-9A-Z]{26}-[A-Za-z0-9_-]{22}$/), interviewId: iv.id, interviewTitle: iv.title, url: `http://localhost:3550/s/${s.id}`, includeTranscript: false, viewCount: 0, expiresAt: null, createdAt: expect.any(String) });
+    expect(s).toEqual({
+      id: expect.stringMatching(/^[0-9A-Z]{26}-[A-Za-z0-9_-]{22}$/),
+      interviewId: iv.id,
+      interviewTitle: iv.title,
+      url: `http://localhost:3550/s/${s.id}`,
+      includeTranscript: false,
+      viewCount: 0,
+      expiresAt: null,
+      createdAt: expect.any(String),
+    });
     const list = (await as(ada).get("/api/shares").expect(200)).body;
     expect(list.items.map((x: ShareSummary) => x.id)).toEqual([s.id]);
   });
@@ -47,9 +77,13 @@ describe("creating links", () => {
     const eve = await createUser();
     const iv = await jdInterview(ada);
     const s = await share(ada, iv.id);
-    expect((await as(eve).post(`/api/interviews/${iv.id}/shares`).send({}).expect(404)).body.code).toBe("INTERVIEW_NOT_FOUND");
+    expect(
+      (await as(eve).post(`/api/interviews/${iv.id}/shares`).send({}).expect(404)).body.code
+    ).toBe("INTERVIEW_NOT_FOUND");
     expect((await as(eve).get("/api/shares").expect(200)).body.items).toEqual([]);
-    expect((await as(eve).delete(`/api/shares/${s.id}`).expect(404)).body.code).toBe("SHARE_NOT_FOUND");
+    expect((await as(eve).delete(`/api/shares/${s.id}`).expect(404)).body.code).toBe(
+      "SHARE_NOT_FOUND"
+    );
     await anon().get(`/api/shared/${s.id}`).expect(200);
     await anon().post(`/api/interviews/${iv.id}/shares`).send({}).expect(401);
   });
@@ -59,7 +93,10 @@ describe("creating links", () => {
     const iv = await jdInterview(ada);
     await as(ada).post(`/api/interviews/${iv.id}/shares`).send({ expiresInDays: 0 }).expect(400);
     await as(ada).post(`/api/interviews/${iv.id}/shares`).send({ expiresInDays: 366 }).expect(400);
-    await as(ada).post(`/api/interviews/${iv.id}/shares`).send({ includeTranscript: "yes" }).expect(400);
+    await as(ada)
+      .post(`/api/interviews/${iv.id}/shares`)
+      .send({ includeTranscript: "yes" })
+      .expect(400);
     await as(ada).post(`/api/interviews/${iv.id}/shares`).send({ viewCount: 1000 }).expect(400);
     const s = await share(ada, iv.id, { expiresInDays: 7 });
     expect(Math.abs(Date.parse(s.expiresAt!) - (Date.now() + 7 * 86_400_000))).toBeLessThan(60_000);
@@ -70,7 +107,9 @@ describe("creating links", () => {
     const iv = await jdInterview(ada);
     const made: ShareSummary[] = [];
     for (let i = 0; i < 10; i++) made.push(await share(ada, iv.id));
-    expect((await as(ada).post(`/api/interviews/${iv.id}/shares`).send({}).expect(403)).body.code).toBe("SHARE_LIMIT");
+    expect(
+      (await as(ada).post(`/api/interviews/${iv.id}/shares`).send({}).expect(403)).body.code
+    ).toBe("SHARE_LIMIT");
     await as(ada).delete(`/api/shares/${made[0]!.id}`).expect(204);
     await share(ada, iv.id);
   });
@@ -98,16 +137,22 @@ describe("reading a link", () => {
   test("the transcript and submitted code are hidden unless the owner included them", async () => {
     const ada = await createUser();
     const iv = await answered(ada);
-    const hidden = await anon().get(`/api/shared/${(await share(ada, iv.id)).id}`).expect(200);
+    const hidden = await anon()
+      .get(`/api/shared/${(await share(ada, iv.id)).id}`)
+      .expect(200);
     expect(hidden.text).not.toContain("MARKER_SHARED_TRANSCRIPT");
     expect(hidden.text).not.toContain("MARKER_SHARED_CODE");
     const answeredQs = (hidden.body as SharedReport).questions.filter((q) => q.answer);
     expect(answeredQs).toHaveLength(2);
     expect(answeredQs.every((q) => q.transcript === null && q.submittedCode === null)).toBe(true);
     // Scores and feedback are part of the report either way.
-    expect(answeredQs.every((q) => q.answer!.status === "SCORED" && q.answer!.domainRating !== null)).toBe(true);
+    expect(
+      answeredQs.every((q) => q.answer!.status === "SCORED" && q.answer!.domainRating !== null)
+    ).toBe(true);
 
-    const shown = await anon().get(`/api/shared/${(await share(ada, iv.id, { includeTranscript: true })).id}`).expect(200);
+    const shown = await anon()
+      .get(`/api/shared/${(await share(ada, iv.id, { includeTranscript: true })).id}`)
+      .expect(200);
     expect(shown.text).toContain("MARKER_SHARED_TRANSCRIPT");
     expect(shown.text).toContain("MARKER_SHARED_CODE");
   });
@@ -128,7 +173,11 @@ describe("reading a link", () => {
     const iv = await jdInterview(ada);
     const s = await share(ada, iv.id, { expiresInDays: 1 });
     await anon().get(`/api/shared/${s.id}`).expect(200);
-    await db.updateTable("shares").set({ expires_at: new Date(Date.now() - 1000) }).where("id", "=", s.id).execute();
+    await db
+      .updateTable("shares")
+      .set({ expires_at: new Date(Date.now() - 1000) })
+      .where("id", "=", s.id)
+      .execute();
     expect((await anon().get(`/api/shared/${s.id}`).expect(404)).body.code).toBe("SHARE_NOT_FOUND");
   });
 
@@ -145,11 +194,20 @@ describe("reading a link", () => {
     const iv = await jdInterview(ada);
     const s = await share(ada, iv.id);
     const unknown = `${s.id.slice(0, 27)}${"A".repeat(22)}`;
-    for (const id of [unknown, "not-a-share", "01ARZ3NDEKTSV4RRFFQ69G5FAV", "%27%20OR%201%3D1", `${s.id}x`, s.id.toLowerCase()]) {
+    for (const id of [
+      unknown,
+      "not-a-share",
+      "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "%27%20OR%201%3D1",
+      `${s.id}x`,
+      s.id.toLowerCase(),
+    ]) {
       const res = await anon().get(`/api/shared/${id}`);
       expect([res.status, res.body.code], id).toEqual([404, "SHARE_NOT_FOUND"]);
     }
-    expect((await as(ada).delete("/api/shares/not-a-share").expect(404)).body.code).toBe("SHARE_NOT_FOUND");
+    expect((await as(ada).delete("/api/shares/not-a-share").expect(404)).body.code).toBe(
+      "SHARE_NOT_FOUND"
+    );
   });
 });
 
@@ -159,14 +217,39 @@ describe("admins and the sharing switch", () => {
     const ada = await createUser();
     const iv = await jdInterview(ada);
     const s = await share(ada, iv.id);
-    await as(admin).post(`/api/admin/shares/${s.id}/revoke`).send({ reason: "Reported content" }).expect(204);
+    await as(admin)
+      .post(`/api/admin/shares/${s.id}/revoke`)
+      .send({ reason: "Reported content" })
+      .expect(204);
     await anon().get(`/api/shared/${s.id}`).expect(404);
     expect((await as(ada).get("/api/shares").expect(200)).body.items).toEqual([]);
-    expect((await db.selectFrom("shares").select("revoked_by").where("id", "=", s.id).executeTakeFirstOrThrow()).revoked_by).toBe(admin.id);
-    expect((await as(admin).post("/api/admin/shares/not-a-share/revoke").send({ reason: "Reported content" }).expect(400)).body.code).toBe("VALIDATION_FAILED");
+    expect(
+      (
+        await db
+          .selectFrom("shares")
+          .select("revoked_by")
+          .where("id", "=", s.id)
+          .executeTakeFirstOrThrow()
+      ).revoked_by
+    ).toBe(admin.id);
+    expect(
+      (
+        await as(admin)
+          .post("/api/admin/shares/not-a-share/revoke")
+          .send({ reason: "Reported content" })
+          .expect(400)
+      ).body.code
+    ).toBe("VALIDATION_FAILED");
     // A user cannot use the admin route on their own link.
     const s2 = await share(ada, iv.id);
-    expect((await as(ada).post(`/api/admin/shares/${s2.id}/revoke`).send({ reason: "Mine anyway" }).expect(403)).body.code).toBe("FORBIDDEN_ADMIN");
+    expect(
+      (
+        await as(ada)
+          .post(`/api/admin/shares/${s2.id}/revoke`)
+          .send({ reason: "Mine anyway" })
+          .expect(403)
+      ).body.code
+    ).toBe("FORBIDDEN_ADMIN");
   });
 
   test("with sharing off, links cannot be made and existing ones stop working until it is back on", async () => {
@@ -174,7 +257,9 @@ describe("admins and the sharing switch", () => {
     const iv = await jdInterview(ada);
     const s = await share(ada, iv.id);
     await setSettings({ features: { ...DEFAULT_SETTINGS.features, sharing: false } });
-    expect((await as(ada).post(`/api/interviews/${iv.id}/shares`).send({}).expect(403)).body.code).toBe("FEATURE_DISABLED");
+    expect(
+      (await as(ada).post(`/api/interviews/${iv.id}/shares`).send({}).expect(403)).body.code
+    ).toBe("FEATURE_DISABLED");
     expect((await anon().get(`/api/shared/${s.id}`).expect(404)).body.code).toBe("SHARE_NOT_FOUND");
     await resetSettings();
     await anon().get(`/api/shared/${s.id}`).expect(200);
@@ -183,7 +268,13 @@ describe("admins and the sharing switch", () => {
   test("a suspended owner cannot make links", async () => {
     const ada = await createUser();
     const iv = await jdInterview(ada);
-    await db.updateTable("users").set({ status: "SUSPENDED", suspended_until: new Date(Date.now() + 86_400_000) }).where("id", "=", ada.id).execute();
-    expect((await as(ada).post(`/api/interviews/${iv.id}/shares`).send({}).expect(403)).body.code).toBe("ACCOUNT_RESTRICTED");
+    await db
+      .updateTable("users")
+      .set({ status: "SUSPENDED", suspended_until: new Date(Date.now() + 86_400_000) })
+      .where("id", "=", ada.id)
+      .execute();
+    expect(
+      (await as(ada).post(`/api/interviews/${iv.id}/shares`).send({}).expect(403)).body.code
+    ).toBe("ACCOUNT_RESTRICTED");
   });
 });

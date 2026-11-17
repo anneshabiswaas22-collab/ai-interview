@@ -26,7 +26,10 @@ import { AccountSection, SectionTitle } from "./section";
 export function SecuritySection() {
   return (
     <div>
-      <SectionTitle title="Security" lead="Your password, two-factor sign-in and the devices signed in to your account." />
+      <SectionTitle
+        title="Security"
+        lead="Your password, two-factor sign-in and the devices signed in to your account."
+      />
       <PasswordBlock />
       <TwoFactorBlock />
       <SessionsBlock />
@@ -42,13 +45,22 @@ const passwordSchema = z
     newPassword: z.string().min(10, "Use at least 10 characters").max(128),
     confirm: z.string(),
   })
-  .refine((v) => v.newPassword === v.confirm, { path: ["confirm"], message: "The passwords do not match" })
-  .refine((v) => v.newPassword !== v.currentPassword, { path: ["newPassword"], message: "Choose a different password from your current one" });
+  .refine((v) => v.newPassword === v.confirm, {
+    path: ["confirm"],
+    message: "The passwords do not match",
+  })
+  .refine((v) => v.newPassword !== v.currentPassword, {
+    path: ["newPassword"],
+    message: "Choose a different password from your current one",
+  });
 type PasswordValues = z.infer<typeof passwordSchema>;
 
 function PasswordBlock() {
   const { logout } = useAuth();
-  const form = useForm<PasswordValues>({ resolver: zodResolver(passwordSchema), defaultValues: { currentPassword: "", newPassword: "", confirm: "" } });
+  const form = useForm<PasswordValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: { currentPassword: "", newPassword: "", confirm: "" },
+  });
   const errs = form.formState.errors;
   return (
     <form
@@ -57,11 +69,16 @@ function PasswordBlock() {
         try {
           await api().auth.changePassword(v.currentPassword, v.newPassword);
           // The API ends every session (this one too) when the password changes.
-          toast.success({ title: "Password changed. Sign in again", description: "Every device was signed out." });
+          toast.success({
+            title: "Password changed. Sign in again",
+            description: "Every device was signed out.",
+          });
           await logout();
         } catch (e) {
-          if (isApiError(e) && e.code === "INVALID_CREDENTIALS") form.setError("currentPassword", { message: "That is not your current password." });
-          else if (isApiError(e) && e.code === "WEAK_PASSWORD") form.setError("newPassword", { message: errorMessage(e) });
+          if (isApiError(e) && e.code === "INVALID_CREDENTIALS")
+            form.setError("currentPassword", { message: "That is not your current password." });
+          else if (isApiError(e) && e.code === "WEAK_PASSWORD")
+            form.setError("newPassword", { message: errorMessage(e) });
           else toast.error({ title: errorMessage(e) });
         }
       })}
@@ -71,17 +88,34 @@ function PasswordBlock() {
         title="Password"
         description="After a change you are signed out everywhere and sign in again with the new password."
         actions={
-          <Button type="submit" variant="outline" loading={form.formState.isSubmitting} data-testid="password-save">
+          <Button
+            type="submit"
+            variant="outline"
+            loading={form.formState.isSubmitting}
+            data-testid="password-save"
+          >
             Change password
           </Button>
         }
       >
         <div className="max-w-sm space-y-4">
-          <Field label="Current password" htmlFor="currentPassword" error={errs.currentPassword?.message}>
-            <PasswordInput id="currentPassword" autoComplete="current-password" {...form.register("currentPassword")} />
+          <Field
+            label="Current password"
+            htmlFor="currentPassword"
+            error={errs.currentPassword?.message}
+          >
+            <PasswordInput
+              id="currentPassword"
+              autoComplete="current-password"
+              {...form.register("currentPassword")}
+            />
           </Field>
           <Field label="New password" htmlFor="newPassword" error={errs.newPassword?.message}>
-            <PasswordInput id="newPassword" autoComplete="new-password" {...form.register("newPassword")} />
+            <PasswordInput
+              id="newPassword"
+              autoComplete="new-password"
+              {...form.register("newPassword")}
+            />
             {!errs.newPassword ? <StrengthMeter value={form.watch("newPassword")} /> : null}
           </Field>
           <Field label="Confirm new password" htmlFor="confirm" error={errs.confirm?.message}>
@@ -96,9 +130,23 @@ function PasswordBlock() {
 // ─── Two-factor ─────────────────────────────────────────────────────────────
 
 const codeError = (e: unknown) =>
-  isApiError(e) && e.code === "INVALID_CREDENTIALS" ? "That password is not right." : isApiError(e) && e.code === "INVALID_TOTP" ? "That code did not match. Codes change every 30 seconds." : errorMessage(e);
+  isApiError(e) && e.code === "INVALID_CREDENTIALS"
+    ? "That password is not right."
+    : isApiError(e) && e.code === "INVALID_TOTP"
+      ? "That code did not match. Codes change every 30 seconds."
+      : errorMessage(e);
 
-function CodeInput({ id, value, onChange, testId }: { id: string; value: string; onChange: (v: string) => void; testId: string }) {
+function CodeInput({
+  id,
+  value,
+  onChange,
+  testId,
+}: {
+  id: string;
+  value: string;
+  onChange: (v: string) => void;
+  testId: string;
+}) {
   return (
     <Input
       id={id}
@@ -136,7 +184,10 @@ function TwoFactorBlock() {
     };
   }, [setup]);
 
-  const start = useMutation({ mutationFn: () => api().auth.totpSetup(), onSuccess: (s) => setSetup(s) });
+  const start = useMutation({
+    mutationFn: () => api().auth.totpSetup(),
+    onSuccess: (s) => setSetup(s),
+  });
   const enable = useMutation({
     mutationFn: () => api().auth.totpEnable(code),
     meta: { silent: true },
@@ -174,7 +225,14 @@ function TwoFactorBlock() {
     onError: (e) => setError(codeError(e)),
   });
 
-  if (recoveryCodes) return <RecoveryCodes codes={recoveryCodes} productName={name} onDone={() => setRecoveryCodes(null)} />;
+  if (recoveryCodes)
+    return (
+      <RecoveryCodes
+        codes={recoveryCodes}
+        productName={name}
+        onDone={() => setRecoveryCodes(null)}
+      />
+    );
 
   if (me.totpEnabled) {
     const confirmed = !!password && confirmCode.length === 6;
@@ -182,17 +240,32 @@ function TwoFactorBlock() {
       <AccountSection
         title={
           <span className="flex items-baseline gap-2">
-            Two-factor sign-in <span className="font-sans text-[14px] font-medium tracking-normal text-success">On</span>
+            Two-factor sign-in{" "}
+            <span className="font-sans text-[14px] font-medium tracking-normal text-success">
+              On
+            </span>
           </span>
         }
         description="Signing in asks for a code from your authenticator app. To turn it off or replace your recovery codes, confirm your password and a current code."
         testId="totp-on"
         actions={
           <>
-            <Button variant="outline" onClick={() => regenerate.mutate()} disabled={!confirmed || disable.isPending} loading={regenerate.isPending} data-testid="totp-regenerate">
+            <Button
+              variant="outline"
+              onClick={() => regenerate.mutate()}
+              disabled={!confirmed || disable.isPending}
+              loading={regenerate.isPending}
+              data-testid="totp-regenerate"
+            >
               New recovery codes
             </Button>
-            <Button variant="danger-ghost" onClick={() => disable.mutate()} disabled={!confirmed || regenerate.isPending} loading={disable.isPending} data-testid="totp-disable">
+            <Button
+              variant="danger-ghost"
+              onClick={() => disable.mutate()}
+              disabled={!confirmed || regenerate.isPending}
+              loading={disable.isPending}
+              data-testid="totp-disable"
+            >
               Turn off
             </Button>
           </>
@@ -200,10 +273,23 @@ function TwoFactorBlock() {
       >
         <div className="max-w-sm space-y-4">
           <Field label="Password" htmlFor="totp-password">
-            <PasswordInput id="totp-password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <PasswordInput
+              id="totp-password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </Field>
           <Field label="6 digit code from your app" htmlFor="totp-confirm-code" error={error}>
-            <CodeInput id="totp-confirm-code" value={confirmCode} onChange={(v) => { setError(null); setConfirmCode(v); }} testId="totp-confirm-code" />
+            <CodeInput
+              id="totp-confirm-code"
+              value={confirmCode}
+              onChange={(v) => {
+                setError(null);
+                setConfirmCode(v);
+              }}
+              testId="totp-confirm-code"
+            />
           </Field>
         </div>
       </AccountSection>
@@ -215,12 +301,20 @@ function TwoFactorBlock() {
       <AccountSection
         title={
           <span className="flex items-baseline gap-2">
-            Two-factor sign-in <span className="font-sans text-[14px] font-medium tracking-normal text-muted-foreground">Off</span>
+            Two-factor sign-in{" "}
+            <span className="font-sans text-[14px] font-medium tracking-normal text-muted-foreground">
+              Off
+            </span>
           </span>
         }
         description="Add a code from an authenticator app to every sign-in, so a stolen password is not enough."
         actions={
-          <Button variant="outline" onClick={() => start.mutate()} loading={start.isPending} data-testid="totp-start">
+          <Button
+            variant="outline"
+            onClick={() => start.mutate()}
+            loading={start.isPending}
+            data-testid="totp-start"
+          >
             Set up two-factor
           </Button>
         }
@@ -235,10 +329,22 @@ function TwoFactorBlock() {
       testId="totp-setup"
       actions={
         <>
-          <Button onClick={() => enable.mutate()} disabled={code.length !== 6} loading={enable.isPending} data-testid="totp-enable">
+          <Button
+            onClick={() => enable.mutate()}
+            disabled={code.length !== 6}
+            loading={enable.isPending}
+            data-testid="totp-enable"
+          >
             Turn on
           </Button>
-          <Button variant="ghost" onClick={() => { setSetup(null); setCode(""); setError(null); }}>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setSetup(null);
+              setCode("");
+              setError(null);
+            }}
+          >
             Cancel
           </Button>
         </>
@@ -249,7 +355,14 @@ function TwoFactorBlock() {
           {qr ? (
             // A data URL with its own light quiet zone, so it scans in dark mode too.
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={qr} alt="QR code for your authenticator app" width={180} height={180} className="rounded-lg" data-testid="totp-qr" />
+            <img
+              src={qr}
+              alt="QR code for your authenticator app"
+              width={180}
+              height={180}
+              className="rounded-lg"
+              data-testid="totp-qr"
+            />
           ) : (
             <Skeleton className="size-[180px]" />
           )}
@@ -258,14 +371,36 @@ function TwoFactorBlock() {
           <div>
             <p className="text-sm font-medium">Cannot scan? Enter this key</p>
             <div className="mt-1 flex items-center gap-2">
-              <code className="min-w-0 flex-1 break-all font-mono text-sm" data-testid="totp-secret">{setup.secret}</code>
-              <Button variant="ghost" size="sm" onClick={() => navigator.clipboard?.writeText(setup.secret).then(() => toast.success({ title: "Key copied" }), () => undefined)}>
+              <code
+                className="min-w-0 flex-1 break-all font-mono text-sm"
+                data-testid="totp-secret"
+              >
+                {setup.secret}
+              </code>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  navigator.clipboard?.writeText(setup.secret).then(
+                    () => toast.success({ title: "Key copied" }),
+                    () => undefined
+                  )
+                }
+              >
                 <Copy /> Copy
               </Button>
             </div>
           </div>
           <Field label="6 digit code" htmlFor="totp-code" error={error}>
-            <CodeInput id="totp-code" value={code} onChange={(v) => { setError(null); setCode(v); }} testId="totp-code" />
+            <CodeInput
+              id="totp-code"
+              value={code}
+              onChange={(v) => {
+                setError(null);
+                setCode(v);
+              }}
+              testId="totp-code"
+            />
           </Field>
         </div>
       </div>
@@ -275,11 +410,25 @@ function TwoFactorBlock() {
 
 /** The plain-text file a user saves: one code per line under a short header. */
 export function recoveryCodesText(codes: string[], productName: string): string {
-  return [`${productName} recovery codes`, "Each code signs you in once if you lose your authenticator app.", "", ...codes, ""].join("\n");
+  return [
+    `${productName} recovery codes`,
+    "Each code signs you in once if you lose your authenticator app.",
+    "",
+    ...codes,
+    "",
+  ].join("\n");
 }
 
 /** Shown once, right after the API returns the codes; Done unlocks after "I saved them". */
-export function RecoveryCodes({ codes, productName, onDone }: { codes: string[]; productName: string; onDone: () => void }) {
+export function RecoveryCodes({
+  codes,
+  productName,
+  onDone,
+}: {
+  codes: string[];
+  productName: string;
+  onDone: () => void;
+}) {
   const [saved, setSaved] = useState(false);
   const text = recoveryCodesText(codes, productName);
   return (
@@ -293,21 +442,44 @@ export function RecoveryCodes({ codes, productName, onDone }: { codes: string[];
         </Button>
       }
     >
-      <ul className="grid max-w-[480px] grid-cols-2 gap-x-6 gap-y-2 border-y border-border py-4 font-mono text-[14px] tabular-nums sm:grid-cols-3" data-testid="recovery-codes">
+      <ul
+        className="grid max-w-[480px] grid-cols-2 gap-x-6 gap-y-2 border-y border-border py-4 font-mono text-[14px] tabular-nums sm:grid-cols-3"
+        data-testid="recovery-codes"
+      >
         {codes.map((c) => (
           <li key={c}>{c}</li>
         ))}
       </ul>
       <div className="mt-3 flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" data-testid="recovery-copy" onClick={() => navigator.clipboard?.writeText(codes.join("\n")).then(() => toast.success({ title: "Codes copied" }), () => undefined)}>
+        <Button
+          variant="outline"
+          size="sm"
+          data-testid="recovery-copy"
+          onClick={() =>
+            navigator.clipboard?.writeText(codes.join("\n")).then(
+              () => toast.success({ title: "Codes copied" }),
+              () => undefined
+            )
+          }
+        >
           <Copy /> Copy
         </Button>
-        <Button variant="outline" size="sm" data-testid="recovery-download" onClick={() => saveBlob(new Blob([text], { type: "text/plain" }), "recovery-codes.txt")}>
+        <Button
+          variant="outline"
+          size="sm"
+          data-testid="recovery-download"
+          onClick={() => saveBlob(new Blob([text], { type: "text/plain" }), "recovery-codes.txt")}
+        >
           <Download /> Download
         </Button>
       </div>
       <label className="mt-4 flex items-center gap-2 text-sm font-medium">
-        <Checkbox checked={saved} onCheckedChange={(v) => setSaved(v === true)} data-testid="recovery-saved" aria-label="I saved them" />
+        <Checkbox
+          checked={saved}
+          onCheckedChange={(v) => setSaved(v === true)}
+          data-testid="recovery-saved"
+          aria-label="I saved them"
+        />
         <span>I saved them somewhere safe</span>
       </label>
     </AccountSection>
@@ -338,7 +510,11 @@ function SessionsBlock() {
       title="Where you are signed in"
       description="Sign out any device you do not recognise, then change your password."
       actions={
-        <Button variant="outline" onClick={() => setConfirmAll(true)} data-testid="sessions-sign-out-all">
+        <Button
+          variant="outline"
+          onClick={() => setConfirmAll(true)}
+          data-testid="sessions-sign-out-all"
+        >
           <LogOut /> Sign out everywhere
         </Button>
       }
@@ -358,14 +534,28 @@ function SessionsBlock() {
               <div className="min-w-0 flex-1">
                 <p className="flex items-center gap-2 text-[14.5px] font-semibold">
                   {summarizeUserAgent(s.userAgent)}
-                  {s.current ? <span className="text-[13px] font-medium text-success">This device</span> : null}
+                  {s.current ? (
+                    <span className="text-[13px] font-medium text-success">This device</span>
+                  ) : null}
                 </p>
                 <p className="truncate text-[13px] text-muted-foreground">
-                  {[s.ip, s.lastUsedAt ? `Active ${relativeTime(s.lastUsedAt)}` : `Signed in ${relativeTime(s.createdAt)}`].filter(Boolean).join(" · ")}
+                  {[
+                    s.ip,
+                    s.lastUsedAt
+                      ? `Active ${relativeTime(s.lastUsedAt)}`
+                      : `Signed in ${relativeTime(s.createdAt)}`,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </p>
               </div>
               {!s.current ? (
-                <Button variant="ghost" size="sm" onClick={() => revoke.mutate(s.id)} data-testid="session-revoke">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => revoke.mutate(s.id)}
+                  data-testid="session-revoke"
+                >
                   Sign out
                 </Button>
               ) : null}

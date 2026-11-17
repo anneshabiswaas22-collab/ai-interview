@@ -5,7 +5,11 @@
  */
 import { config } from "./config";
 
-export function awsClientConfig(region?: string): { region: string; endpoint?: string; forcePathStyle?: boolean } {
+export function awsClientConfig(region?: string): {
+  region: string;
+  endpoint?: string;
+  forcePathStyle?: boolean;
+} {
   const endpoint = config.AWS_ENDPOINT_URL;
   return {
     region: region || config.AWS_REGION,

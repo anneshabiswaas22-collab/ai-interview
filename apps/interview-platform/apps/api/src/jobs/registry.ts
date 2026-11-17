@@ -51,14 +51,22 @@ export function queueFor(name: JobName): QueueName {
   return name.split(".")[0] as QueueName;
 }
 
-const queues = new Map<QueueName, { queue: Queue; connection: ReturnType<typeof redisProducerConnection> }>();
+const queues = new Map<
+  QueueName,
+  { queue: Queue; connection: ReturnType<typeof redisProducerConnection> }
+>();
 function queue(name: QueueName): Queue {
   let entry = queues.get(name);
   if (!entry) {
     const connection = redisProducerConnection();
     const q = new Queue(name, {
       connection,
-      defaultJobOptions: { attempts: 5, backoff: { type: "exponential", delay: 5_000 }, removeOnComplete: 1000, removeOnFail: 5000 },
+      defaultJobOptions: {
+        attempts: 5,
+        backoff: { type: "exponential", delay: 5_000 },
+        removeOnComplete: 1000,
+        removeOnFail: 5000,
+      },
     });
     q.on("error", (err) => captureError(err, { where: "queue.connection", queue: name }));
     entry = { queue: q, connection };
@@ -74,7 +82,11 @@ const JOB_OPTIONS: Partial<Record<JobName, JobsOptions>> = {
   "interview.hangup": { attempts: 3 },
 };
 
-export async function enqueue<N extends JobName>(name: N, data: JobDefinitions[N], opts: JobsOptions = {}): Promise<void> {
+export async function enqueue<N extends JobName>(
+  name: N,
+  data: JobDefinitions[N],
+  opts: JobsOptions = {}
+): Promise<void> {
   if (config.JOBS_MODE === "inline") {
     const handler = getHandler(name);
     if (!handler) {

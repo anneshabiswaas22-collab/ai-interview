@@ -7,7 +7,11 @@ export function isRestricted(user: Pick<Me, "status"> | null | undefined): boole
 }
 
 /** Banner copy: with the end date when the API reports it. */
-export function restrictionMessage(until: string | null | undefined, locale?: string, timeZone?: string): string {
+export function restrictionMessage(
+  until: string | null | undefined,
+  locale?: string,
+  timeZone?: string
+): string {
   if (!until) return "Your account is restricted.";
   return `Your account is restricted until ${fullTimestamp(until, locale, timeZone)}.`;
 }

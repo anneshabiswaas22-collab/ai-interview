@@ -11,7 +11,11 @@ export function parse<S extends ZodTypeAny>(schema: S, input: unknown): z.infer<
   if (!result.success) {
     const fields = result.error.issues.map((i) => ({ path: i.path.join("."), message: i.message }));
     const first = fields[0];
-    throw badRequest(first ? `${first.path || "body"}: ${first.message}` : "Invalid request", "VALIDATION_FAILED", { fields });
+    throw badRequest(
+      first ? `${first.path || "body"}: ${first.message}` : "Invalid request",
+      "VALIDATION_FAILED",
+      { fields }
+    );
   }
   return result.data;
 }

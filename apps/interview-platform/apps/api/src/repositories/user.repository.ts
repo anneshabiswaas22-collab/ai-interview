@@ -38,7 +38,15 @@ export class UserRepository {
   findAuthById(id: string, exec: Executor = db) {
     return exec
       .selectFrom("users")
-      .select(["id", "username", "display_name", "role", "status", "token_version", "suspended_until"])
+      .select([
+        "id",
+        "username",
+        "display_name",
+        "role",
+        "status",
+        "token_version",
+        "suspended_until",
+      ])
       .where("id", "=", id)
       .executeTakeFirst();
   }
@@ -87,7 +95,11 @@ export class UserRepository {
   }
 
   touchLastSeen(id: string, exec: Executor = db) {
-    return exec.updateTable("users").set({ last_seen_at: new Date() }).where("id", "=", id).execute();
+    return exec
+      .updateTable("users")
+      .set({ last_seen_at: new Date() })
+      .where("id", "=", id)
+      .execute();
   }
 
   countUsers(exec: Executor = db) {

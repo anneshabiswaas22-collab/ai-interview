@@ -4,7 +4,10 @@ import { forwardRef, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@open-conversation/ui";
 
-export const PasswordInput = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(function PasswordInput(props, ref) {
+export const PasswordInput = forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(function PasswordInput(props, ref) {
   const [show, setShow] = useState(false);
   return (
     <div className="relative">
@@ -41,7 +44,10 @@ export function StrengthMeter({ value }: { value: string }) {
     <div className="mt-1.5" aria-live="polite">
       <div className="flex gap-1" aria-hidden>
         {[1, 2, 3, 4].map((i) => (
-          <span key={i} className={`h-1 flex-1 rounded-full ${i <= score ? TONES[score] : "bg-muted"}`} />
+          <span
+            key={i}
+            className={`h-1 flex-1 rounded-full ${i <= score ? TONES[score] : "bg-muted"}`}
+          />
         ))}
       </div>
       <p className="mt-1 text-xs text-subtle-foreground">

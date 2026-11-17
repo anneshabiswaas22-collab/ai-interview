@@ -33,7 +33,9 @@ export function auditAction(group: string, custom: string): string {
 export function AdminAudit() {
   const url = useUrlState();
   const groupParam = url.get("group");
-  const group: Group = AUDIT_GROUPS.some((g) => g.value === groupParam) ? (groupParam as Group) : "all";
+  const group: Group = AUDIT_GROUPS.some((g) => g.value === groupParam)
+    ? (groupParam as Group)
+    : "all";
   const custom = url.get("action");
   const action = auditAction(group, custom);
   const actorId = url.get("actor");
@@ -43,15 +45,30 @@ export function AdminAudit() {
   const f = { action, actorId, entityType, entityId };
   const list = useInfiniteQuery({
     queryKey: ak.audit(f),
-    queryFn: ({ pageParam }) => api().admin.audit({ action: action || undefined, actorId: actorId || undefined, entityType: entityType || undefined, entityId: entityId || undefined, cursor: pageParam, limit: 50 }),
+    queryFn: ({ pageParam }) =>
+      api().admin.audit({
+        action: action || undefined,
+        actorId: actorId || undefined,
+        entityType: entityType || undefined,
+        entityId: entityId || undefined,
+        cursor: pageParam,
+        limit: 50,
+      }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: nextCursor,
   });
   const items = flattenPages(list.data?.pages);
   const active: { key: string; label: string; clear: Record<string, null> }[] = [];
-  if (actorId) active.push({ key: "actor", label: `By ${actorName || "one person"}`, clear: { actor: null, actorName: null } });
-  if (entityType) active.push({ key: "entityType", label: `Type ${entityType}`, clear: { entityType: null } });
-  if (entityId) active.push({ key: "entityId", label: `Item ${entityId}`, clear: { entityId: null } });
+  if (actorId)
+    active.push({
+      key: "actor",
+      label: `By ${actorName || "one person"}`,
+      clear: { actor: null, actorName: null },
+    });
+  if (entityType)
+    active.push({ key: "entityType", label: `Type ${entityType}`, clear: { entityType: null } });
+  if (entityId)
+    active.push({ key: "entityId", label: `Item ${entityId}`, clear: { entityId: null } });
 
   return (
     <AdminPage
@@ -69,13 +86,31 @@ export function AdminAudit() {
             searchPlaceholder="Action prefix, such as user.ban"
             testId="audit-filter"
           >
-            <SearchInput value={entityType} onChange={(v) => url.set({ entityType: v.trim() })} placeholder="Entity type" className="sm:w-36" testId="audit-entity-type" />
-            <SearchInput value={entityId} onChange={(v) => url.set({ entityId: v.trim() })} placeholder="Entity id" className="sm:w-40" testId="audit-entity-id" />
+            <SearchInput
+              value={entityType}
+              onChange={(v) => url.set({ entityType: v.trim() })}
+              placeholder="Entity type"
+              className="sm:w-36"
+              testId="audit-entity-type"
+            />
+            <SearchInput
+              value={entityId}
+              onChange={(v) => url.set({ entityId: v.trim() })}
+              placeholder="Entity id"
+              className="sm:w-40"
+              testId="audit-entity-id"
+            />
           </FilterBar>
           {active.length ? (
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px]">
               {active.map((a) => (
-                <button key={a.key} type="button" onClick={() => url.set(a.clear)} className="inline-flex min-w-0 items-center gap-1 break-all text-muted-foreground hover:text-foreground" aria-label={`Clear filter: ${a.label}`}>
+                <button
+                  key={a.key}
+                  type="button"
+                  onClick={() => url.set(a.clear)}
+                  className="inline-flex min-w-0 items-center gap-1 break-all text-muted-foreground hover:text-foreground"
+                  aria-label={`Clear filter: ${a.label}`}
+                >
                   {a.label} <X className="size-3.5 shrink-0" aria-hidden />
                 </button>
               ))}
@@ -98,19 +133,34 @@ export function AdminAudit() {
           ))}
         </ul>
       ) : !items.length ? (
-        <EmptyState compact title={active.length || action ? "Nothing matches these filters." : "Nothing recorded yet."} />
+        <EmptyState
+          compact
+          title={
+            active.length || action ? "Nothing matches these filters." : "Nothing recorded yet."
+          }
+        />
       ) : (
         <>
           <ul className="divide-y divide-border border-b border-border" data-testid="audit-list">
             {items.map((e) => (
-              <AuditRow key={e.id} entry={e} onActor={(a) => url.set({ actor: a.id, actorName: a.displayName })} onEntity={(t, id) => url.set({ entityType: t, entityId: id })} />
+              <AuditRow
+                key={e.id}
+                entry={e}
+                onActor={(a) => url.set({ actor: a.id, actorName: a.displayName })}
+                onEntity={(t, id) => url.set({ entityType: t, entityId: id })}
+              />
             ))}
           </ul>
           <div className="flex min-h-12 items-center justify-center py-3" aria-live="polite">
             {list.isFetchingNextPage ? (
               <Spinner />
             ) : list.hasNextPage ? (
-              <Button variant="ghost" size="sm" onClick={() => void list.fetchNextPage()} data-testid="audit-more">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void list.fetchNextPage()}
+                data-testid="audit-more"
+              >
                 Load more
               </Button>
             ) : (
@@ -123,7 +173,15 @@ export function AdminAudit() {
   );
 }
 
-function AuditRow({ entry: e, onActor, onEntity }: { entry: AuditEntry; onActor: (a: NonNullable<AuditEntry["actor"]>) => void; onEntity: (type: string, id: string) => void }) {
+function AuditRow({
+  entry: e,
+  onActor,
+  onEntity,
+}: {
+  entry: AuditEntry;
+  onActor: (a: NonNullable<AuditEntry["actor"]>) => void;
+  onEntity: (type: string, id: string) => void;
+}) {
   const [open, setOpen] = useState(false);
   const hasData = Object.keys(e.data ?? {}).length > 0;
   const panel = `audit-${e.id}`;
@@ -133,14 +191,22 @@ function AuditRow({ entry: e, onActor, onEntity }: { entry: AuditEntry; onActor:
         {e.actor ? (
           <PersonAvatar user={e.actor} size="sm" />
         ) : (
-          <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground" aria-hidden>
+          <span
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground"
+            aria-hidden
+          >
             SYS
           </span>
         )}
         <div className="min-w-0 flex-1">
           <p className="text-[14px]">
             {e.actor ? (
-              <button type="button" className="font-medium text-foreground hover:underline" onClick={() => onActor(e.actor!)} title="Show only this person's changes">
+              <button
+                type="button"
+                className="font-medium text-foreground hover:underline"
+                onClick={() => onActor(e.actor!)}
+                title="Show only this person's changes"
+              >
                 {e.actor.displayName}
               </button>
             ) : (
@@ -152,7 +218,12 @@ function AuditRow({ entry: e, onActor, onEntity }: { entry: AuditEntry; onActor:
             <span className="font-mono">{e.action}</span>
             {" · "}
             {e.entityId ? (
-              <button type="button" className="break-all text-left font-mono hover:text-foreground hover:underline" onClick={() => onEntity(e.entityType, e.entityId!)} title="Show every change to this item">
+              <button
+                type="button"
+                className="break-all text-left font-mono hover:text-foreground hover:underline"
+                onClick={() => onEntity(e.entityType, e.entityId!)}
+                title="Show every change to this item"
+              >
                 {e.entityType} {e.entityId}
               </button>
             ) : (
@@ -161,7 +232,11 @@ function AuditRow({ entry: e, onActor, onEntity }: { entry: AuditEntry; onActor:
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <time dateTime={e.createdAt} title={fullTimestamp(e.createdAt)} className="text-[12.5px] tabular-nums text-muted-foreground">
+          <time
+            dateTime={e.createdAt}
+            title={fullTimestamp(e.createdAt)}
+            className="text-[12.5px] tabular-nums text-muted-foreground"
+          >
             {relativeTime(e.createdAt)}
           </time>
           {hasData ? (
@@ -182,7 +257,11 @@ function AuditRow({ entry: e, onActor, onEntity }: { entry: AuditEntry; onActor:
         </div>
       </div>
       {open && hasData ? (
-        <pre id={panel} className="mb-3 max-h-80 overflow-auto rounded-md bg-ground-2 p-3 font-mono text-[12.5px] leading-relaxed text-foreground sm:ml-11" data-testid="audit-data">
+        <pre
+          id={panel}
+          className="mb-3 max-h-80 overflow-auto rounded-md bg-ground-2 p-3 font-mono text-[12.5px] leading-relaxed text-foreground sm:ml-11"
+          data-testid="audit-data"
+        >
           {prettyJson(e.data)}
         </pre>
       ) : null}

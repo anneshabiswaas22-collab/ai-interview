@@ -37,7 +37,7 @@ export async function updatePreferences(req: Request, res: Response) {
       })
       .partial()
       .strict(),
-    req.body,
+    req.body
   );
   res.json(await prefs.updatePreferences(actorOf(req), body));
 }

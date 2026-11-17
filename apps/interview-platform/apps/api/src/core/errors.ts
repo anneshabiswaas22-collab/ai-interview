@@ -10,7 +10,7 @@ export class HttpError extends Error {
     readonly status: number,
     message: string,
     readonly code: string = defaultCode(status),
-    readonly details?: unknown,
+    readonly details?: unknown
   ) {
     super(message);
     this.name = "HttpError";
@@ -32,11 +32,25 @@ function defaultCode(status: number): string {
   );
 }
 
-export const badRequest = (message: string, code = "BAD_REQUEST", details?: unknown) => new HttpError(400, message, code, details);
-export const unauthenticated = (message = "Sign in to continue", code = "UNAUTHENTICATED") => new HttpError(401, message, code);
-export const forbidden = (message = "You do not have permission to do that", code = "FORBIDDEN", details?: unknown) => new HttpError(403, message, code, details);
-export const notFound = (message = "Not found", code = "NOT_FOUND") => new HttpError(404, message, code);
-export const conflict = (message: string, code = "CONFLICT", details?: unknown) => new HttpError(409, message, code, details);
-export const unprocessable = (message: string, code = "UNPROCESSABLE", details?: unknown) => new HttpError(422, message, code, details);
+export const badRequest = (message: string, code = "BAD_REQUEST", details?: unknown) =>
+  new HttpError(400, message, code, details);
+export const unauthenticated = (message = "Sign in to continue", code = "UNAUTHENTICATED") =>
+  new HttpError(401, message, code);
+export const forbidden = (
+  message = "You do not have permission to do that",
+  code = "FORBIDDEN",
+  details?: unknown
+) => new HttpError(403, message, code, details);
+export const notFound = (message = "Not found", code = "NOT_FOUND") =>
+  new HttpError(404, message, code);
+export const conflict = (message: string, code = "CONFLICT", details?: unknown) =>
+  new HttpError(409, message, code, details);
+export const unprocessable = (message: string, code = "UNPROCESSABLE", details?: unknown) =>
+  new HttpError(422, message, code, details);
 export const tooMany = (message = "Too many requests, slow down", retryAfterSeconds?: number) =>
-  new HttpError(429, message, "RATE_LIMITED", retryAfterSeconds ? { retryAfterSeconds } : undefined);
+  new HttpError(
+    429,
+    message,
+    "RATE_LIMITED",
+    retryAfterSeconds ? { retryAfterSeconds } : undefined
+  );

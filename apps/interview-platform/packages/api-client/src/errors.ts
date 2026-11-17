@@ -16,7 +16,13 @@ export class ApiError extends Error {
   readonly details: unknown;
   readonly requestId: string | undefined;
 
-  constructor(init: { status: number; code: string; message: string; details?: unknown; requestId?: string }) {
+  constructor(init: {
+    status: number;
+    code: string;
+    message: string;
+    details?: unknown;
+    requestId?: string;
+  }) {
     super(init.message);
     this.name = "ApiError";
     this.status = init.status;
@@ -46,7 +52,8 @@ export function fieldErrorsOf(details: unknown): Record<string, string> {
   const out: Record<string, string> = {};
   if (!Array.isArray(fields)) return out;
   for (const f of fields as Partial<FieldError>[]) {
-    if (f && typeof f.path === "string" && typeof f.message === "string" && !(f.path in out)) out[f.path] = f.message;
+    if (f && typeof f.path === "string" && typeof f.message === "string" && !(f.path in out))
+      out[f.path] = f.message;
   }
   return out;
 }
@@ -80,7 +87,10 @@ export function toApiError(status: number, body: unknown): ApiError {
   return new ApiError({
     status,
     code: STATUS_CODES[status] ?? (status >= 500 ? "SERVER_ERROR" : `HTTP_${status}`),
-    message: status >= 500 ? "The server had a problem. Try again in a moment." : `Request failed (${status})`,
+    message:
+      status >= 500
+        ? "The server had a problem. Try again in a moment."
+        : `Request failed (${status})`,
   });
 }
 
@@ -94,4 +104,8 @@ export function networkError(cause?: unknown): ApiError {
 }
 
 /** Codes on a 401 that mean "your access token is stale, refresh and retry". */
-export const REFRESHABLE_CODES: ReadonlySet<string> = new Set(["TOKEN_INVALID", "TOKEN_EXPIRED", "SESSION_EXPIRED"]);
+export const REFRESHABLE_CODES: ReadonlySet<string> = new Set([
+  "TOKEN_INVALID",
+  "TOKEN_EXPIRED",
+  "SESSION_EXPIRED",
+]);

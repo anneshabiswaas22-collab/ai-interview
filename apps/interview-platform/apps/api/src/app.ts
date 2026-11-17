@@ -34,23 +34,48 @@ export function createApp() {
       genReqId: (req) => (req as Request).requestId,
       autoLogging: { ignore: (req) => req.url === "/up" || req.url === "/api/ready" },
       serializers: {
-        req: (req: { method: string; url: string; id: string }) => ({ id: req.id, method: req.method, url: req.url.replace(/\/shared\/[^/?#]+/, "/shared/[token]") }),
+        req: (req: { method: string; url: string; id: string }) => ({
+          id: req.id,
+          method: req.method,
+          url: req.url.replace(/\/shared\/[^/?#]+/, "/shared/[token]"),
+        }),
       },
-    }),
+    })
   );
 
   // The API serves JSON only; the web app sets its own CSP for pages.
-  app.use(helmet({ contentSecurityPolicy: { directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] } }, crossOriginResourcePolicy: { policy: "cross-origin" } }));
+  app.use(
+    helmet({
+      contentSecurityPolicy: { directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] } },
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+    })
+  );
 
   const origins = allowedOrigins();
-  app.use(cors({ origin: (origin, cb) => cb(null, !origin || origins.includes(origin)), credentials: true, maxAge: 600 }));
+  app.use(
+    cors({
+      origin: (origin, cb) => cb(null, !origin || origins.includes(origin)),
+      credentials: true,
+      maxAge: 600,
+    })
+  );
 
   // Cookie-authenticated endpoints (refresh, logout) reject cross-site callers even
   // though SameSite=Lax already covers top-level POSTs: defence in depth.
   app.use((req, res, next) => {
     const origin = req.get("origin");
-    if (origin && req.method !== "GET" && req.method !== "HEAD" && req.method !== "OPTIONS" && !origins.includes(origin)) {
-      res.status(403).json({ error: "Origin not allowed", code: "CORS_ORIGIN_DENIED", requestId: req.requestId });
+    if (
+      origin &&
+      req.method !== "GET" &&
+      req.method !== "HEAD" &&
+      req.method !== "OPTIONS" &&
+      !origins.includes(origin)
+    ) {
+      res.status(403).json({
+        error: "Origin not allowed",
+        code: "CORS_ORIGIN_DENIED",
+        requestId: req.requestId,
+      });
       return;
     }
     next();
@@ -85,18 +110,31 @@ export function createApp() {
 
   app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
     if (err instanceof HttpError) {
-      res.status(err.status).json({ error: err.message, code: err.code, ...(err.details !== undefined ? { details: err.details } : {}), requestId: req.requestId });
+      res.status(err.status).json({
+        error: err.message,
+        code: err.code,
+        ...(err.details !== undefined ? { details: err.details } : {}),
+        requestId: req.requestId,
+      });
       return;
     }
-    const status = (err as { status?: number; statusCode?: number }).status ?? (err as { statusCode?: number }).statusCode;
+    const status =
+      (err as { status?: number; statusCode?: number }).status ??
+      (err as { statusCode?: number }).statusCode;
     if (status && status >= 400 && status < 500) {
       // body-parser and friends: malformed JSON, payload too large.
       const type = (err as { type?: string }).type;
-      res.status(status).json({ error: type === "entity.too.large" ? "Request body too large" : "Malformed request", code: type === "entity.too.large" ? "PAYLOAD_TOO_LARGE" : "BAD_REQUEST", requestId: req.requestId });
+      res.status(status).json({
+        error: type === "entity.too.large" ? "Request body too large" : "Malformed request",
+        code: type === "entity.too.large" ? "PAYLOAD_TOO_LARGE" : "BAD_REQUEST",
+        requestId: req.requestId,
+      });
       return;
     }
     captureError(err, { requestId: req.requestId, method: req.method, url: req.originalUrl });
-    res.status(500).json({ error: "Something went wrong", code: "INTERNAL", requestId: req.requestId });
+    res
+      .status(500)
+      .json({ error: "Something went wrong", code: "INTERNAL", requestId: req.requestId });
   });
 
   return app;

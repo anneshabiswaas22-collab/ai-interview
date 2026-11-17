@@ -12,7 +12,9 @@ import { verifyAccessToken } from "../security/tokens";
 export type AuthFailure = "MISSING" | "INVALID" | "BANNED" | "DEACTIVATED";
 
 /** Resolve an access token to an Actor. Used by the HTTP middleware. */
-export async function actorFromToken(token: string | null | undefined): Promise<{ actor: Actor } | { failure: AuthFailure }> {
+export async function actorFromToken(
+  token: string | null | undefined
+): Promise<{ actor: Actor } | { failure: AuthFailure }> {
   if (!token) return { failure: "MISSING" };
   const claims = verifyAccessToken(token);
   if (!claims) return { failure: "INVALID" };
@@ -21,8 +23,19 @@ export async function actorFromToken(token: string | null | undefined): Promise<
   if (user.status === "BANNED") return { failure: "BANNED" };
   if (user.status === "DEACTIVATED") return { failure: "DEACTIVATED" };
   // A timed suspension that has run out is lifted lazily here and by the sweep job.
-  const status = user.status === "SUSPENDED" && user.suspended_until && user.suspended_until <= new Date() ? "ACTIVE" : user.status;
-  return { actor: { id: user.id, username: user.username, displayName: user.display_name, role: user.role, status } };
+  const status =
+    user.status === "SUSPENDED" && user.suspended_until && user.suspended_until <= new Date()
+      ? "ACTIVE"
+      : user.status;
+  return {
+    actor: {
+      id: user.id,
+      username: user.username,
+      displayName: user.display_name,
+      role: user.role,
+      status,
+    },
+  };
 }
 
 function bearer(req: Request): string | null {
@@ -31,19 +44,32 @@ function bearer(req: Request): string | null {
   return header.slice(7).trim() || null;
 }
 
-export async function authenticate(req: Request, _res: Response, next: NextFunction): Promise<void> {
+export async function authenticate(
+  req: Request,
+  _res: Response,
+  next: NextFunction
+): Promise<void> {
   const result = await actorFromToken(bearer(req));
   if ("failure" in result) {
-    if (result.failure === "BANNED") throw forbidden("This account has been banned", "ACCOUNT_BANNED");
-    if (result.failure === "DEACTIVATED") throw forbidden("This account is deactivated", "ACCOUNT_DEACTIVATED");
-    throw unauthenticated(result.failure === "MISSING" ? "Sign in to continue" : "Session expired", result.failure === "MISSING" ? "UNAUTHENTICATED" : "TOKEN_INVALID");
+    if (result.failure === "BANNED")
+      throw forbidden("This account has been banned", "ACCOUNT_BANNED");
+    if (result.failure === "DEACTIVATED")
+      throw forbidden("This account is deactivated", "ACCOUNT_DEACTIVATED");
+    throw unauthenticated(
+      result.failure === "MISSING" ? "Sign in to continue" : "Session expired",
+      result.failure === "MISSING" ? "UNAUTHENTICATED" : "TOKEN_INVALID"
+    );
   }
   req.actor = result.actor;
   next();
 }
 
 /** Attach the actor when a valid token is present; public otherwise. A bad token is ignored, not rejected. */
-export async function optionalAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
+export async function optionalAuth(
+  req: Request,
+  _res: Response,
+  next: NextFunction
+): Promise<void> {
   const token = bearer(req);
   if (token) {
     const result = await actorFromToken(token);

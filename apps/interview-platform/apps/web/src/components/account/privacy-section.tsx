@@ -5,7 +5,19 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { Download } from "lucide-react";
 import { isApiError } from "@open-conversation/api-client";
-import { Button, Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Field, Input, toast } from "@open-conversation/ui";
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Field,
+  Input,
+  toast,
+} from "@open-conversation/ui";
 import { FormAlert } from "@/components/auth/auth-shell";
 import { PasswordInput } from "@/components/auth/password-input";
 import { exportErrorMessage } from "@/lib/account";
@@ -29,12 +41,20 @@ export function PrivacySection() {
   });
   return (
     <div>
-      <SectionTitle title="Privacy and data" lead="Take a copy of your data, or delete your account." />
+      <SectionTitle
+        title="Privacy and data"
+        lead="Take a copy of your data, or delete your account."
+      />
       <AccountSection
         title="Download your data"
         description="A JSON file with what your account holds: your profile, preferences, every interview with its plan, answers, transcripts and scores, and your shared links. You can export 3 times a day."
         actions={
-          <Button variant="outline" onClick={() => download.mutate()} loading={download.isPending} data-testid="export-data">
+          <Button
+            variant="outline"
+            onClick={() => download.mutate()}
+            loading={download.isPending}
+            data-testid="export-data"
+          >
             <Download /> Download my data
           </Button>
         }
@@ -43,7 +63,11 @@ export function PrivacySection() {
         title="Delete account"
         description={`You are signed out everywhere at once. Your data is erased for good after ${DELETION_GRACE_DAYS} days; signing in before then cancels the deletion.`}
         actions={
-          <Button variant="danger-ghost" onClick={() => setDeleting(true)} data-testid="delete-account">
+          <Button
+            variant="danger-ghost"
+            onClick={() => setDeleting(true)}
+            data-testid="delete-account"
+          >
             Delete account
           </Button>
         }
@@ -61,7 +85,8 @@ function DeleteAccountDialog({ onClose }: { onClose: () => void }) {
   const [password, setPassword] = useState("");
   const [totp, setTotp] = useState("");
   const [error, setError] = useState<React.ReactNode>(null);
-  const ready = typed.trim() === me.username && !!password && (!me.totpEnabled || totp.length === 6);
+  const ready =
+    typed.trim() === me.username && !!password && (!me.totpEnabled || totp.length === 6);
   const del = useMutation({
     mutationFn: () => api().users.deleteMe({ password, ...(me.totpEnabled ? { totp } : {}) }),
     meta: { silent: true },
@@ -70,9 +95,12 @@ function DeleteAccountDialog({ onClose }: { onClose: () => void }) {
       router.replace("/goodbye");
     },
     onError: (e) => {
-      if (isApiError(e) && e.code === "INVALID_CREDENTIALS") setError("That password is not right.");
-      else if (isApiError(e) && e.code === "INVALID_TOTP") setError("That code did not match. Codes change every 30 seconds.");
-      else if (isApiError(e) && e.code === "LAST_ADMIN") setError("You are the last administrator. Make someone else an admin first.");
+      if (isApiError(e) && e.code === "INVALID_CREDENTIALS")
+        setError("That password is not right.");
+      else if (isApiError(e) && e.code === "INVALID_TOTP")
+        setError("That code did not match. Codes change every 30 seconds.");
+      else if (isApiError(e) && e.code === "LAST_ADMIN")
+        setError("You are the last administrator. Make someone else an admin first.");
       else setError(errorMessage(e));
     },
   });
@@ -82,16 +110,37 @@ function DeleteAccountDialog({ onClose }: { onClose: () => void }) {
         <DialogHeader>
           <DialogTitle>Delete your account?</DialogTitle>
           <DialogDescription>
-            After {DELETION_GRACE_DAYS} days your interviews, answers, transcripts and reports are erased, and your shared links stop working.
+            After {DELETION_GRACE_DAYS} days your interviews, answers, transcripts and reports are
+            erased, and your shared links stop working.
           </DialogDescription>
         </DialogHeader>
         <DialogBody className="space-y-4">
           {error ? <FormAlert>{error}</FormAlert> : null}
-          <Field label={<>Type your username <span className="font-mono">{me.username}</span> to confirm</>} htmlFor="delete-confirm">
-            <Input id="delete-confirm" autoComplete="off" spellCheck={false} value={typed} onChange={(e) => setTyped(e.target.value)} data-testid="delete-confirm-username" />
+          <Field
+            label={
+              <>
+                Type your username <span className="font-mono">{me.username}</span> to confirm
+              </>
+            }
+            htmlFor="delete-confirm"
+          >
+            <Input
+              id="delete-confirm"
+              autoComplete="off"
+              spellCheck={false}
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              data-testid="delete-confirm-username"
+            />
           </Field>
           <Field label="Password" htmlFor="delete-password">
-            <PasswordInput id="delete-password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} data-testid="delete-password" />
+            <PasswordInput
+              id="delete-password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              data-testid="delete-password"
+            />
           </Field>
           {me.totpEnabled ? (
             <Field label="6 digit code from your app" htmlFor="delete-totp">
@@ -112,7 +161,13 @@ function DeleteAccountDialog({ onClose }: { onClose: () => void }) {
           <Button variant="ghost" onClick={onClose} disabled={del.isPending}>
             Keep my account
           </Button>
-          <Button variant="danger" onClick={() => del.mutate()} disabled={!ready} loading={del.isPending} data-testid="delete-account-confirm">
+          <Button
+            variant="danger"
+            onClick={() => del.mutate()}
+            disabled={!ready}
+            loading={del.isPending}
+            data-testid="delete-account-confirm"
+          >
             Delete account
           </Button>
         </DialogFooter>

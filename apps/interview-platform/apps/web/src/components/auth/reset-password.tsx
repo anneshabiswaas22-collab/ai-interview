@@ -14,14 +14,25 @@ import { AuthHeading, FormAlert } from "./auth-shell";
 import { PasswordInput, StrengthMeter } from "./password-input";
 
 const schema = z
-  .object({ password: z.string().min(10, "Use at least 10 characters").max(128), confirm: z.string() })
-  .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "The passwords do not match" });
+  .object({
+    password: z.string().min(10, "Use at least 10 characters").max(128),
+    confirm: z.string(),
+  })
+  .refine((v) => v.password === v.confirm, {
+    path: ["confirm"],
+    message: "The passwords do not match",
+  });
 
 export function ResetPassword() {
   const token = useSearchParams().get("token") ?? "";
   const [done, setDone] = useState(false);
-  const [error, setError] = useState<string | null>(token ? null : "This link is missing its token. Request a new one.");
-  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { password: "", confirm: "" } });
+  const [error, setError] = useState<string | null>(
+    token ? null : "This link is missing its token. Request a new one."
+  );
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+    defaultValues: { password: "", confirm: "" },
+  });
   const pw = form.watch("password");
 
   if (done) {
@@ -30,7 +41,10 @@ export function ResetPassword() {
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-success-soft text-success-soft-foreground">
           <CheckCircle2 className="size-6" />
         </div>
-        <AuthHeading title="Password updated" description="You can now sign in with your new password. Other sessions were signed out." />
+        <AuthHeading
+          title="Password updated"
+          description="You can now sign in with your new password. Other sessions were signed out."
+        />
         <Button asChild block size="lg">
           <Link href="/login">Sign in</Link>
         </Button>
@@ -62,14 +76,27 @@ export function ResetPassword() {
       ) : null}
       <div className="space-y-4">
         <Field label="New password" htmlFor="password" error={errs.password?.message}>
-          <PasswordInput id="password" autoComplete="new-password" autoFocus {...form.register("password")} />
+          <PasswordInput
+            id="password"
+            autoComplete="new-password"
+            autoFocus
+            {...form.register("password")}
+          />
           {!errs.password ? <StrengthMeter value={pw} /> : null}
         </Field>
         <Field label="Confirm password" htmlFor="confirm" error={errs.confirm?.message}>
           <PasswordInput id="confirm" autoComplete="new-password" {...form.register("confirm")} />
         </Field>
       </div>
-      <Button type="submit" block size="lg" className="mt-6" disabled={!token} loading={form.formState.isSubmitting} data-testid="reset-submit">
+      <Button
+        type="submit"
+        block
+        size="lg"
+        className="mt-6"
+        disabled={!token}
+        loading={form.formState.isSubmitting}
+        data-testid="reset-submit"
+      >
         Update password
       </Button>
     </form>

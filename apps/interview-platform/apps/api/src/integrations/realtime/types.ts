@@ -38,7 +38,7 @@ export interface RealtimeAdapter {
 export class RealtimeMintError extends Error {
   constructor(
     message: string,
-    readonly status: number | null = null,
+    readonly status: number | null = null
   ) {
     super(message);
   }

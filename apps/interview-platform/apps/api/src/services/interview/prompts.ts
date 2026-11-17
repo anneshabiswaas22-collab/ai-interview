@@ -51,7 +51,10 @@ Coding questions
 - A coding question's text contains, in order: Problem (what to build, input, output, constraints), Hints (one or two), Sample (an example input and output, or a two or three line starter), Dataset (only for data problems: three to five rows of CSV or a short JSON snippet), and it ends with "Write your solution in <Language>.".
 - "language" is one of ${CODE_LANGUAGES.join(", ")}, matching the role. Voice questions have "code": false and "language": null.`;
 
-export function plannerFromResume(resumeText: string, interviewerName: string): { system: string; user: string } {
+export function plannerFromResume(
+  resumeText: string,
+  interviewerName: string
+): { system: string; user: string } {
   return {
     system: `You are ${interviewerName}, an expert interviewer preparing a realistic mock interview from a candidate's resume.
 
@@ -66,7 +69,10 @@ ${PLAN_SHAPE}`,
   };
 }
 
-export function plannerFromJobDescription(input: { company: string; role: string; jobDescription: string }, interviewerName: string): { system: string; user: string } {
+export function plannerFromJobDescription(
+  input: { company: string; role: string; jobDescription: string },
+  interviewerName: string
+): { system: string; user: string } {
   return {
     system: `You are ${interviewerName}, an expert interviewer preparing a realistic mock interview for someone applying to a specific job, based only on its job description.
 
@@ -105,15 +111,22 @@ export function interviewerInstructions(c: InterviewerContext): string {
   const r = c.plan[c.round];
   const q = r.questions[c.question];
   const where = `Round ${c.round + 1} of ${c.plan.length}, "${r.name}" (${r.focus || "general"}), question ${c.question + 1} of ${r.questions.length}.`;
-  const context = c.summary?.trim() ? `\nWhat this interview is based on (remember it; never ask the candidate to repeat it):\n${fence("context", c.summary.trim())}\n` : "";
-  const target = [c.role && `Role: ${c.role}.`, c.company && `Company: ${c.company}.`].filter(Boolean).join(" ");
+  const context = c.summary?.trim()
+    ? `\nWhat this interview is based on (remember it; never ask the candidate to repeat it):\n${fence("context", c.summary.trim())}\n`
+    : "";
+  const target = [c.role && `Role: ${c.role}.`, c.company && `Company: ${c.company}.`]
+    .filter(Boolean)
+    .join(" ");
   const opening = c.first
     ? `Start speaking as soon as the session opens: greet the candidate in one short sentence ("Hi, I'm ${c.interviewerName}. Let's begin."), then ask the question.`
     : `This continues an interview already under way. Do not greet again. Start speaking as soon as the session opens with a brief transition, then ask the question.`;
   const codeNote = q.code
     ? `\nThis is a coding question. The candidate writes the solution in the editor on their screen, not out loud. Read out the problem briefly, invite clarifying questions, and talk through their approach if they want to. Do not dictate a solution. When they say they have submitted or are done, call end_question.`
     : "";
-  const language = c.language !== "auto" ? `\nSpeak ${languageName(c.language)} unless the candidate clearly prefers another language.` : `\nSpeak English unless the candidate speaks another language; then answer in that exact language and script.`;
+  const language =
+    c.language !== "auto"
+      ? `\nSpeak ${languageName(c.language)} unless the candidate clearly prefers another language.`
+      : `\nSpeak English unless the candidate speaks another language; then answer in that exact language and script.`;
   return `You are ${c.interviewerName}, a warm, professional and attentive interviewer holding a live voice mock interview. ${target}
 ${context}
 ${where}
@@ -139,7 +152,8 @@ ${c.addendum.trim() ? `\nHouse rules from the organisers:\n${c.addendum.trim()}\
 /** The single tool the realtime model gets. It carries no ratings: the server scores. */
 export const END_QUESTION_TOOL = {
   name: "end_question",
-  description: "Call when the current question is finished (after the follow-ups, or when the candidate asks to move on). Takes no arguments.",
+  description:
+    "Call when the current question is finished (after the follow-ups, or when the candidate asks to move on). Takes no arguments.",
   parameters: { type: "object", properties: {}, additionalProperties: false },
 } as const;
 
@@ -169,8 +183,14 @@ const RUBRIC = `Ratings (integers, 1 to 100)
 - 90+ exceptional, 75-89 strong, 60-74 adequate, 40-59 weak, below 40 little or no relevant answer. An empty or off-topic answer scores below 20 on both.
 Be fair and honest, and judge against the level the role implies.`;
 
-export function voiceScorer(input: { question: string; transcript: TranscriptLine[]; role: string | null }): { system: string; user: string } {
-  const convo = input.transcript.map((l) => `${l.role === "interviewer" ? "Interviewer" : "Candidate"}: ${l.text}`).join("\n");
+export function voiceScorer(input: {
+  question: string;
+  transcript: TranscriptLine[];
+  role: string | null;
+}): { system: string; user: string } {
+  const convo = input.transcript
+    .map((l) => `${l.role === "interviewer" ? "Interviewer" : "Candidate"}: ${l.text}`)
+    .join("\n");
   return {
     system: `You are an expert interviewer scoring one answer from a mock interview${input.role ? ` for the role "${input.role}"` : ""}. Score only what the candidate said, across the main answer and the follow-ups.
 
@@ -185,8 +205,14 @@ Set "correctedSnippet" to null for spoken answers.`,
 }
 
 /** A written response cannot provide evidence of pronunciation or speaking delivery. */
-export function textScorer(input: { question: string; transcript: TranscriptLine[]; role: string | null }): { system: string; user: string } {
-  const convo = input.transcript.map((l) => `${l.role === "interviewer" ? "Interviewer" : "Candidate"}: ${l.text}`).join("\n");
+export function textScorer(input: {
+  question: string;
+  transcript: TranscriptLine[];
+  role: string | null;
+}): { system: string; user: string } {
+  const convo = input.transcript
+    .map((l) => `${l.role === "interviewer" ? "Interviewer" : "Candidate"}: ${l.text}`)
+    .join("\n");
   return {
     system: `You are an interviewer reviewing a written practice answer${input.role ? ` for the role "${input.role}"` : ""}. Assess only the written content. Do not infer pronunciation, accent, speaking fluency, audio, or personal traits.
 
@@ -200,7 +226,12 @@ Set "correctedSnippet" to null.`,
   };
 }
 
-export function codeScorer(input: { question: string; code: string; language: string | null; role: string | null }): { system: string; user: string } {
+export function codeScorer(input: {
+  question: string;
+  code: string;
+  language: string | null;
+  role: string | null;
+}): { system: string; user: string } {
   return {
     system: `You are an expert technical interviewer reviewing a coding answer from a mock interview${input.role ? ` for the role "${input.role}"` : ""}.
 

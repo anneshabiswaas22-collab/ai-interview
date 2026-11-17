@@ -23,7 +23,14 @@ export function openAiTransport(): RealtimeTransport {
   };
 
   const onMessage = (raw: string) => {
-    let ev: { type?: string; delta?: string; transcript?: string; name?: string; call_id?: string; error?: { message?: string } };
+    let ev: {
+      type?: string;
+      delta?: string;
+      transcript?: string;
+      name?: string;
+      call_id?: string;
+      error?: { message?: string };
+    };
     try {
       ev = JSON.parse(raw);
     } catch {
@@ -37,7 +44,8 @@ export function openAiTransport(): RealtimeTransport {
         emit({ type: "speaking", who: "candidate", on: false });
         break;
       case "conversation.item.input_audio_transcription.completed":
-        if (ev.transcript?.trim()) emit({ type: "line", role: "candidate", text: ev.transcript.trim() });
+        if (ev.transcript?.trim())
+          emit({ type: "line", role: "candidate", text: ev.transcript.trim() });
         break;
       case "response.output_audio_transcript.delta":
       case "response.audio_transcript.delta":
@@ -47,7 +55,11 @@ export function openAiTransport(): RealtimeTransport {
         break;
       case "response.output_audio_transcript.done":
       case "response.audio_transcript.done":
-        emit({ type: "line", role: "interviewer", text: (ev.transcript ?? interviewerLine).trim() });
+        emit({
+          type: "line",
+          role: "interviewer",
+          text: (ev.transcript ?? interviewerLine).trim(),
+        });
         interviewerLine = "";
         break;
       case "output_audio_buffer.stopped":
@@ -57,12 +69,18 @@ export function openAiTransport(): RealtimeTransport {
       case "response.function_call_arguments.done":
         if (ev.name === "end_question") {
           // Acknowledge the call without asking for another response: the interviewer stays quiet.
-          send({ type: "conversation.item.create", item: { type: "function_call_output", call_id: ev.call_id, output: "{\"ok\":true}" } });
+          send({
+            type: "conversation.item.create",
+            item: { type: "function_call_output", call_id: ev.call_id, output: '{"ok":true}' },
+          });
           emit({ type: "end_question" });
         }
         break;
       case "error":
-        emit({ type: "error", message: ev.error?.message ?? "The voice service reported an error." });
+        emit({
+          type: "error",
+          message: ev.error?.message ?? "The voice service reported an error.",
+        });
         break;
     }
   };
@@ -78,7 +96,8 @@ export function openAiTransport(): RealtimeTransport {
       };
       pc.onconnectionstatechange = () => {
         if (pc?.connectionState === "failed") emit({ type: "error", message: BLOCKED_NETWORK });
-        if (pc?.connectionState === "closed" || pc?.connectionState === "failed") emit({ type: "stage", stage: "closed" });
+        if (pc?.connectionState === "closed" || pc?.connectionState === "failed")
+          emit({ type: "stage", stage: "closed" });
       };
       micTrack = mic?.getAudioTracks()[0] ?? null;
       if (micTrack) pc.addTrack(micTrack, mic!);
@@ -96,15 +115,26 @@ export function openAiTransport(): RealtimeTransport {
         body: offer.sdp,
         credentials: "omit",
       });
-      if (!res.ok) throw new Error(res.status === 401 ? "The voice session expired. Start the question again." : BLOCKED_NETWORK);
+      if (!res.ok)
+        throw new Error(
+          res.status === 401
+            ? "The voice session expired. Start the question again."
+            : BLOCKED_NETWORK
+        );
       await pc.setRemoteDescription({ type: "answer", sdp: await res.text() });
-      await Promise.race([opened, new Promise((_, reject) => setTimeout(() => reject(new Error(BLOCKED_NETWORK)), 15_000))]);
+      await Promise.race([
+        opened,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(BLOCKED_NETWORK)), 15_000)),
+      ]);
       emit({ type: "stage", stage: "live" });
       // The interviewer speaks first.
       send({ type: "response.create" });
     },
     sendText(text) {
-      send({ type: "conversation.item.create", item: { type: "message", role: "user", content: [{ type: "input_text", text }] } });
+      send({
+        type: "conversation.item.create",
+        item: { type: "message", role: "user", content: [{ type: "input_text", text }] },
+      });
       send({ type: "response.create" });
       emit({ type: "line", role: "candidate", text });
     },

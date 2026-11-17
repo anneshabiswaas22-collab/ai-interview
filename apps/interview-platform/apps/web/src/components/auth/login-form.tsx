@@ -27,8 +27,10 @@ const RECOVERY_MIN = 6;
 
 /** Login-specific copy: throttling is about attempts, not a locked account. */
 export function loginErrorMessage(e: unknown): string {
-  if (isApiError(e) && e.code === "RATE_LIMITED") return "Too many attempts. Try again in a few minutes.";
-  if (isApiError(e) && e.code === "INVALID_RECOVERY_CODE") return "That recovery code did not work. Check it and try again, or use your authenticator app.";
+  if (isApiError(e) && e.code === "RATE_LIMITED")
+    return "Too many attempts. Try again in a few minutes.";
+  if (isApiError(e) && e.code === "INVALID_RECOVERY_CODE")
+    return "That recovery code did not work. Check it and try again, or use your authenticator app.";
   return errorMessage(e);
 }
 
@@ -43,7 +45,10 @@ export function LoginForm() {
   const [error, setError] = useState<{ code: string; message: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [resent, setResent] = useState(false);
-  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { login: "", password: "" } });
+  const form = useForm<Values>({
+    resolver: zodResolver(schema),
+    defaultValues: { login: "", password: "" },
+  });
 
   useEffect(() => {
     if (status === "signed-in") router.replace(next);
@@ -61,7 +66,8 @@ export function LoginForm() {
       router.replace(next);
     } catch (e) {
       setError({ code: isApiError(e) ? e.code : "ERROR", message: loginErrorMessage(e) });
-      if (isApiError(e) && (e.code === "INVALID_TOTP" || e.code === "INVALID_RECOVERY_CODE")) setCode("");
+      if (isApiError(e) && (e.code === "INVALID_TOTP" || e.code === "INVALID_RECOVERY_CODE"))
+        setCode("");
     } finally {
       setBusy(false);
     }
@@ -87,7 +93,8 @@ export function LoginForm() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (ready) void attempt(form.getValues(), useRecovery ? { recoveryCode: code.trim() } : code);
+          if (ready)
+            void attempt(form.getValues(), useRecovery ? { recoveryCode: code.trim() } : code);
         }}
         noValidate
       >
@@ -96,7 +103,11 @@ export function LoginForm() {
         </div>
         <AuthHeading
           title="Two-factor authentication"
-          description={useRecovery ? "Enter one of the recovery codes you saved. Each code works once." : "Enter the 6 digit code from your authenticator app."}
+          description={
+            useRecovery
+              ? "Enter one of the recovery codes you saved. Each code works once."
+              : "Enter the 6 digit code from your authenticator app."
+          }
         />
         {error ? <FormAlert>{error.message}</FormAlert> : null}
         {useRecovery ? (
@@ -112,7 +123,11 @@ export function LoginForm() {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               className="text-center font-mono tracking-wider"
-              aria-invalid={error?.code === "INVALID_RECOVERY_CODE" || error?.code === "INVALID_TOTP" || undefined}
+              aria-invalid={
+                error?.code === "INVALID_RECOVERY_CODE" ||
+                error?.code === "INVALID_TOTP" ||
+                undefined
+              }
             />
           </Field>
         ) : (
@@ -143,7 +158,15 @@ export function LoginForm() {
         >
           {useRecovery ? "Use your authenticator app" : "Use a recovery code"}
         </button>
-        <Button type="submit" block size="lg" className="mt-5" loading={busy} disabled={!ready} data-testid="login-submit">
+        <Button
+          type="submit"
+          block
+          size="lg"
+          className="mt-5"
+          loading={busy}
+          disabled={!ready}
+          data-testid="login-submit"
+        >
           Verify
         </Button>
         <Button
@@ -175,7 +198,11 @@ export function LoginForm() {
               {resent ? (
                 "If that address has an account, a new link is on its way."
               ) : (
-                <button type="button" onClick={() => void resend()} className="font-semibold underline">
+                <button
+                  type="button"
+                  onClick={() => void resend()}
+                  className="font-semibold underline"
+                >
                   Resend the verification email
                 </button>
               )}
@@ -185,10 +212,21 @@ export function LoginForm() {
       ) : null}
       <div className="space-y-4">
         <Field label="Email or username" htmlFor="login" error={errs.login?.message}>
-          <Input id="login" autoComplete="username" autoFocus aria-invalid={!!errs.login || undefined} {...form.register("login")} />
+          <Input
+            id="login"
+            autoComplete="username"
+            autoFocus
+            aria-invalid={!!errs.login || undefined}
+            {...form.register("login")}
+          />
         </Field>
         <Field label="Password" htmlFor="password" error={errs.password?.message}>
-          <PasswordInput id="password" autoComplete="current-password" aria-invalid={!!errs.password || undefined} {...form.register("password")} />
+          <PasswordInput
+            id="password"
+            autoComplete="current-password"
+            aria-invalid={!!errs.password || undefined}
+            {...form.register("password")}
+          />
         </Field>
       </div>
       <div className="mt-2 text-right">
@@ -196,12 +234,22 @@ export function LoginForm() {
           Forgot password?
         </Link>
       </div>
-      <Button type="submit" block size="lg" className="mt-4" loading={busy} data-testid="login-submit">
+      <Button
+        type="submit"
+        block
+        size="lg"
+        className="mt-4"
+        loading={busy}
+        data-testid="login-submit"
+      >
         Sign in
       </Button>
       <p className="mt-5 text-center text-sm text-muted-foreground">
         New here?{" "}
-        <Link href={next !== "/" ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="font-semibold text-link hover:underline">
+        <Link
+          href={next !== "/" ? `/signup?next=${encodeURIComponent(next)}` : "/signup"}
+          className="font-semibold text-link hover:underline"
+        >
           Create an account
         </Link>
       </p>

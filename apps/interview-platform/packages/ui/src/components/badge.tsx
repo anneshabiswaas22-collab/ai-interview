@@ -20,24 +20,33 @@ export const badgeVariants = cva(
       size: { sm: "h-5 px-2 text-2xs", md: "h-6 px-2.5 text-xs" },
     },
     defaultVariants: { tone: "neutral", size: "sm" },
-  },
+  }
 );
 
-export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof badgeVariants> {}
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof badgeVariants> {}
 
 export function Badge({ className, tone, size, ...props }: BadgeProps) {
   return <span className={cn(badgeVariants({ tone, size }), className)} {...props} />;
 }
 
 /** Small red count bubble over a nav icon. Hidden at zero. */
-export function CountBadge({ count, className, label }: { count: number; className?: string; label?: string }) {
+export function CountBadge({
+  count,
+  className,
+  label,
+}: {
+  count: number;
+  className?: string;
+  label?: string;
+}) {
   if (!count || count <= 0) return null;
   return (
     <span
       aria-label={label ?? `${count} unread`}
       className={cn(
         "pointer-events-none inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-danger px-1 text-[11px] font-bold leading-none text-danger-foreground ring-2 ring-card",
-        className,
+        className
       )}
     >
       {count > 99 ? "99+" : count}

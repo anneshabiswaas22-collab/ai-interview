@@ -9,9 +9,20 @@ let search = new URLSearchParams();
 let registration: "OPEN" | "CLOSED" = "OPEN";
 
 vi.mock("@/lib/auth", () => ({ useAuth: () => ({ acceptSession, status: "signed-out" }) }));
-vi.mock("@/lib/meta", () => ({ useAppMeta: () => ({ data: { appName: "Book Club", registration } }) }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, push: vi.fn() }), useSearchParams: () => search }));
-vi.mock("next/link", () => ({ default: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => <a href={href} {...rest}>{children}</a> }));
+vi.mock("@/lib/meta", () => ({
+  useAppMeta: () => ({ data: { appName: "Book Club", registration } }),
+}));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace, push: vi.fn() }),
+  useSearchParams: () => search,
+}));
+vi.mock("next/link", () => ({
+  default: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 vi.mock("@/lib/api", () => ({ api: () => ({ auth: { signup } }) }));
 
 import { SignupForm } from "@/components/auth/signup-form";
@@ -34,7 +45,11 @@ describe("SignupForm", () => {
     render(<SignupForm />);
     await fill();
     await userEvent.click(screen.getByTestId("signup-submit"));
-    await waitFor(() => expect(signup).toHaveBeenCalledWith(expect.objectContaining({ email: "ada@example.org", username: "ada-l", displayName: "Ada" })));
+    await waitFor(() =>
+      expect(signup).toHaveBeenCalledWith(
+        expect.objectContaining({ email: "ada@example.org", username: "ada-l", displayName: "Ada" })
+      )
+    );
   });
 
   it("accepts hyphens in usernames and refuses underscores before calling the API", async () => {

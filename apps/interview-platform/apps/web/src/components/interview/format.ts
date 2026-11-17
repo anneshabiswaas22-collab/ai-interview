@@ -61,4 +61,12 @@ export function proctorWord(k: ProctorEventKind): string {
   }
 }
 
-export const LANGUAGE_LABEL: Record<string, string> = { python: "Python", javascript: "JavaScript", typescript: "TypeScript", java: "Java", cpp: "C++", go: "Go", sql: "SQL" };
+export const LANGUAGE_LABEL: Record<string, string> = {
+  python: "Python",
+  javascript: "JavaScript",
+  typescript: "TypeScript",
+  java: "Java",
+  cpp: "C++",
+  go: "Go",
+  sql: "SQL",
+};

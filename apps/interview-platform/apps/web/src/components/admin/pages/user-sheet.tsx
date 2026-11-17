@@ -5,10 +5,28 @@ import Link from "next/link";
 import { useMutation, useQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { mapPages } from "@open-conversation/api-client";
 import { Button, Field, Input, Select, Textarea, toast } from "@open-conversation/ui";
-import type { AdminUserDetail, AdminUserRow, Page, QuotaTier, UserRole } from "@open-conversation/types";
+import type {
+  AdminUserDetail,
+  AdminUserRow,
+  Page,
+  QuotaTier,
+  UserRole,
+} from "@open-conversation/types";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { ROLE_LABEL, STATUS_LABEL, STATUS_TONE, accountActions, adminErrorMessage, formatCount, formatMinutes, limitLabel, limitText, parseLimit, shortDate } from "@/lib/admin";
+import {
+  ROLE_LABEL,
+  STATUS_LABEL,
+  STATUS_TONE,
+  accountActions,
+  adminErrorMessage,
+  formatCount,
+  formatMinutes,
+  limitLabel,
+  limitText,
+  parseLimit,
+  shortDate,
+} from "@/lib/admin";
 import { fullTimestamp } from "@/lib/time";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Chart, DetailSection, DetailSheet, FactList, ReasonDialog, StatusText } from "../shell";
@@ -16,19 +34,44 @@ import { adminMutation, ak, LineItem, PersonAvatar } from "./common";
 
 const DEFAULT_TIER = "__default";
 
-type Dialog = null | "makeAdmin" | "removeAdmin" | "suspend" | "unsuspend" | "ban" | "unban" | "erase" | "removeOverride";
+type Dialog =
+  | null
+  | "makeAdmin"
+  | "removeAdmin"
+  | "suspend"
+  | "unsuspend"
+  | "ban"
+  | "unban"
+  | "erase"
+  | "removeOverride";
 
-export function UserSheet({ userId, tiers, onClose }: { userId: string | null; tiers: QuotaTier[]; onClose: () => void }) {
+export function UserSheet({
+  userId,
+  tiers,
+  onClose,
+}: {
+  userId: string | null;
+  tiers: QuotaTier[];
+  onClose: () => void;
+}) {
   const qc = useQueryClient();
   const me = useAuth().user;
   const [dialog, setDialog] = useState<Dialog>(null);
-  const q = useQuery({ queryKey: ak.user(userId ?? ""), queryFn: () => api().admin.user(userId!), enabled: !!userId });
+  const q = useQuery({
+    queryKey: ak.user(userId ?? ""),
+    queryFn: () => api().admin.user(userId!),
+    enabled: !!userId,
+  });
   const u = q.data;
 
   /** Put a changed row everywhere it shows: the open detail and every loaded list page. */
   const applyRow = (row: AdminUserRow) => {
     qc.setQueryData<AdminUserDetail>(ak.user(row.id), (d) => (d ? { ...d, ...row } : d));
-    qc.setQueriesData<InfiniteData<Page<AdminUserRow>>>({ queryKey: ak.usersPrefix }, (old) => (old ? { ...old, pages: mapPages(old.pages, (r) => (r.id === row.id ? { ...r, ...row } : r)) } : old));
+    qc.setQueriesData<InfiniteData<Page<AdminUserRow>>>({ queryKey: ak.usersPrefix }, (old) =>
+      old
+        ? { ...old, pages: mapPages(old.pages, (r) => (r.id === row.id ? { ...r, ...row } : r)) }
+        : old
+    );
   };
   const refreshLists = () => void qc.invalidateQueries({ queryKey: ak.usersPrefix });
 
@@ -37,7 +80,12 @@ export function UserSheet({ userId, tiers, onClose }: { userId: string | null; t
     ...adminMutation(),
     onSuccess: (row) => {
       applyRow(row);
-      toast.success({ title: row.role === "ADMIN" ? `${row.displayName} is now an admin` : `${row.displayName} is no longer an admin` });
+      toast.success({
+        title:
+          row.role === "ADMIN"
+            ? `${row.displayName} is now an admin`
+            : `${row.displayName} is no longer an admin`,
+      });
     },
   });
   const tier = useMutation({
@@ -47,7 +95,11 @@ export function UserSheet({ userId, tiers, onClose }: { userId: string | null; t
       // Instant: show the new tier while the request runs.
       const prev = qc.getQueryData<AdminUserDetail>(ak.user(userId!));
       const t = tiers.find((x) => x.id === tierId);
-      if (prev) qc.setQueryData<AdminUserDetail>(ak.user(userId!), { ...prev, quotaTier: t ? { id: t.id, name: t.name } : null });
+      if (prev)
+        qc.setQueryData<AdminUserDetail>(ak.user(userId!), {
+          ...prev,
+          quotaTier: t ? { id: t.id, name: t.name } : null,
+        });
       return { prev };
     },
     onError: (e, _v, ctx) => {
@@ -60,7 +112,8 @@ export function UserSheet({ userId, tiers, onClose }: { userId: string | null; t
     },
   });
   const simple = useMutation({
-    mutationFn: (action: "unsuspend" | "unban") => (action === "unsuspend" ? api().admin.unsuspend(userId!) : api().admin.unban(userId!)),
+    mutationFn: (action: "unsuspend" | "unban") =>
+      action === "unsuspend" ? api().admin.unsuspend(userId!) : api().admin.unban(userId!),
     ...adminMutation(),
     onSuccess: (row) => applyRow(row),
   });
@@ -85,10 +138,30 @@ export function UserSheet({ userId, tiers, onClose }: { userId: string | null; t
           <DetailSection title="Account">
             <FactList
               items={[
-                { label: "Status", value: <StatusText tone={STATUS_TONE[u.status]}>{STATUS_LABEL[u.status]}{u.status === "SUSPENDED" && u.suspendedUntil ? ` until ${shortDate(u.suspendedUntil)}` : ""}</StatusText> },
+                {
+                  label: "Status",
+                  value: (
+                    <StatusText tone={STATUS_TONE[u.status]}>
+                      {STATUS_LABEL[u.status]}
+                      {u.status === "SUSPENDED" && u.suspendedUntil
+                        ? ` until ${shortDate(u.suspendedUntil)}`
+                        : ""}
+                    </StatusText>
+                  ),
+                },
                 { label: "Role", value: ROLE_LABEL[u.role] },
-                { label: "Joined", value: <span title={fullTimestamp(u.createdAt)}>{shortDate(u.createdAt)}</span> },
-                { label: "Last seen", value: u.lastSeenAt ? <span title={fullTimestamp(u.lastSeenAt)}>{shortDate(u.lastSeenAt)}</span> : "Never" },
+                {
+                  label: "Joined",
+                  value: <span title={fullTimestamp(u.createdAt)}>{shortDate(u.createdAt)}</span>,
+                },
+                {
+                  label: "Last seen",
+                  value: u.lastSeenAt ? (
+                    <span title={fullTimestamp(u.lastSeenAt)}>{shortDate(u.lastSeenAt)}</span>
+                  ) : (
+                    "Never"
+                  ),
+                },
               ]}
             />
           </DetailSection>
@@ -100,32 +173,54 @@ export function UserSheet({ userId, tiers, onClose }: { userId: string | null; t
               onValueChange={(v) => tier.mutate(v === DEFAULT_TIER ? null : v)}
               disabled={can.erased || tier.isPending}
               options={[
-                { value: DEFAULT_TIER, label: `Whichever tier is the default${defaultName(tiers)}` },
+                {
+                  value: DEFAULT_TIER,
+                  label: `Whichever tier is the default${defaultName(tiers)}`,
+                },
                 ...tiers.map((t) => ({ value: t.id, label: t.name })),
               ]}
               data-testid="user-tier"
             />
-            <TierLimits tier={u.quotaTier ? tiers.find((t) => t.id === u.quotaTier!.id) : tiers.find((t) => t.isDefault)} />
+            <TierLimits
+              tier={
+                u.quotaTier
+                  ? tiers.find((t) => t.id === u.quotaTier!.id)
+                  : tiers.find((t) => t.isDefault)
+              }
+            />
           </DetailSection>
 
           <DetailSection
             title="Own limits"
             action={
               u.override ? (
-                <Button variant="link" size="sm" className="text-[13px] text-danger" onClick={() => setDialog("removeOverride")} data-testid="override-remove">
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="text-[13px] text-danger"
+                  onClick={() => setDialog("removeOverride")}
+                  data-testid="override-remove"
+                >
                   Remove
                 </Button>
               ) : null
             }
           >
-            <OverrideEditor user={u} disabled={can.erased} onSaved={(d) => qc.setQueryData(ak.user(d.id), d)} />
+            <OverrideEditor
+              user={u}
+              disabled={can.erased}
+              onSaved={(d) => qc.setQueryData(ak.user(d.id), d)}
+            />
           </DetailSection>
 
           <DetailSection
             title="Last 30 days"
             action={
               <Button asChild variant="link" size="sm" className="text-[13px]">
-                <Link href={`/admin/interviews?user=${encodeURIComponent(u.id)}`} data-testid="user-interviews-link">
+                <Link
+                  href={`/admin/interviews?user=${encodeURIComponent(u.id)}`}
+                  data-testid="user-interviews-link"
+                >
                   See their interviews
                 </Link>
               </Button>
@@ -161,19 +256,136 @@ export function UserSheet({ userId, tiers, onClose }: { userId: string | null; t
 
           <DetailSection title="Access">
             {can.self ? (
-              <p className="text-[13.5px] text-muted-foreground">This is your account. Another admin can change its role or access.</p>
+              <p className="text-[13.5px] text-muted-foreground">
+                This is your account. Another admin can change its role or access.
+              </p>
             ) : can.erased ? (
-              <p className="text-[13.5px] text-muted-foreground">This account was erased. Nothing else can be done with it.</p>
+              <p className="text-[13.5px] text-muted-foreground">
+                This account was erased. Nothing else can be done with it.
+              </p>
             ) : (
               <div>
-                {can.makeAdmin ? <LineItem title="Make admin" description="Opens this control plane to them." control={<Button variant="outline" size="sm" onClick={() => setDialog("makeAdmin")} data-testid="user-make-admin">Make admin</Button>} /> : null}
-                {can.removeAdmin ? <LineItem title="Remove admin" description="Signs them out of the admin area at once." control={<Button variant="outline" size="sm" onClick={() => setDialog("removeAdmin")} data-testid="user-remove-admin">Remove admin</Button>} /> : null}
-                {can.suspend ? <LineItem title="Suspend" description="Read-only for a number of days: they can sign in and read their reports but not start or continue an interview." control={<Button variant="outline" size="sm" onClick={() => setDialog("suspend")} data-testid="user-suspend">Suspend</Button>} /> : null}
-                {can.unsuspend ? <LineItem title="Lift the suspension" description={u.suspendedUntil ? `Ends on its own on ${shortDate(u.suspendedUntil)}.` : undefined} control={<Button variant="outline" size="sm" onClick={() => setDialog("unsuspend")} data-testid="user-unsuspend">Unsuspend</Button>} /> : null}
-                {can.ban ? <LineItem title="Ban" description="Signs them out everywhere and revokes their shared links." control={<Button variant="danger-ghost" size="sm" onClick={() => setDialog("ban")} data-testid="user-ban">Ban</Button>} /> : null}
-                {can.unban ? <LineItem title="Unban" description="They can sign in again. Revoked links stay revoked." control={<Button variant="outline" size="sm" onClick={() => setDialog("unban")} data-testid="user-unban">Unban</Button>} /> : null}
-                {can.erase ? <LineItem title="Erase" description="Deletes every interview, answer, transcript and shared link, and anonymises the account. This cannot be undone." control={<Button variant="danger-ghost" size="sm" onClick={() => setDialog("erase")} data-testid="user-erase">Erase</Button>} /> : null}
-                {u.role === "ADMIN" ? <p className="pt-3 text-[13px] text-muted-foreground">Admins cannot be suspended, banned or erased. Remove admin first.</p> : null}
+                {can.makeAdmin ? (
+                  <LineItem
+                    title="Make admin"
+                    description="Opens this control plane to them."
+                    control={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDialog("makeAdmin")}
+                        data-testid="user-make-admin"
+                      >
+                        Make admin
+                      </Button>
+                    }
+                  />
+                ) : null}
+                {can.removeAdmin ? (
+                  <LineItem
+                    title="Remove admin"
+                    description="Signs them out of the admin area at once."
+                    control={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDialog("removeAdmin")}
+                        data-testid="user-remove-admin"
+                      >
+                        Remove admin
+                      </Button>
+                    }
+                  />
+                ) : null}
+                {can.suspend ? (
+                  <LineItem
+                    title="Suspend"
+                    description="Read-only for a number of days: they can sign in and read their reports but not start or continue an interview."
+                    control={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDialog("suspend")}
+                        data-testid="user-suspend"
+                      >
+                        Suspend
+                      </Button>
+                    }
+                  />
+                ) : null}
+                {can.unsuspend ? (
+                  <LineItem
+                    title="Lift the suspension"
+                    description={
+                      u.suspendedUntil
+                        ? `Ends on its own on ${shortDate(u.suspendedUntil)}.`
+                        : undefined
+                    }
+                    control={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDialog("unsuspend")}
+                        data-testid="user-unsuspend"
+                      >
+                        Unsuspend
+                      </Button>
+                    }
+                  />
+                ) : null}
+                {can.ban ? (
+                  <LineItem
+                    title="Ban"
+                    description="Signs them out everywhere and revokes their shared links."
+                    control={
+                      <Button
+                        variant="danger-ghost"
+                        size="sm"
+                        onClick={() => setDialog("ban")}
+                        data-testid="user-ban"
+                      >
+                        Ban
+                      </Button>
+                    }
+                  />
+                ) : null}
+                {can.unban ? (
+                  <LineItem
+                    title="Unban"
+                    description="They can sign in again. Revoked links stay revoked."
+                    control={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDialog("unban")}
+                        data-testid="user-unban"
+                      >
+                        Unban
+                      </Button>
+                    }
+                  />
+                ) : null}
+                {can.erase ? (
+                  <LineItem
+                    title="Erase"
+                    description="Deletes every interview, answer, transcript and shared link, and anonymises the account. This cannot be undone."
+                    control={
+                      <Button
+                        variant="danger-ghost"
+                        size="sm"
+                        onClick={() => setDialog("erase")}
+                        data-testid="user-erase"
+                      >
+                        Erase
+                      </Button>
+                    }
+                  />
+                ) : null}
+                {u.role === "ADMIN" ? (
+                  <p className="pt-3 text-[13px] text-muted-foreground">
+                    Admins cannot be suspended, banned or erased. Remove admin first.
+                  </p>
+                ) : null}
               </div>
             )}
           </DetailSection>
@@ -181,8 +393,16 @@ export function UserSheet({ userId, tiers, onClose }: { userId: string | null; t
           <ConfirmDialog
             open={dialog === "makeAdmin" || dialog === "removeAdmin"}
             onOpenChange={(o) => !o && setDialog(null)}
-            title={dialog === "makeAdmin" ? `Make ${u.displayName} an admin?` : `Remove admin from ${u.displayName}?`}
-            description={dialog === "makeAdmin" ? "They will see every account, the model catalogue and the settings. Never anyone's transcripts or answers." : "They keep their account and interviews, and lose the admin area right away."}
+            title={
+              dialog === "makeAdmin"
+                ? `Make ${u.displayName} an admin?`
+                : `Remove admin from ${u.displayName}?`
+            }
+            description={
+              dialog === "makeAdmin"
+                ? "They will see every account, the model catalogue and the settings. Never anyone's transcripts or answers."
+                : "They keep their account and interviews, and lose the admin area right away."
+            }
             confirmLabel={dialog === "makeAdmin" ? "Make admin" : "Remove admin"}
             destructive={dialog === "removeAdmin"}
             onConfirm={() => role.mutateAsync(dialog === "makeAdmin" ? "ADMIN" : "USER")}
@@ -190,8 +410,16 @@ export function UserSheet({ userId, tiers, onClose }: { userId: string | null; t
           <ConfirmDialog
             open={dialog === "unsuspend" || dialog === "unban"}
             onOpenChange={(o) => !o && setDialog(null)}
-            title={dialog === "unsuspend" ? `Lift ${u.displayName}'s suspension?` : `Unban ${u.displayName}?`}
-            description={dialog === "unsuspend" ? "They can start interviews again right away." : "They can sign in again."}
+            title={
+              dialog === "unsuspend"
+                ? `Lift ${u.displayName}'s suspension?`
+                : `Unban ${u.displayName}?`
+            }
+            description={
+              dialog === "unsuspend"
+                ? "They can start interviews again right away."
+                : "They can sign in again."
+            }
             confirmLabel={dialog === "unsuspend" ? "Unsuspend" : "Unban"}
             onConfirm={() => simple.mutateAsync(dialog === "unsuspend" ? "unsuspend" : "unban")}
           />
@@ -220,7 +448,9 @@ export function UserSheet({ userId, tiers, onClose }: { userId: string | null; t
             days={7}
             maxDays={365}
             reason="optional"
-            onConfirm={async ({ days, reason }) => applyRow(await api().admin.suspend(u.id, days, reason || undefined))}
+            onConfirm={async ({ days, reason }) =>
+              applyRow(await api().admin.suspend(u.id, days, reason || undefined))
+            }
             testId="suspend-dialog"
           />
           <ReasonDialog
@@ -231,7 +461,9 @@ export function UserSheet({ userId, tiers, onClose }: { userId: string | null; t
             confirmLabel="Ban"
             destructive
             reason="optional"
-            onConfirm={async ({ reason }) => applyRow(await api().admin.ban(u.id, reason || undefined))}
+            onConfirm={async ({ reason }) =>
+              applyRow(await api().admin.ban(u.id, reason || undefined))
+            }
             testId="ban-dialog"
           />
           <ReasonDialog
@@ -266,15 +498,29 @@ function TierLimits({ tier }: { tier: QuotaTier | undefined }) {
   if (!tier) return null;
   return (
     <p className="mt-2 text-[13px] text-muted-foreground">
-      {limitLabel(tier.monthlyInterviews)} interviews and {limitLabel(tier.monthlyVoiceMinutes).toLowerCase()} voice minutes a month, sessions up to {tier.maxSessionMinutes} minutes.
+      {limitLabel(tier.monthlyInterviews)} interviews and{" "}
+      {limitLabel(tier.monthlyVoiceMinutes).toLowerCase()} voice minutes a month, sessions up to{" "}
+      {tier.maxSessionMinutes} minutes.
     </p>
   );
 }
 
-function OverrideEditor({ user, disabled, onSaved }: { user: AdminUserDetail; disabled: boolean; onSaved: (d: AdminUserDetail) => void }) {
+function OverrideEditor({
+  user,
+  disabled,
+  onSaved,
+}: {
+  user: AdminUserDetail;
+  disabled: boolean;
+  onSaved: (d: AdminUserDetail) => void;
+}) {
   const id = useId();
   const o = user.override;
-  const init = () => ({ interviews: limitText(o?.monthlyInterviews), minutes: limitText(o?.monthlyVoiceMinutes), note: o?.note ?? "" });
+  const init = () => ({
+    interviews: limitText(o?.monthlyInterviews),
+    minutes: limitText(o?.monthlyVoiceMinutes),
+    note: o?.note ?? "",
+  });
   const [draft, setDraft] = useState(init);
   // Reset when the saved override changes (another save, a removal).
   useEffect(() => setDraft(init()), [o?.updatedAt, user.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -283,7 +529,12 @@ function OverrideEditor({ user, disabled, onSaved }: { user: AdminUserDetail; di
   const dirty = JSON.stringify(draft) !== JSON.stringify(init());
   const valid = interviews !== undefined && minutes !== undefined && draft.note.length <= 300;
   const save = useMutation({
-    mutationFn: () => api().admin.setQuota(user.id, { monthlyInterviews: interviews ?? null, monthlyVoiceMinutes: minutes ?? null, note: draft.note.trim() || null }),
+    mutationFn: () =>
+      api().admin.setQuota(user.id, {
+        monthlyInterviews: interviews ?? null,
+        monthlyVoiceMinutes: minutes ?? null,
+        note: draft.note.trim() || null,
+      }),
     ...adminMutation(),
     onSuccess: (d) => {
       onSaved(d);
@@ -299,21 +550,69 @@ function OverrideEditor({ user, disabled, onSaved }: { user: AdminUserDetail; di
       }}
       data-testid="override-form"
     >
-      <p className="text-[13px] text-muted-foreground">Limits for this account only, on top of the tier. Leave a field empty to use the tier&apos;s limit.</p>
+      <p className="text-[13px] text-muted-foreground">
+        Limits for this account only, on top of the tier. Leave a field empty to use the tier&apos;s
+        limit.
+      </p>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Interviews a month" htmlFor={`${id}-i`} error={interviews === undefined ? "Use a whole number." : undefined}>
-          <Input id={`${id}-i`} inputMode="numeric" placeholder="Tier limit" value={draft.interviews} onChange={(e) => setDraft((d) => ({ ...d, interviews: e.target.value }))} disabled={disabled} data-testid="override-interviews" />
+        <Field
+          label="Interviews a month"
+          htmlFor={`${id}-i`}
+          error={interviews === undefined ? "Use a whole number." : undefined}
+        >
+          <Input
+            id={`${id}-i`}
+            inputMode="numeric"
+            placeholder="Tier limit"
+            value={draft.interviews}
+            onChange={(e) => setDraft((d) => ({ ...d, interviews: e.target.value }))}
+            disabled={disabled}
+            data-testid="override-interviews"
+          />
         </Field>
-        <Field label="Voice minutes a month" htmlFor={`${id}-m`} error={minutes === undefined ? "Use a whole number." : undefined}>
-          <Input id={`${id}-m`} inputMode="numeric" placeholder="Tier limit" value={draft.minutes} onChange={(e) => setDraft((d) => ({ ...d, minutes: e.target.value }))} disabled={disabled} data-testid="override-voice-minutes" />
+        <Field
+          label="Voice minutes a month"
+          htmlFor={`${id}-m`}
+          error={minutes === undefined ? "Use a whole number." : undefined}
+        >
+          <Input
+            id={`${id}-m`}
+            inputMode="numeric"
+            placeholder="Tier limit"
+            value={draft.minutes}
+            onChange={(e) => setDraft((d) => ({ ...d, minutes: e.target.value }))}
+            disabled={disabled}
+            data-testid="override-voice-minutes"
+          />
         </Field>
       </div>
-      <Field label="Note" htmlFor={`${id}-n`} optional hint="Why this account has its own limits. Only admins see it.">
-        <Textarea id={`${id}-n`} rows={2} maxLength={300} value={draft.note} onChange={(e) => setDraft((d) => ({ ...d, note: e.target.value }))} disabled={disabled} data-testid="override-note" />
+      <Field
+        label="Note"
+        htmlFor={`${id}-n`}
+        optional
+        hint="Why this account has its own limits. Only admins see it."
+      >
+        <Textarea
+          id={`${id}-n`}
+          rows={2}
+          maxLength={300}
+          value={draft.note}
+          onChange={(e) => setDraft((d) => ({ ...d, note: e.target.value }))}
+          disabled={disabled}
+          data-testid="override-note"
+        />
       </Field>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[12.5px] text-subtle-foreground">{o ? `Last changed ${shortDate(o.updatedAt)}` : "No own limits yet."}</p>
-        <Button type="submit" size="sm" disabled={!dirty || !valid || disabled} loading={save.isPending} data-testid="override-save">
+        <p className="text-[12.5px] text-subtle-foreground">
+          {o ? `Last changed ${shortDate(o.updatedAt)}` : "No own limits yet."}
+        </p>
+        <Button
+          type="submit"
+          size="sm"
+          disabled={!dirty || !valid || disabled}
+          loading={save.isPending}
+          data-testid="override-save"
+        >
           Save limits
         </Button>
       </div>

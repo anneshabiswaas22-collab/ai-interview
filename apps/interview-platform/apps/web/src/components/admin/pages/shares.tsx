@@ -19,7 +19,12 @@ export function AdminShares() {
   const f = { includeRevoked };
   const list = useInfiniteQuery({
     queryKey: ak.shares(f),
-    queryFn: ({ pageParam }) => api().admin.shares({ includeRevoked: includeRevoked || undefined, cursor: pageParam, limit: 30 }),
+    queryFn: ({ pageParam }) =>
+      api().admin.shares({
+        includeRevoked: includeRevoked || undefined,
+        cursor: pageParam,
+        limit: 30,
+      }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: nextCursor,
   });
@@ -32,8 +37,20 @@ export function AdminShares() {
         header: "Interview",
         cell: (s) => (
           <div className="min-w-0">
-            <p className={s.revoked ? "truncate text-muted-foreground line-through" : "truncate font-medium text-foreground"}>{s.title || "Untitled"}</p>
-            {s.revoked ? <StatusText tone="muted" className="text-[12.5px]">Revoked</StatusText> : null}
+            <p
+              className={
+                s.revoked
+                  ? "truncate text-muted-foreground line-through"
+                  : "truncate font-medium text-foreground"
+              }
+            >
+              {s.title || "Untitled"}
+            </p>
+            {s.revoked ? (
+              <StatusText tone="muted" className="text-[12.5px]">
+                Revoked
+              </StatusText>
+            ) : null}
           </div>
         ),
         className: "max-w-[220px] sm:max-w-[360px]",
@@ -49,8 +66,22 @@ export function AdminShares() {
         ),
         hideBelow: "md",
       },
-      { key: "views", header: "Views", align: "right", cell: (s) => formatCount(s.viewCount), sortValue: (s) => s.viewCount, hideBelow: "sm" },
-      { key: "created", header: "Created", align: "right", cell: (s) => <span className="text-muted-foreground">{shortDate(s.createdAt)}</span>, sortValue: (s) => s.createdAt, hideBelow: "sm" },
+      {
+        key: "views",
+        header: "Views",
+        align: "right",
+        cell: (s) => formatCount(s.viewCount),
+        sortValue: (s) => s.viewCount,
+        hideBelow: "sm",
+      },
+      {
+        key: "created",
+        header: "Created",
+        align: "right",
+        cell: (s) => <span className="text-muted-foreground">{shortDate(s.createdAt)}</span>,
+        sortValue: (s) => s.createdAt,
+        hideBelow: "sm",
+      },
       {
         key: "actions",
         header: <span className="sr-only">Actions</span>,
@@ -60,11 +91,21 @@ export function AdminShares() {
             {!s.revoked ? (
               <>
                 <Button asChild variant="ghost" size="sm">
-                  <a href={s.url} target="_blank" rel="noopener noreferrer" aria-label={`Open the shared link for ${s.title || "Untitled"}`}>
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Open the shared link for ${s.title || "Untitled"}`}
+                  >
                     Open <ArrowUpRight />
                   </a>
                 </Button>
-                <Button variant="danger-ghost" size="sm" onClick={() => setRevoking(s)} data-testid={`share-revoke-${s.id}`}>
+                <Button
+                  variant="danger-ghost"
+                  size="sm"
+                  onClick={() => setRevoking(s)}
+                  data-testid={`share-revoke-${s.id}`}
+                >
                   Revoke
                 </Button>
               </>
@@ -73,14 +114,19 @@ export function AdminShares() {
         ),
       },
     ],
-    [],
+    []
   );
 
   const revoked = (id: string) => {
     qc.setQueriesData<InfiniteData<Page<AdminShareRow>>>({ queryKey: ak.sharesPrefix }, (old) => {
       if (!old) return old;
       // Live-only lists drop the row; lists with revoked links keep it, marked.
-      return { ...old, pages: includeRevoked ? mapPages(old.pages, (r) => (r.id === id ? { ...r, revoked: true } : r)) : filterPages(old.pages, (r) => r.id !== id) };
+      return {
+        ...old,
+        pages: includeRevoked
+          ? mapPages(old.pages, (r) => (r.id === id ? { ...r, revoked: true } : r))
+          : filterPages(old.pages, (r) => r.id !== id),
+      };
     });
     void qc.invalidateQueries({ queryKey: ak.sharesPrefix, refetchType: "none" });
   };
@@ -92,7 +138,11 @@ export function AdminShares() {
       filters={
         <label className="flex items-center justify-end gap-2.5 border-b border-border pb-3 text-[13.5px] text-muted-foreground">
           Show revoked links
-          <Switch checked={includeRevoked} onCheckedChange={(v) => url.set({ revoked: v ? "1" : null })} data-testid="shares-include-revoked" />
+          <Switch
+            checked={includeRevoked}
+            onCheckedChange={(v) => url.set({ revoked: v ? "1" : null })}
+            data-testid="shares-include-revoked"
+          />
         </label>
       }
       testId="admin-shares"
@@ -108,7 +158,9 @@ export function AdminShares() {
         hasMore={!!list.hasNextPage}
         loadingMore={list.isFetchingNextPage}
         onLoadMore={() => void list.fetchNextPage()}
-        empty={{ title: includeRevoked ? "No links have been shared yet." : "No live shared links." }}
+        empty={{
+          title: includeRevoked ? "No links have been shared yet." : "No live shared links.",
+        }}
         rowTestId={(s) => `share-row-${s.id}`}
         testId="shares-table"
       />
@@ -116,7 +168,11 @@ export function AdminShares() {
         open={!!revoking}
         onOpenChange={(o) => !o && setRevoking(null)}
         title="Revoke this link?"
-        description={revoking ? `"${revoking.title || "Untitled"}" by ${revoking.owner.displayName} stops working for everyone. The interview and its report are kept.` : undefined}
+        description={
+          revoking
+            ? `"${revoking.title || "Untitled"}" by ${revoking.owner.displayName} stops working for everyone. The interview and its report are kept.`
+            : undefined
+        }
         confirmLabel="Revoke link"
         destructive
         reason="required"

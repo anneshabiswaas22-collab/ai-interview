@@ -20,7 +20,10 @@ export function RequireAuth({ children, role }: { children: ReactNode; role?: "a
   const pathname = usePathname();
   useEffect(() => {
     // Keep the query string too, read at redirect time.
-    if (status === "signed-out") router.replace(`/login?next=${encodeURIComponent(`${pathname || "/"}${typeof window !== "undefined" ? window.location.search : ""}`)}`);
+    if (status === "signed-out")
+      router.replace(
+        `/login?next=${encodeURIComponent(`${pathname || "/"}${typeof window !== "undefined" ? window.location.search : ""}`)}`
+      );
   }, [status, router, pathname]);
   if (status !== "signed-in") return <FullPageSpinner />;
   if (role === "admin" && !isAdmin) return <Forbidden />;
@@ -31,7 +34,9 @@ function Forbidden() {
   return (
     <div className="mx-auto max-w-md py-16 text-center">
       <p className="text-lg font-semibold">This area is for administrators</p>
-      <p className="mt-1 text-sm text-muted-foreground">Ask an administrator if you think you should have access.</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Ask an administrator if you think you should have access.
+      </p>
     </div>
   );
 }

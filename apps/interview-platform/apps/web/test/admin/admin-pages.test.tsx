@@ -4,7 +4,13 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@open-conversation/ui";
-import type { AdminInterviewRow, AppSettings, IntegrationStatus, Page, QuotaTier } from "@open-conversation/types";
+import type {
+  AdminInterviewRow,
+  AppSettings,
+  IntegrationStatus,
+  Page,
+  QuotaTier,
+} from "@open-conversation/types";
 
 // jsdom has no ResizeObserver; Radix switches measure themselves with it.
 globalThis.ResizeObserver ??= class {
@@ -22,7 +28,11 @@ const admin = {
 };
 const nav = { replace: vi.fn(), push: vi.fn() };
 let search = new URLSearchParams();
-vi.mock("next/navigation", () => ({ useRouter: () => nav, usePathname: () => "/admin/interviews", useSearchParams: () => search }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => nav,
+  usePathname: () => "/admin/interviews",
+  useSearchParams: () => search,
+}));
 vi.mock("@/lib/api", () => ({ api: () => ({ admin }) }));
 
 import { AdminQuotas } from "@/components/admin/pages/quotas";
@@ -37,7 +47,14 @@ const settings: AppSettings = {
   supportEmail: null,
   interviewerName: "Avani",
   interviewerAddendum: "",
-  features: { resumeUpload: true, jobDescription: true, codeQuestions: true, proctoring: true, sharing: true, pdfExport: true },
+  features: {
+    resumeUpload: true,
+    jobDescription: true,
+    codeQuestions: true,
+    proctoring: true,
+    sharing: true,
+    pdfExport: true,
+  },
   retentionDays: null,
   minSupportedVersion: null,
 };
@@ -47,7 +64,7 @@ function wrap(ui: ReactNode) {
   return render(
     <QueryClientProvider client={client}>
       <TooltipProvider>{ui}</TooltipProvider>
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
 }
 
@@ -56,7 +73,11 @@ beforeEach(() => {
   search = new URLSearchParams();
   admin.integrations.mockResolvedValue({
     mail: { mode: "outbox" },
-    realtime: { openai: { keyConfigured: true, models: 2 }, gemini: { keyConfigured: false, models: 0 }, stub: { keyConfigured: true, models: 1 } },
+    realtime: {
+      openai: { keyConfigured: true, models: 2 },
+      gemini: { keyConfigured: false, models: 0 },
+      stub: { keyConfigured: true, models: 1 },
+    },
     textModels: 0,
   });
 });
@@ -64,8 +85,24 @@ beforeEach(() => {
 describe("quotas page", () => {
   it("lists tiers with Unlimited and the default marker", async () => {
     admin.tiers.mockResolvedValue([
-      { id: "t1", name: "Default", monthlyInterviews: 10, monthlyVoiceMinutes: 300, maxSessionMinutes: 30, isDefault: true, userCount: 4 },
-      { id: "t2", name: "Staff", monthlyInterviews: null, monthlyVoiceMinutes: null, maxSessionMinutes: 60, isDefault: false, userCount: 1 },
+      {
+        id: "t1",
+        name: "Default",
+        monthlyInterviews: 10,
+        monthlyVoiceMinutes: 300,
+        maxSessionMinutes: 30,
+        isDefault: true,
+        userCount: 4,
+      },
+      {
+        id: "t2",
+        name: "Staff",
+        monthlyInterviews: null,
+        monthlyVoiceMinutes: null,
+        maxSessionMinutes: 60,
+        isDefault: false,
+        userCount: 1,
+      },
     ]);
     wrap(<AdminQuotas />);
     const staff = await screen.findByTestId("tier-row-Staff");
@@ -79,7 +116,11 @@ describe("quotas page", () => {
 describe("settings page", () => {
   it("saves only what changed", async () => {
     admin.settings.mockResolvedValue(settings);
-    admin.updateSettings.mockImplementation(async (b) => ({ ...settings, ...b, features: { ...settings.features, ...(b.features ?? {}) } }));
+    admin.updateSettings.mockImplementation(async (b) => ({
+      ...settings,
+      ...b,
+      features: { ...settings.features, ...(b.features ?? {}) },
+    }));
     const user = userEvent.setup();
     wrap(<AdminSettings />);
     const proctoring = await screen.findByTestId("settings-feature-proctoring");
@@ -87,16 +128,24 @@ describe("settings page", () => {
     await user.click(proctoring);
     expect(await screen.findByText(/Unsaved changes in Features/)).toBeInTheDocument();
     await user.click(screen.getByTestId("settings-save"));
-    await waitFor(() => expect(admin.updateSettings).toHaveBeenCalledWith({ features: { proctoring: false } }));
+    await waitFor(() =>
+      expect(admin.updateSettings).toHaveBeenCalledWith({ features: { proctoring: false } })
+    );
   });
 
   it("blocks invite-only sign-up without a domain", async () => {
-    admin.settings.mockResolvedValue({ ...settings, registration: "INVITE_ONLY", allowedEmailDomains: ["example.com"] });
+    admin.settings.mockResolvedValue({
+      ...settings,
+      registration: "INVITE_ONLY",
+      allowedEmailDomains: ["example.com"],
+    });
     const user = userEvent.setup();
     wrap(<AdminSettings />);
     const list = await screen.findByTestId("settings-domains");
     await user.click(within(list).getByRole("button", { name: "Remove example.com" }));
-    expect(await screen.findByText("Invite-only sign-up needs at least one allowed domain.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Invite-only sign-up needs at least one allowed domain.")
+    ).toBeInTheDocument();
     expect(screen.getByTestId("settings-save")).toBeDisabled();
   });
 
@@ -127,7 +176,21 @@ describe("interviews page", () => {
   });
 
   it("lists metadata and filters by status in the URL", async () => {
-    admin.interviews.mockResolvedValue({ items: [row({}), row({ id: "i2", title: "Data analyst", status: "PLANNING", questionCount: 0, answeredCount: 0, overallScore: null, voiceMinutes: 0 })], nextCursor: null });
+    admin.interviews.mockResolvedValue({
+      items: [
+        row({}),
+        row({
+          id: "i2",
+          title: "Data analyst",
+          status: "PLANNING",
+          questionCount: 0,
+          answeredCount: 0,
+          overallScore: null,
+          voiceMinutes: 0,
+        }),
+      ],
+      nextCursor: null,
+    });
     const user = userEvent.setup();
     wrap(<AdminInterviews />);
     const first = await screen.findByTestId("interview-row-i1");
@@ -138,14 +201,23 @@ describe("interviews page", () => {
     expect(within(second).getByText("Not scored")).toBeInTheDocument();
     expect(within(second).getByText("No plan")).toBeInTheDocument();
     await user.click(screen.getByRole("tab", { name: "Completed" }));
-    expect(nav.replace).toHaveBeenCalledWith("/admin/interviews?status=COMPLETED", { scroll: false });
+    expect(nav.replace).toHaveBeenCalledWith("/admin/interviews?status=COMPLETED", {
+      scroll: false,
+    });
   });
 
   it("passes the URL filters to the API", async () => {
     search = new URLSearchParams("status=IN_PROGRESS&user=u1&q=acme");
-    admin.interviews.mockResolvedValue({ items: [row({ status: "IN_PROGRESS" })], nextCursor: null });
+    admin.interviews.mockResolvedValue({
+      items: [row({ status: "IN_PROGRESS" })],
+      nextCursor: null,
+    });
     wrap(<AdminInterviews />);
-    expect(await screen.findByText("Showing interviews by Ada Lovelace.", { exact: false })).toBeInTheDocument();
-    expect(admin.interviews).toHaveBeenCalledWith(expect.objectContaining({ status: "IN_PROGRESS", userId: "u1", q: "acme" }));
+    expect(
+      await screen.findByText("Showing interviews by Ada Lovelace.", { exact: false })
+    ).toBeInTheDocument();
+    expect(admin.interviews).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "IN_PROGRESS", userId: "u1", q: "acme" })
+    );
   });
 });

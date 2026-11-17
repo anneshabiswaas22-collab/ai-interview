@@ -6,7 +6,11 @@ import { db, type Executor } from "../db/kysely";
 import { realtimeOptions } from "./models.service";
 
 export async function preferencesOf(userId: string, exec: Executor = db): Promise<Preferences> {
-  const row = await exec.selectFrom("user_preferences").selectAll().where("user_id", "=", userId).executeTakeFirst();
+  const row = await exec
+    .selectFrom("user_preferences")
+    .selectAll()
+    .where("user_id", "=", userId)
+    .executeTakeFirst();
   return {
     voice: row?.voice ?? "alloy",
     transcriptionLanguage: row?.transcription_language ?? "auto",
@@ -15,17 +19,27 @@ export async function preferencesOf(userId: string, exec: Executor = db): Promis
   };
 }
 
-export async function updatePreferences(actor: Actor, patch: Partial<Preferences>): Promise<Preferences> {
+export async function updatePreferences(
+  actor: Actor,
+  patch: Partial<Preferences>
+): Promise<Preferences> {
   requireActive(actor);
   if (patch.defaultRealtimeModelId) {
     const options = await realtimeOptions();
-    if (!options.some((m) => m.id === patch.defaultRealtimeModelId)) throw badRequest("That model is not available", "MODEL_UNAVAILABLE");
+    if (!options.some((m) => m.id === patch.defaultRealtimeModelId))
+      throw badRequest("That model is not available", "MODEL_UNAVAILABLE");
   }
   const values = {
     ...(patch.voice !== undefined ? { voice: patch.voice } : {}),
-    ...(patch.transcriptionLanguage !== undefined ? { transcription_language: patch.transcriptionLanguage } : {}),
-    ...(patch.proctoringDefault !== undefined ? { proctoring_default: patch.proctoringDefault } : {}),
-    ...(patch.defaultRealtimeModelId !== undefined ? { default_realtime_model_id: patch.defaultRealtimeModelId } : {}),
+    ...(patch.transcriptionLanguage !== undefined
+      ? { transcription_language: patch.transcriptionLanguage }
+      : {}),
+    ...(patch.proctoringDefault !== undefined
+      ? { proctoring_default: patch.proctoringDefault }
+      : {}),
+    ...(patch.defaultRealtimeModelId !== undefined
+      ? { default_realtime_model_id: patch.defaultRealtimeModelId }
+      : {}),
   };
   await db
     .insertInto("user_preferences")

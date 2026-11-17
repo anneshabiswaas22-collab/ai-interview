@@ -8,13 +8,20 @@
  */
 import { logger } from "../core/logger";
 
-export type ProviderFailure = "AUTH" | "RATE_LIMITED" | "CONTEXT_TOO_LONG" | "BAD_REQUEST" | "CONTENT_FILTER" | "UNAVAILABLE" | "TIMEOUT";
+export type ProviderFailure =
+  | "AUTH"
+  | "RATE_LIMITED"
+  | "CONTEXT_TOO_LONG"
+  | "BAD_REQUEST"
+  | "CONTENT_FILTER"
+  | "UNAVAILABLE"
+  | "TIMEOUT";
 
 export class ProviderError extends Error {
   constructor(
     readonly failure: ProviderFailure,
     readonly provider: string,
-    readonly status: number | null = null,
+    readonly status: number | null = null
   ) {
     super(`${provider}: ${failure}${status ? ` (${status})` : ""}`);
     this.name = "ProviderError";
@@ -35,7 +42,8 @@ export function maskSecrets(text: string): string {
     .replace(/(bearer\s+)[A-Za-z0-9._-]{8,}/gi, "$1[masked]");
 }
 
-const CONTEXT_HINTS = /context(_| )length|maximum context|too many tokens|prompt is too long|input is too long|exceeds the (model'?s )?(maximum|context)/i;
+const CONTEXT_HINTS =
+  /context(_| )length|maximum context|too many tokens|prompt is too long|input is too long|exceeds the (model'?s )?(maximum|context)/i;
 const FILTER_HINTS = /content[_ ]?(policy|filter|management)|safety|blocked|moderation/i;
 
 /** Turn a non-2xx provider response into a ProviderError, logging a masked excerpt. */
@@ -43,7 +51,8 @@ export async function failFromResponse(provider: string, res: Response): Promise
   const body = await res.text().catch(() => "");
   const excerpt = maskSecrets(body.slice(0, 600));
   logger.warn({ provider, status: res.status, body: excerpt }, "provider call failed");
-  if (res.status === 401 || res.status === 403) throw new ProviderError("AUTH", provider, res.status);
+  if (res.status === 401 || res.status === 403)
+    throw new ProviderError("AUTH", provider, res.status);
   if (res.status === 429) throw new ProviderError("RATE_LIMITED", provider, res.status);
   if (res.status === 400 || res.status === 413 || res.status === 422) {
     if (CONTEXT_HINTS.test(body)) throw new ProviderError("CONTEXT_TOO_LONG", provider, res.status);
@@ -54,13 +63,19 @@ export async function failFromResponse(provider: string, res: Response): Promise
 }
 
 /** fetch with provider failure mapping for network errors and timeouts. */
-export async function providerFetch(provider: string, url: string, init: RequestInit): Promise<Response> {
+export async function providerFetch(
+  provider: string,
+  url: string,
+  init: RequestInit
+): Promise<Response> {
   let res: Response;
   try {
     res = await fetch(url, init);
   } catch (err) {
-    const reason = (init.signal as AbortSignal | null | undefined)?.reason as { name?: string } | undefined;
-    if (reason?.name === "TimeoutError" || (err as Error).name === "TimeoutError") throw new ProviderError("TIMEOUT", provider);
+    const reason = (init.signal as AbortSignal | null | undefined)?.reason as
+      { name?: string } | undefined;
+    if (reason?.name === "TimeoutError" || (err as Error).name === "TimeoutError")
+      throw new ProviderError("TIMEOUT", provider);
     // The caller cancelled (the user pressed stop): not a provider failure.
     if ((err as Error).name === "AbortError") throw err;
     logger.warn({ provider, err: (err as Error).message }, "provider unreachable");

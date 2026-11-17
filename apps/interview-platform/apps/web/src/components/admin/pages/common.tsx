@@ -37,12 +37,32 @@ export function adminMutation(opts: { inline?: boolean } = {}) {
 }
 
 /** A row of a settings-like list: label and help on the left, a control on the right, a hairline below. */
-export function LineItem({ title, description, control, className, testId }: { title: ReactNode; description?: ReactNode; control?: ReactNode; className?: string; testId?: string }) {
+export function LineItem({
+  title,
+  description,
+  control,
+  className,
+  testId,
+}: {
+  title: ReactNode;
+  description?: ReactNode;
+  control?: ReactNode;
+  className?: string;
+  testId?: string;
+}) {
   return (
-    <div className={cn("flex flex-col gap-2 border-b border-border py-3.5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6", className)} data-testid={testId}>
+    <div
+      className={cn(
+        "flex flex-col gap-2 border-b border-border py-3.5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6",
+        className
+      )}
+      data-testid={testId}
+    >
       <div className="min-w-0">
         <p className="text-[14px] font-medium text-foreground">{title}</p>
-        {description ? <p className="mt-0.5 text-[13px] text-muted-foreground">{description}</p> : null}
+        {description ? (
+          <p className="mt-0.5 text-[13px] text-muted-foreground">{description}</p>
+        ) : null}
       </div>
       {control ? <div className="flex shrink-0 items-center gap-2">{control}</div> : null}
     </div>
@@ -50,6 +70,14 @@ export function LineItem({ title, description, control, className, testId }: { t
 }
 
 /** A person's initials avatar in admin lists. Accounts here carry no picture, so it is name and colour only. */
-export function PersonAvatar({ user, size = "md", className }: { user: Pick<UserSummary, "id" | "displayName">; size?: AvatarSize; className?: string }) {
+export function PersonAvatar({
+  user,
+  size = "md",
+  className,
+}: {
+  user: Pick<UserSummary, "id" | "displayName">;
+  size?: AvatarSize;
+  className?: string;
+}) {
   return <Avatar name={user.displayName} seed={user.id} size={size} className={className} />;
 }

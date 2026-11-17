@@ -32,7 +32,11 @@ export function Avatar({ name, seed, src, size = "md", shape = "circle", classNa
   return (
     <span className={cn("relative inline-flex shrink-0", className)}>
       <AvatarPrimitive.Root
-        className={cn("inline-flex items-center justify-center overflow-hidden align-middle", radius, sizes[size])}
+        className={cn(
+          "inline-flex items-center justify-center overflow-hidden align-middle",
+          radius,
+          sizes[size]
+        )}
       >
         {src ? <AvatarPrimitive.Image src={src} alt="" className="size-full object-cover" /> : null}
         <AvatarPrimitive.Fallback
@@ -51,16 +55,36 @@ export function Avatar({ name, seed, src, size = "md", shape = "circle", classNa
 }
 
 /** Overlapping row of avatars (attendees, group participants). */
-export function AvatarStack({ people, max = 4, size = "sm" }: { people: { id: string; name: string; src?: string | null }[]; max?: number; size?: AvatarSize }) {
+export function AvatarStack({
+  people,
+  max = 4,
+  size = "sm",
+}: {
+  people: { id: string; name: string; src?: string | null }[];
+  max?: number;
+  size?: AvatarSize;
+}) {
   const shown = people.slice(0, max);
   const extra = people.length - shown.length;
   return (
     <span className="flex items-center -space-x-2">
       {shown.map((p) => (
-        <Avatar key={p.id} name={p.name} seed={p.id} src={p.src} size={size} className="rounded-full ring-2 ring-card" />
+        <Avatar
+          key={p.id}
+          name={p.name}
+          seed={p.id}
+          src={p.src}
+          size={size}
+          className="rounded-full ring-2 ring-card"
+        />
       ))}
       {extra > 0 ? (
-        <span className={cn("inline-flex items-center justify-center rounded-full bg-muted font-semibold text-muted-foreground ring-2 ring-card", sizes[size])}>
+        <span
+          className={cn(
+            "inline-flex items-center justify-center rounded-full bg-muted font-semibold text-muted-foreground ring-2 ring-card",
+            sizes[size]
+          )}
+        >
           +{extra}
         </span>
       ) : null}

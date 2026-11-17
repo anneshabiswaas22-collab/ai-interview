@@ -4,7 +4,9 @@ import * as React from "react";
 import { cn } from "../lib/cn";
 
 export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div aria-hidden className={cn("animate-shimmer rounded-md bg-muted", className)} {...props} />;
+  return (
+    <div aria-hidden className={cn("animate-shimmer rounded-md bg-muted", className)} {...props} />
+  );
 }
 
 /** A few lines of text placeholder, last line shorter. */

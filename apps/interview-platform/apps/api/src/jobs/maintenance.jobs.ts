@@ -26,23 +26,42 @@ export async function liftSuspensions(): Promise<number> {
     .where("suspended_until", "<=", new Date())
     .returning("id")
     .execute();
-  for (const r of rows) await audit({ actorId: null, action: "user.suspension_lifted", entityType: "user", entityId: r.id });
+  for (const r of rows)
+    await audit({
+      actorId: null,
+      action: "user.suspension_lifted",
+      entityType: "user",
+      entityId: r.id,
+    });
   return rows.length;
 }
 
 /** Erase accounts whose deletion request is older than the grace period. Returns how many. */
 export async function purgeAccounts(now = new Date()): Promise<number> {
   const cutoff = new Date(now.getTime() - DELETION_GRACE_DAYS * 86_400_000);
-  const due = await db.selectFrom("users").select("id").where("deletion_requested_at", "<=", cutoff).limit(200).execute();
+  const due = await db
+    .selectFrom("users")
+    .select("id")
+    .where("deletion_requested_at", "<=", cutoff)
+    .limit(200)
+    .execute();
   let n = 0;
   for (const { id } of due) {
     try {
       const done = await withTransaction(async (trx) => {
         // Re-check under a row lock: they may have signed in (cancelling it) since the select.
-        const row = await trx.selectFrom("users").select("deletion_requested_at").where("id", "=", id).forUpdate().executeTakeFirst();
+        const row = await trx
+          .selectFrom("users")
+          .select("deletion_requested_at")
+          .where("id", "=", id)
+          .forUpdate()
+          .executeTakeFirst();
         if (!row?.deletion_requested_at || row.deletion_requested_at > cutoff) return false;
         await anonymiseUser(id, trx);
-        await audit({ actorId: null, action: "user.purged", entityType: "user", entityId: id }, trx);
+        await audit(
+          { actorId: null, action: "user.purged", entityType: "user", entityId: id },
+          trx
+        );
         return true;
       });
       if (done) n++;
@@ -66,7 +85,14 @@ export async function applyRetention(): Promise<number> {
     total += res.rows.length;
     if (res.rows.length < 500) break;
   }
-  if (total) await audit({ actorId: null, action: "retention.applied", entityType: "settings", entityId: "app", data: { deleted: total, retentionDays } });
+  if (total)
+    await audit({
+      actorId: null,
+      action: "retention.applied",
+      entityType: "settings",
+      entityId: "app",
+      data: { deleted: total, retentionDays },
+    });
   return total;
 }
 

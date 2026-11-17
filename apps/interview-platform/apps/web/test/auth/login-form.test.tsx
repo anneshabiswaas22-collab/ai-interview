@@ -8,8 +8,17 @@ const replace = vi.fn();
 let search = new URLSearchParams();
 
 vi.mock("@/lib/auth", () => ({ useAuth: () => ({ login, status: "signed-out" }) }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, push: vi.fn() }), useSearchParams: () => search }));
-vi.mock("next/link", () => ({ default: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => <a href={href} {...rest}>{children}</a> }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace, push: vi.fn() }),
+  useSearchParams: () => search,
+}));
+vi.mock("next/link", () => ({
+  default: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 const resendVerification = vi.fn(async () => undefined);
 vi.mock("@/lib/api", () => ({ api: () => ({ auth: { resendVerification } }) }));
 
@@ -46,7 +55,9 @@ describe("LoginForm", () => {
   });
 
   it("asks for a TOTP code when required and resubmits with it", async () => {
-    login.mockResolvedValueOnce({ ok: false, totpRequired: true }).mockResolvedValueOnce({ ok: true, user: {} });
+    login
+      .mockResolvedValueOnce({ ok: false, totpRequired: true })
+      .mockResolvedValueOnce({ ok: true, user: {} });
     render(<LoginForm />);
     await fillAndSubmit();
     const code = await screen.findByTestId("totp-input");
@@ -59,7 +70,9 @@ describe("LoginForm", () => {
   });
 
   it("shows the human message for a wrong code and clears it", async () => {
-    login.mockResolvedValueOnce({ ok: false, totpRequired: true }).mockRejectedValueOnce(new ApiError({ status: 401, code: "INVALID_TOTP", message: "bad" }));
+    login
+      .mockResolvedValueOnce({ ok: false, totpRequired: true })
+      .mockRejectedValueOnce(new ApiError({ status: 401, code: "INVALID_TOTP", message: "bad" }));
     render(<LoginForm />);
     await fillAndSubmit();
     await userEvent.type(await screen.findByTestId("totp-input"), "000000");
@@ -69,19 +82,27 @@ describe("LoginForm", () => {
   });
 
   it("maps wrong credentials and offers a resend for unverified email", async () => {
-    login.mockRejectedValueOnce(new ApiError({ status: 401, code: "INVALID_CREDENTIALS", message: "x" }));
+    login.mockRejectedValueOnce(
+      new ApiError({ status: 401, code: "INVALID_CREDENTIALS", message: "x" })
+    );
     render(<LoginForm />);
     await fillAndSubmit();
     expect(await screen.findByRole("alert")).toHaveTextContent(/not right/i);
 
-    login.mockRejectedValueOnce(new ApiError({ status: 403, code: "EMAIL_NOT_VERIFIED", message: "x" }));
+    login.mockRejectedValueOnce(
+      new ApiError({ status: 403, code: "EMAIL_NOT_VERIFIED", message: "x" })
+    );
     await userEvent.click(screen.getByTestId("login-submit"));
-    await userEvent.click(await screen.findByRole("button", { name: /resend the verification email/i }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: /resend the verification email/i })
+    );
     expect(resendVerification).toHaveBeenCalledWith("ada@example.org");
   });
 
   it("switches the second step to a recovery code and sends it instead of a TOTP code", async () => {
-    login.mockResolvedValueOnce({ ok: false, totpRequired: true }).mockResolvedValueOnce({ ok: true, user: {} });
+    login
+      .mockResolvedValueOnce({ ok: false, totpRequired: true })
+      .mockResolvedValueOnce({ ok: true, user: {} });
     render(<LoginForm />);
     await fillAndSubmit();
     await screen.findByTestId("totp-input");
@@ -89,7 +110,9 @@ describe("LoginForm", () => {
     expect(screen.queryByTestId("totp-input")).not.toBeInTheDocument();
     await userEvent.type(screen.getByTestId("recovery-code-input"), " abcd-efgh ");
     await userEvent.click(screen.getByTestId("login-submit"));
-    expect(login).toHaveBeenLastCalledWith("ada@example.org", "correct horse", { recoveryCode: "abcd-efgh" });
+    expect(login).toHaveBeenLastCalledWith("ada@example.org", "correct horse", {
+      recoveryCode: "abcd-efgh",
+    });
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/"));
   });
 

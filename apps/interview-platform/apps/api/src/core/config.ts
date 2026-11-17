@@ -21,11 +21,19 @@ export const DEV_DEFAULTS = {
   JWT_SECRET: "change-me-open-conversation-local-access-token-secret",
   REFRESH_SECRET: "change-me-open-conversation-local-refresh-token-secret",
   // 32 bytes, base64, derived from a public constant: fine for a laptop, refused in production.
-  TOTP_ENCRYPTION_KEY: crypto.createHash("sha256").update("change-me-open-conversation-local-totp-encryption-key").digest("base64"),
+  TOTP_ENCRYPTION_KEY: crypto
+    .createHash("sha256")
+    .update("change-me-open-conversation-local-totp-encryption-key")
+    .digest("base64"),
 } as const;
 
 /** A base64 string that decodes to exactly 32 bytes (an AES-256 key). */
-const key32 = z.string().refine((v) => Buffer.from(v, "base64").length === 32, "must be 32 bytes, base64 encoded (openssl rand -base64 32)");
+const key32 = z
+  .string()
+  .refine(
+    (v) => Buffer.from(v, "base64").length === 32,
+    "must be 32 bytes, base64 encoded (openssl rand -base64 32)"
+  );
 
 const bool = z
   .enum(["true", "false", "1", "0", ""])
@@ -39,7 +47,7 @@ const list = z
     (v ?? "")
       .split(",")
       .map((s) => s.trim())
-      .filter(Boolean),
+      .filter(Boolean)
   );
 
 const schema = z.object({
@@ -155,8 +163,13 @@ export const isProd = config.NODE_ENV === "production";
 export const isTest = config.NODE_ENV === "test";
 
 /** The two rate-limit switches, read from the environment on every call (tests flip them). */
-export function rateLimitEnv(env: NodeJS.ProcessEnv = process.env): { enabled: boolean; store: "memory" | "redis" } {
-  const parsed = schema.pick({ RATE_LIMITS: true, RATE_LIMIT_STORE: true }).parse({ RATE_LIMITS: env.RATE_LIMITS, RATE_LIMIT_STORE: env.RATE_LIMIT_STORE });
+export function rateLimitEnv(env: NodeJS.ProcessEnv = process.env): {
+  enabled: boolean;
+  store: "memory" | "redis";
+} {
+  const parsed = schema
+    .pick({ RATE_LIMITS: true, RATE_LIMIT_STORE: true })
+    .parse({ RATE_LIMITS: env.RATE_LIMITS, RATE_LIMIT_STORE: env.RATE_LIMIT_STORE });
   return {
     enabled: (parsed.RATE_LIMITS ?? (isTest ? "off" : "on")) !== "off",
     store: isTest && parsed.RATE_LIMIT_STORE !== "redis" ? "memory" : "redis",
@@ -184,19 +197,28 @@ export function assertProductionConfig(c: Config = config): string[] {
     ["REFRESH_SECRET", c.REFRESH_SECRET],
   ];
   for (const [key, value] of secrets) {
-    if (value === DEV_DEFAULTS[key]) problems.push(`${key} is still the committed development default`);
+    if (value === DEV_DEFAULTS[key])
+      problems.push(`${key} is still the committed development default`);
     else if (value.length < 32) problems.push(`${key} must be at least 32 characters`);
   }
   if (c.JWT_SECRET === c.REFRESH_SECRET) problems.push("JWT_SECRET and REFRESH_SECRET must differ");
-  if (c.TOTP_ENCRYPTION_KEY === DEV_DEFAULTS.TOTP_ENCRYPTION_KEY) problems.push("TOTP_ENCRYPTION_KEY is not set (the development default is derived from a public constant)");
+  if (c.TOTP_ENCRYPTION_KEY === DEV_DEFAULTS.TOTP_ENCRYPTION_KEY)
+    problems.push(
+      "TOTP_ENCRYPTION_KEY is not set (the development default is derived from a public constant)"
+    );
   if (!c.CORS_ORIGINS.length) problems.push("CORS_ORIGINS is not set");
-  if (/localhost|127\.0\.0\.1/.test(c.APP_WEB_URL)) problems.push("APP_WEB_URL points at localhost");
-  if (c.MAIL_MODE === "outbox") problems.push("MAIL_MODE=outbox writes mail to disk instead of sending it");
+  if (/localhost|127\.0\.0\.1/.test(c.APP_WEB_URL))
+    problems.push("APP_WEB_URL points at localhost");
+  if (c.MAIL_MODE === "outbox")
+    problems.push("MAIL_MODE=outbox writes mail to disk instead of sending it");
   if (c.MAIL_MODE !== "outbox" && !c.MAIL_FROM) problems.push("MAIL_FROM is not set");
-  if (c.JOBS_MODE === "inline") problems.push("JOBS_MODE=inline runs background work on the request path");
+  if (c.JOBS_MODE === "inline")
+    problems.push("JOBS_MODE=inline runs background work on the request path");
   if (c.BCRYPT_ROUNDS < 12) problems.push("BCRYPT_ROUNDS below 12 weakens stored passwords");
   if (c.NODE_ENV === "production" && problems.length) {
-    throw new Error(`Refusing to start with an insecure configuration:\n  - ${problems.join("\n  - ")}`);
+    throw new Error(
+      `Refusing to start with an insecure configuration:\n  - ${problems.join("\n  - ")}`
+    );
   }
   return problems;
 }
@@ -207,7 +229,10 @@ export function assertProductionConfig(c: Config = config): string[] {
  */
 export function productionWarnings(c: Config = config): string[] {
   const warnings: string[] = [];
-  if (!Object.keys(providerKeys(c)).length) warnings.push("no model provider key is configured (PROVIDER_KEYS or OPENAI_API_KEY, GEMINI_API_KEY, ...): interviews cannot be planned or held");
+  if (!Object.keys(providerKeys(c)).length)
+    warnings.push(
+      "no model provider key is configured (PROVIDER_KEYS or OPENAI_API_KEY, GEMINI_API_KEY, ...): interviews cannot be planned or held"
+    );
   return warnings;
 }
 
@@ -233,7 +258,8 @@ export function providerKeys(c: Config = config): Record<string, string> {
     try {
       const parsed = JSON.parse(c.PROVIDER_KEYS) as unknown;
       if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        for (const [slug, v] of Object.entries(parsed)) if (typeof v === "string" && isRealKey(v)) out[slug] = v.trim();
+        for (const [slug, v] of Object.entries(parsed))
+          if (typeof v === "string" && isRealKey(v)) out[slug] = v.trim();
       }
     } catch {
       // Deliberately silent about the content.

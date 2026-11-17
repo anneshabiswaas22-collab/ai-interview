@@ -7,7 +7,20 @@
  */
 import type { ConnectOptions, RealtimeTransport, TransportEvent } from "./types";
 
-type Recognition = { continuous: boolean; interimResults: boolean; lang: string; onresult: ((e: { results: ArrayLike<{ 0: { transcript: string }; isFinal: boolean }>; resultIndex: number }) => void) | null; onend: (() => void) | null; start(): void; stop(): void };
+type Recognition = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult:
+    | ((e: {
+        results: ArrayLike<{ 0: { transcript: string }; isFinal: boolean }>;
+        resultIndex: number;
+      }) => void)
+    | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+};
 
 export function stubTransport(): RealtimeTransport {
   let emit: (e: TransportEvent) => void = () => undefined;
@@ -22,12 +35,18 @@ export function stubTransport(): RealtimeTransport {
       if (!synth || navigator.webdriver) {
         // Automated browsers: no audio, keep the pace quick.
         emit({ type: "speaking", who: "interviewer", on: true });
-        setTimeout(() => (emit({ type: "speaking", who: "interviewer", on: false }), resolve()), 400);
+        setTimeout(
+          () => (emit({ type: "speaking", who: "interviewer", on: false }), resolve()),
+          400
+        );
         return;
       }
       const u = new SpeechSynthesisUtterance(text.replace(/```[\s\S]*?```/g, "").slice(0, 600));
       u.onstart = () => emit({ type: "speaking", who: "interviewer", on: true });
-      u.onend = u.onerror = () => (emit({ type: "speaking", who: "interviewer", on: false }), resolve());
+      u.onend = u.onerror = () => (
+        emit({ type: "speaking", who: "interviewer", on: false }),
+        resolve()
+      );
       synth.speak(u);
     });
 
@@ -41,7 +60,15 @@ export function stubTransport(): RealtimeTransport {
         if (closed) return;
         await speak(line);
       }
-      const Ctor = (window as unknown as { SpeechRecognition?: new () => Recognition; webkitSpeechRecognition?: new () => Recognition }).SpeechRecognition ?? (window as unknown as { webkitSpeechRecognition?: new () => Recognition }).webkitSpeechRecognition;
+      const Ctor =
+        (
+          window as unknown as {
+            SpeechRecognition?: new () => Recognition;
+            webkitSpeechRecognition?: new () => Recognition;
+          }
+        ).SpeechRecognition ??
+        (window as unknown as { webkitSpeechRecognition?: new () => Recognition })
+          .webkitSpeechRecognition;
       if (Ctor && !navigator.webdriver && !closed) {
         recognition = new Ctor();
         recognition.continuous = true;
@@ -51,7 +78,8 @@ export function stubTransport(): RealtimeTransport {
           if (muted) return;
           for (let i = e.resultIndex; i < e.results.length; i++) {
             const r = e.results[i]!;
-            if (r.isFinal && r[0].transcript.trim()) emit({ type: "line", role: "candidate", text: r[0].transcript.trim() });
+            if (r.isFinal && r[0].transcript.trim())
+              emit({ type: "line", role: "candidate", text: r[0].transcript.trim() });
           }
         };
         recognition.onend = () => {
@@ -72,7 +100,12 @@ export function stubTransport(): RealtimeTransport {
     },
     sendText(text) {
       emit({ type: "line", role: "candidate", text });
-      setTimeout(() => !closed && void speak("Thanks. Tell me a little more, or press Next question when you are done."), 300);
+      setTimeout(
+        () =>
+          !closed &&
+          void speak("Thanks. Tell me a little more, or press Next question when you are done."),
+        300
+      );
     },
     setMuted(m) {
       muted = m;

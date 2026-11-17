@@ -20,7 +20,13 @@ import type { IssuedSession } from "../services/auth.service";
 export const REFRESH_COOKIE = "conv_refresh";
 
 function cookieOptions(expires?: Date): CookieOptions {
-  return { httpOnly: true, secure: cookieSecure(), sameSite: "lax", path: "/api/auth", ...(expires ? { expires } : {}) };
+  return {
+    httpOnly: true,
+    secure: cookieSecure(),
+    sameSite: "lax",
+    path: "/api/auth",
+    ...(expires ? { expires } : {}),
+  };
 }
 
 /** The request comes from a native app (`X-Client: native`, any case). */
@@ -31,7 +37,11 @@ export function isNative(req: Request): boolean {
 function sendSession(req: Request, res: Response, session: IssuedSession, status = 200): void {
   const { refreshToken, refreshExpiresAt, ...body } = session;
   if (isNative(req)) {
-    const native: IssuedNativeSession = { ...body, refreshToken, refreshExpiresAt: refreshExpiresAt.toISOString() };
+    const native: IssuedNativeSession = {
+      ...body,
+      refreshToken,
+      refreshExpiresAt: refreshExpiresAt.toISOString(),
+    };
     res.status(status).json(native);
     return;
   }
@@ -54,14 +64,25 @@ const password = z.string().min(1).max(128);
  * a 400 VALIDATION_FAILED naming the field. security/passwords.ts passwordProblem then
  * refuses guessable ones (WEAK_PASSWORD).
  */
-const newPassword = z.string().min(10, "must be at least 10 characters").max(128, "must be at most 128 characters");
+const newPassword = z
+  .string()
+  .min(10, "must be at least 10 characters")
+  .max(128, "must be at most 128 characters");
 
-const signupBody = z.object({
-  email,
-  username: z.string().trim().regex(USERNAME_PATTERN, "3 to 40 letters, digits or hyphens, starting and ending with a letter or digit"),
-  displayName: z.string().trim().min(1).max(80),
-  password: newPassword,
-}).strict();
+const signupBody = z
+  .object({
+    email,
+    username: z
+      .string()
+      .trim()
+      .regex(
+        USERNAME_PATTERN,
+        "3 to 40 letters, digits or hyphens, starting and ending with a letter or digit"
+      ),
+    displayName: z.string().trim().min(1).max(80),
+    password: newPassword,
+  })
+  .strict();
 
 const totpCode = z.string().trim().max(10);
 const recoveryCode = z.string().trim().min(8).max(32);
@@ -87,7 +108,17 @@ export async function resendVerification(req: Request, res: Response) {
 }
 
 export async function login(req: Request, res: Response) {
-  const body = parse(z.object({ login: z.string().trim().min(3).max(254), password, totp: totpCode.optional(), recoveryCode: recoveryCode.optional() }).strict(), req.body);
+  const body = parse(
+    z
+      .object({
+        login: z.string().trim().min(3).max(254),
+        password,
+        totp: totpCode.optional(),
+        recoveryCode: recoveryCode.optional(),
+      })
+      .strict(),
+    req.body
+  );
   const result = await auth.login({ ...body, login: body.login.toLowerCase() }, meta(req));
   if ("totpRequired" in result) {
     res.status(200).json(result);
@@ -143,7 +174,10 @@ export async function forgotPassword(req: Request, res: Response) {
 }
 
 export async function resetPassword(req: Request, res: Response) {
-  const body = parse(z.object({ token: z.string().min(10).max(200), password: newPassword }).strict(), req.body);
+  const body = parse(
+    z.object({ token: z.string().min(10).max(200), password: newPassword }).strict(),
+    req.body
+  );
   await auth.resetPassword(body.token, body.password, meta(req));
   res.status(204).end();
 }
@@ -165,19 +199,34 @@ export async function startTotp(req: Request, res: Response) {
 
 /** 200 { recoveryCodes }: the only time the codes are shown. */
 export async function enableTotp(req: Request, res: Response) {
-  res.json(await auth.enableTotp(actorOf(req), parse(z.object({ code: totpCode }).strict(), req.body).code, meta(req)));
+  res.json(
+    await auth.enableTotp(
+      actorOf(req),
+      parse(z.object({ code: totpCode }).strict(), req.body).code,
+      meta(req)
+    )
+  );
 }
 
 /** { password, code } (a current TOTP code), or { password, recoveryCode } when the device is lost. */
 export async function disableTotp(req: Request, res: Response) {
   const body = parse(
-    z.object({ password, code: totpCode.optional(), recoveryCode: recoveryCode.optional() }).strict().refine((b) => b.code || b.recoveryCode, { message: "code is required", path: ["code"] }),
-    req.body,
+    z
+      .object({ password, code: totpCode.optional(), recoveryCode: recoveryCode.optional() })
+      .strict()
+      .refine((b) => b.code || b.recoveryCode, { message: "code is required", path: ["code"] }),
+    req.body
   );
   await auth.disableTotp(actorOf(req), body, meta(req));
   res.status(204).end();
 }
 
 export async function regenerateRecoveryCodes(req: Request, res: Response) {
-  res.json(await auth.regenerateRecoveryCodes(actorOf(req), parse(z.object({ password, code: totpCode }).strict(), req.body), meta(req)));
+  res.json(
+    await auth.regenerateRecoveryCodes(
+      actorOf(req),
+      parse(z.object({ password, code: totpCode }).strict(), req.body),
+      meta(req)
+    )
+  );
 }

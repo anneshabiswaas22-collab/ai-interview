@@ -53,7 +53,11 @@ for (const area of order) {
   const ids = groups.get(area);
   if (!ids) continue;
   md += `\n## ${area}\n\n| Test id | Source |\n|---|---|\n`;
-  for (const id of [...ids.keys()].sort()) md += `| \`${id}\` | ${[...ids.get(id)].sort().map((f) => `\`${f}\``).join(", ")} |\n`;
+  for (const id of [...ids.keys()].sort())
+    md += `| \`${id}\` | ${[...ids.get(id)]
+      .sort()
+      .map((f) => `\`${f}\``)
+      .join(", ")} |\n`;
 }
 writeFileSync(join(root, "TESTIDS.md"), md);
 // A command-line script: printing the summary is its output.

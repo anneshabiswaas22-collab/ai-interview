@@ -17,7 +17,9 @@ const AT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}\+00$/;
 
 /** Select a timestamptz column as exact UTC text, aliased `alias` (default "_at"). */
 export function atKey<A extends string = "_at">(column: string, alias: A = "_at" as A) {
-  return sql<string>`to_char(${sql.ref(column)} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"+00"')`.as(alias);
+  return sql<string>`to_char(${sql.ref(column)} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"+00"')`.as(
+    alias
+  );
 }
 
 function encode(parts: unknown[]): string {
@@ -26,7 +28,8 @@ function encode(parts: unknown[]): string {
 
 function decodeParts(raw: unknown): unknown[] | null {
   if (raw === undefined || raw === null || raw === "") return null;
-  if (typeof raw !== "string" || raw.length > 300) throw badRequest("Invalid cursor", "INVALID_CURSOR");
+  if (typeof raw !== "string" || raw.length > 300)
+    throw badRequest("Invalid cursor", "INVALID_CURSOR");
   try {
     const parsed = JSON.parse(Buffer.from(raw, "base64url").toString("utf8"));
     if (!Array.isArray(parsed)) throw new Error("not an array");
@@ -44,13 +47,27 @@ export function decodeTime(raw: unknown): TimeKey | null {
   const p = decodeParts(raw);
   if (!p) return null;
   const [at, id] = p;
-  if (p.length !== 2 || typeof at !== "string" || !AT.test(at) || typeof id !== "string" || !ID_PATTERN.test(id)) throw badRequest("Invalid cursor", "INVALID_CURSOR");
+  if (
+    p.length !== 2 ||
+    typeof at !== "string" ||
+    !AT.test(at) ||
+    typeof id !== "string" ||
+    !ID_PATTERN.test(id)
+  )
+    throw badRequest("Invalid cursor", "INVALID_CURSOR");
   return { at, id };
 }
 
 /** Rows strictly after the cursor in (at DESC, id DESC) order. */
-export function olderThan(atColumn: string, idColumn: string, key: TimeKey | null): (eb: unknown) => Expression<SqlBool> {
-  return () => (key ? sql<boolean>`(${sql.ref(atColumn)}, ${sql.ref(idColumn)}) < (${key.at}::timestamptz, ${key.id})` : sql<boolean>`true`);
+export function olderThan(
+  atColumn: string,
+  idColumn: string,
+  key: TimeKey | null
+): (eb: unknown) => Expression<SqlBool> {
+  return () =>
+    key
+      ? sql<boolean>`(${sql.ref(atColumn)}, ${sql.ref(idColumn)}) < (${key.at}::timestamptz, ${key.id})`
+      : sql<boolean>`true`;
 }
 
 interface Paged<T> {
@@ -66,6 +83,9 @@ function pageBy<T>(rows: T[], limit: number, cursorOf: (last: T) => string): Pag
   return { items, nextCursor: hasMore && last !== undefined ? cursorOf(last) : null };
 }
 
-export function timePage<T extends { _at: string; id: string }>(rows: T[], limit: number): Paged<T> {
+export function timePage<T extends { _at: string; id: string }>(
+  rows: T[],
+  limit: number
+): Paged<T> {
   return pageBy(rows, limit, (r) => encodeTime(r._at, r.id));
 }

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { formatDay, formatTick, indexAt, labelIndexes, niceTicks, scaleLinear } from "@/components/admin/shell/chart";
+import {
+  formatDay,
+  formatTick,
+  indexAt,
+  labelIndexes,
+  niceTicks,
+  scaleLinear,
+} from "@/components/admin/shell/chart";
 
 describe("niceTicks", () => {
   it("rounds the top up to a nice step and starts at zero", () => {
@@ -49,7 +56,9 @@ describe("scales and positions", () => {
 describe("formatting", () => {
   it("reads ISO days as calendar dates without a timezone shift", () => {
     expect(formatDay("2026-03-04", { month: "short", day: "numeric" }, "en-US")).toBe("Mar 4");
-    expect(formatDay("2026-01-01", { year: "numeric", month: "2-digit", day: "2-digit" }, "en-US")).toBe("01/01/2026");
+    expect(
+      formatDay("2026-01-01", { year: "numeric", month: "2-digit", day: "2-digit" }, "en-US")
+    ).toBe("01/01/2026");
     expect(formatDay("nonsense")).toBe("nonsense");
   });
   it("compacts large axis figures only", () => {

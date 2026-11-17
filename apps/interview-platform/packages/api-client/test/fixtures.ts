@@ -14,7 +14,11 @@ export const me: Me = {
   canOpenAdmin: false,
 };
 
-export const authResult = (token: string): AuthResult => ({ accessToken: token, expiresIn: 900, user: me });
+export const authResult = (token: string): AuthResult => ({
+  accessToken: token,
+  expiresIn: 900,
+  user: me,
+});
 
 export function json(status: number, body: unknown): Response {
   return new Response(body === undefined ? null : JSON.stringify(body), {

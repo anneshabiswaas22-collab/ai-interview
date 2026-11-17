@@ -1,12 +1,24 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 import { cn } from "@open-conversation/ui";
 
 // ─── Pure helpers (tested in test/admin/chart.test.ts) ──────────────────────
 
 /** A "nice" axis for counts starting at zero: ticks at 1, 2, 2.5 or 5 times a power of ten. */
-export function niceTicks(max: number, target = 4, integer = true): { ticks: number[]; max: number } {
+export function niceTicks(
+  max: number,
+  target = 4,
+  integer = true
+): { ticks: number[]; max: number } {
   if (!Number.isFinite(max) || max <= 0) return { ticks: [0, 1], max: 1 };
   const raw = max / Math.max(1, target);
   const pow = 10 ** Math.floor(Math.log10(raw));
@@ -41,15 +53,24 @@ export function labelIndexes(n: number, max = 6): number[] {
 }
 
 /** "Mar 4" for an ISO day (YYYY-MM-DD), read as a calendar date (no timezone shift). */
-export function formatDay(iso: string, opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" }, locale?: string): string {
+export function formatDay(
+  iso: string,
+  opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" },
+  locale?: string
+): string {
   const [y, m, d] = iso.split("-").map(Number);
   if (!y || !m || !d) return iso;
-  return new Intl.DateTimeFormat(locale, { ...opts, timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, d)));
+  return new Intl.DateTimeFormat(locale, { ...opts, timeZone: "UTC" }).format(
+    new Date(Date.UTC(y, m - 1, d))
+  );
 }
 
 /** Axis figures: 950, 1.2K. */
 export function formatTick(n: number, locale?: string): string {
-  return new Intl.NumberFormat(locale, { notation: n >= 10_000 ? "compact" : "standard", maximumFractionDigits: 1 }).format(n);
+  return new Intl.NumberFormat(locale, {
+    notation: n >= 10_000 ? "compact" : "standard",
+    maximumFractionDigits: 1,
+  }).format(n);
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -85,7 +106,16 @@ export interface ChartProps<D extends { date: string }> {
 const M = { top: 12, right: 12, bottom: 26, left: 40 };
 
 /** A dependency-free SVG line or bar chart over daily data: axes, gridlines, hover tooltip, table view. */
-export function Chart<D extends { date: string }>({ data, series, type = "line", height = 240, title, formatValue = (n) => formatTick(n), className, testId = "chart" }: ChartProps<D>) {
+export function Chart<D extends { date: string }>({
+  data,
+  series,
+  type = "line",
+  height = 240,
+  title,
+  formatValue = (n) => formatTick(n),
+  className,
+  testId = "chart",
+}: ChartProps<D>) {
   const wrap = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(640);
   const [hover, setHover] = useState<number | null>(null);
@@ -95,13 +125,18 @@ export function Chart<D extends { date: string }>({ data, series, type = "line",
   useEffect(() => {
     const el = wrap.current;
     if (!el || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(([e]) => e && setWidth(Math.max(240, Math.round(e.contentRect.width))));
+    const ro = new ResizeObserver(
+      ([e]) => e && setWidth(Math.max(240, Math.round(e.contentRect.width)))
+    );
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
   const val = (d: D, k: string) => Number((d as Record<string, unknown>)[k] ?? 0) || 0;
-  const maxVal = useMemo(() => Math.max(0, ...data.flatMap((d) => series.map((s) => val(d, s.key)))), [data, series]); // eslint-disable-line react-hooks/exhaustive-deps
+  const maxVal = useMemo(
+    () => Math.max(0, ...data.flatMap((d) => series.map((s) => val(d, s.key)))),
+    [data, series]
+  ); // eslint-disable-line react-hooks/exhaustive-deps
   const axis = niceTicks(maxVal);
   const left = M.left;
   const right = width - M.right;
@@ -109,7 +144,8 @@ export function Chart<D extends { date: string }>({ data, series, type = "line",
   const y = scaleLinear([0, axis.max], [bottom, M.top]);
   const n = data.length;
   const band = n ? (right - left) / n : 0;
-  const xLine = (i: number) => (n <= 1 ? (left + right) / 2 : left + (i / (n - 1)) * (right - left));
+  const xLine = (i: number) =>
+    n <= 1 ? (left + right) / 2 : left + (i / (n - 1)) * (right - left);
   const xBar = (i: number) => left + band * i + band / 2;
   const x = type === "bar" ? xBar : xLine;
   const labels = labelIndexes(n, width < 480 ? 4 : 7);
@@ -117,7 +153,11 @@ export function Chart<D extends { date: string }>({ data, series, type = "line",
   const pick = (e: PointerEvent<SVGSVGElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
     const px = ((e.clientX - r.left) / r.width) * width;
-    setHover(type === "bar" ? Math.min(n - 1, Math.max(0, Math.floor((px - left) / (band || 1)))) : indexAt(px, n, left, right));
+    setHover(
+      type === "bar"
+        ? Math.min(n - 1, Math.max(0, Math.floor((px - left) / (band || 1))))
+        : indexAt(px, n, left, right)
+    );
   };
   const onKey = (e: KeyboardEvent<SVGSVGElement>) => {
     if (!n) return;
@@ -137,10 +177,17 @@ export function Chart<D extends { date: string }>({ data, series, type = "line",
   return (
     <figure className={cn("min-w-0", className)} data-testid={testId}>
       {series.length > 1 ? (
-        <ul className="mb-3 flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-muted-foreground" aria-label="Legend">
+        <ul
+          className="mb-3 flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-muted-foreground"
+          aria-label="Legend"
+        >
           {series.map((s) => (
             <li key={s.key} className="inline-flex items-center gap-2">
-              <span aria-hidden className="inline-block h-0.5 w-4 rounded-full" style={{ background: TONE[s.tone ?? "primary"] }} />
+              <span
+                aria-hidden
+                className="inline-block h-0.5 w-4 rounded-full"
+                style={{ background: TONE[s.tone ?? "primary"] }}
+              />
               {s.label}
             </li>
           ))}
@@ -162,18 +209,55 @@ export function Chart<D extends { date: string }>({ data, series, type = "line",
         >
           {axis.ticks.map((t) => (
             <g key={t}>
-              <line x1={left} x2={right} y1={y(t)} y2={y(t)} stroke="hsl(var(--border))" strokeDasharray={t === 0 ? undefined : "2 4"} />
-              <text x={left - 8} y={y(t)} dy="0.32em" textAnchor="end" fontSize={11} fill="hsl(var(--subtle-foreground))" className="tabular-nums">
+              <line
+                x1={left}
+                x2={right}
+                y1={y(t)}
+                y2={y(t)}
+                stroke="hsl(var(--border))"
+                strokeDasharray={t === 0 ? undefined : "2 4"}
+              />
+              <text
+                x={left - 8}
+                y={y(t)}
+                dy="0.32em"
+                textAnchor="end"
+                fontSize={11}
+                fill="hsl(var(--subtle-foreground))"
+                className="tabular-nums"
+              >
                 {formatValue(t)}
               </text>
             </g>
           ))}
           {labels.map((i) => (
-            <text key={i} x={x(i)} y={height - 6} textAnchor={n > 1 && i === 0 && type === "line" ? "start" : n > 1 && i === n - 1 && type === "line" ? "end" : "middle"} fontSize={11} fill="hsl(var(--subtle-foreground))">
+            <text
+              key={i}
+              x={x(i)}
+              y={height - 6}
+              textAnchor={
+                n > 1 && i === 0 && type === "line"
+                  ? "start"
+                  : n > 1 && i === n - 1 && type === "line"
+                    ? "end"
+                    : "middle"
+              }
+              fontSize={11}
+              fill="hsl(var(--subtle-foreground))"
+            >
               {formatDay(data[i]!.date)}
             </text>
           ))}
-          {hover !== null ? <line x1={x(hover)} x2={x(hover)} y1={M.top} y2={bottom} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.45} /> : null}
+          {hover !== null ? (
+            <line
+              x1={x(hover)}
+              x2={x(hover)}
+              y1={M.top}
+              y2={bottom}
+              stroke="hsl(var(--muted-foreground))"
+              strokeOpacity={0.45}
+            />
+          ) : null}
           {type === "bar"
             ? data.map((d, i) =>
                 series.map((s, si) => {
@@ -192,14 +276,32 @@ export function Chart<D extends { date: string }>({ data, series, type = "line",
                       fillOpacity={hover === null || hover === i ? 1 : 0.45}
                     />
                   );
-                }),
+                })
               )
             : series.map((s) => {
-                const pts = data.map((d, i) => `${x(i).toFixed(1)},${y(val(d, s.key)).toFixed(1)}`).join(" ");
+                const pts = data
+                  .map((d, i) => `${x(i).toFixed(1)},${y(val(d, s.key)).toFixed(1)}`)
+                  .join(" ");
                 return (
                   <g key={s.key}>
-                    <polyline points={pts} fill="none" stroke={TONE[s.tone ?? "primary"]} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-                    {hover !== null && hovered ? <circle cx={x(hover)} cy={y(val(hovered, s.key))} r={4} fill={TONE[s.tone ?? "primary"]} stroke="hsl(var(--card))" strokeWidth={2} /> : null}
+                    <polyline
+                      points={pts}
+                      fill="none"
+                      stroke={TONE[s.tone ?? "primary"]}
+                      strokeWidth={2}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                    {hover !== null && hovered ? (
+                      <circle
+                        cx={x(hover)}
+                        cy={y(val(hovered, s.key))}
+                        r={4}
+                        fill={TONE[s.tone ?? "primary"]}
+                        stroke="hsl(var(--card))"
+                        strokeWidth={2}
+                      />
+                    ) : null}
                   </g>
                 );
               })}
@@ -211,21 +313,43 @@ export function Chart<D extends { date: string }>({ data, series, type = "line",
             className="pointer-events-none absolute top-0 z-10 min-w-[140px] -translate-x-1/2 rounded-md border border-border bg-popover px-3 py-2 text-[12.5px] text-popover-foreground shadow-popover"
             style={{ left: `clamp(70px, ${tipLeft}%, calc(100% - 70px))` }}
           >
-            <p className="font-semibold">{formatDay(hovered.date, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</p>
+            <p className="font-semibold">
+              {formatDay(hovered.date, {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
             {series.map((s) => (
-              <p key={s.key} className="mt-0.5 flex items-center justify-between gap-4 text-muted-foreground">
+              <p
+                key={s.key}
+                className="mt-0.5 flex items-center justify-between gap-4 text-muted-foreground"
+              >
                 <span className="inline-flex items-center gap-1.5">
-                  <span aria-hidden className="inline-block size-2 rounded-full" style={{ background: TONE[s.tone ?? "primary"] }} />
+                  <span
+                    aria-hidden
+                    className="inline-block size-2 rounded-full"
+                    style={{ background: TONE[s.tone ?? "primary"] }}
+                  />
                   {s.label}
                 </span>
-                <span className="font-semibold tabular-nums text-foreground">{formatValue(val(hovered, s.key))}</span>
+                <span className="font-semibold tabular-nums text-foreground">
+                  {formatValue(val(hovered, s.key))}
+                </span>
               </p>
             ))}
           </div>
         ) : null}
       </div>
       <div className="mt-2 flex justify-end">
-        <button type="button" className="text-[12.5px] font-medium text-link hover:underline" aria-expanded={showTable} aria-controls={tableId} onClick={() => setShowTable((v) => !v)}>
+        <button
+          type="button"
+          className="text-[12.5px] font-medium text-link hover:underline"
+          aria-expanded={showTable}
+          aria-controls={tableId}
+          onClick={() => setShowTable((v) => !v)}
+        >
           {showTable ? "Hide table" : "View as table"}
         </button>
       </div>
@@ -234,9 +358,15 @@ export function Chart<D extends { date: string }>({ data, series, type = "line",
           <caption className="sr-only">{title}</caption>
           <thead>
             <tr className="border-b border-border text-muted-foreground">
-              <th scope="col" className="py-1.5 pr-4 font-medium">Date</th>
+              <th scope="col" className="py-1.5 pr-4 font-medium">
+                Date
+              </th>
               {series.map((s) => (
-                <th key={s.key} scope="col" className="py-1.5 pr-4 text-right font-medium last:pr-0">
+                <th
+                  key={s.key}
+                  scope="col"
+                  className="py-1.5 pr-4 text-right font-medium last:pr-0"
+                >
                   {s.label}
                 </th>
               ))}
@@ -245,7 +375,9 @@ export function Chart<D extends { date: string }>({ data, series, type = "line",
           <tbody>
             {data.map((d) => (
               <tr key={d.date} className="border-b border-border last:border-0">
-                <th scope="row" className="py-1.5 pr-4 font-normal">{formatDay(d.date, { month: "short", day: "numeric", year: "numeric" })}</th>
+                <th scope="row" className="py-1.5 pr-4 font-normal">
+                  {formatDay(d.date, { month: "short", day: "numeric", year: "numeric" })}
+                </th>
                 {series.map((s) => (
                   <td key={s.key} className="py-1.5 pr-4 text-right tabular-nums last:pr-0">
                     {formatValue(val(d, s.key))}

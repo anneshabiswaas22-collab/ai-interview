@@ -67,7 +67,13 @@ const preset: Partial<Config> = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: [
+          "var(--font-display)",
+          "var(--font-sans)",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+        ],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       fontSize: {
@@ -79,12 +85,21 @@ const preset: Partial<Config> = {
       keyframes: {
         "fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },
         "fade-out": { from: { opacity: "1" }, to: { opacity: "0" } },
-        "pop-in": { from: { opacity: "0", transform: "scale(0.97) translateY(2px)" }, to: { opacity: "1", transform: "none" } },
+        "pop-in": {
+          from: { opacity: "0", transform: "scale(0.97) translateY(2px)" },
+          to: { opacity: "1", transform: "none" },
+        },
         "slide-in-right": { from: { transform: "translateX(100%)" }, to: { transform: "none" } },
         "slide-in-left": { from: { transform: "translateX(-100%)" }, to: { transform: "none" } },
-        "slide-up": { from: { opacity: "0", transform: "translateY(8px)" }, to: { opacity: "1", transform: "none" } },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(8px)" },
+          to: { opacity: "1", transform: "none" },
+        },
         shimmer: { "0%": { opacity: "1" }, "50%": { opacity: "0.55" }, "100%": { opacity: "1" } },
-        rise: { from: { opacity: "0", transform: "translateY(14px)" }, to: { opacity: "1", transform: "none" } },
+        rise: {
+          from: { opacity: "0", transform: "translateY(14px)" },
+          to: { opacity: "1", transform: "none" },
+        },
       },
       animation: {
         "fade-in": "fade-in 150ms ease-out",

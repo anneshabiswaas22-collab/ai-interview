@@ -4,7 +4,10 @@ import { newUser, pageFor } from "../helpers";
 
 const fixture = (name: string) => path.join(__dirname, "..", "fixtures", name);
 
-test("a resume PDF becomes a plan; a text file named .pdf is refused", async ({ browser, request }) => {
+test("a resume PDF becomes a plan; a text file named .pdf is refused", async ({
+  browser,
+  request,
+}) => {
   const user = await newUser(request);
   const page = await pageFor(browser, user, "/new?from=resume");
   const prepare = page.getByRole("button", { name: "Prepare my interview" });

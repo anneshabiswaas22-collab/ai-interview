@@ -6,12 +6,18 @@ import { openAiRealtime } from "./openai";
 import { stubRealtime } from "./stub";
 import type { RealtimeAdapter } from "./types";
 
-const ADAPTERS: Record<RealtimeProvider, RealtimeAdapter> = { openai: openAiRealtime, gemini: geminiLive, stub: stubRealtime };
+const ADAPTERS: Record<RealtimeProvider, RealtimeAdapter> = {
+  openai: openAiRealtime,
+  gemini: geminiLive,
+  stub: stubRealtime,
+};
 
 let override: Partial<Record<RealtimeProvider, RealtimeAdapter>> | null = null;
 
 /** Tests: replace one or more adapters (null restores the real ones). */
-export function setRealtimeAdaptersForTests(a: Partial<Record<RealtimeProvider, RealtimeAdapter>> | null): void {
+export function setRealtimeAdaptersForTests(
+  a: Partial<Record<RealtimeProvider, RealtimeAdapter>> | null
+): void {
   override = a;
 }
 

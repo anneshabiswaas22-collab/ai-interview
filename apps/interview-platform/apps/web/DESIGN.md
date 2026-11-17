@@ -7,15 +7,15 @@ contract for every page.
 
 ## Foundations
 
-| Token | Use |
-| --- | --- |
-| `font-display` (Bricolage Grotesque, 600 to 700, tracking -0.02em) | Page titles, the home greeting, report scores, section headings in settings and admin |
-| `font-sans` (Hanken Grotesk) | Everything else. Body and feedback text 15.5px at line height 1.7, meta 13px, labels 12.5px |
-| `ink` | Text and the one solid call to action per screen (Start interview, Join, `Button variant="primary"`) |
-| `primary` / `brand` | Links, focus rings, the active underline, the interviewer orb, small accents. Never large fills |
-| `background` / `ground-2` | Page ground; the sidebar and the candidate's transcript lines sit on `ground-2` |
-| `card` + `shadow-card` + `rounded-card` | Only surfaces that float: menus, dialogs, sheets, the code editor |
-| `border` | 1px hairlines between list rows and sections |
+| Token                                                              | Use                                                                                                  |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `font-display` (Bricolage Grotesque, 600 to 700, tracking -0.02em) | Page titles, the home greeting, report scores, section headings in settings and admin                |
+| `font-sans` (Hanken Grotesk)                                       | Everything else. Body and feedback text 15.5px at line height 1.7, meta 13px, labels 12.5px          |
+| `ink`                                                              | Text and the one solid call to action per screen (Start interview, Join, `Button variant="primary"`) |
+| `primary` / `brand`                                                | Links, focus rings, the active underline, the interviewer orb, small accents. Never large fills      |
+| `background` / `ground-2`                                          | Page ground; the sidebar and the candidate's transcript lines sit on `ground-2`                      |
+| `card` + `shadow-card` + `rounded-card`                            | Only surfaces that float: menus, dialogs, sheets, the code editor                                    |
+| `border`                                                           | 1px hairlines between list rows and sections                                                         |
 
 Widths: reading columns (interview detail, report, new interview) `max-w-[780px]`, settings
 `max-w-[860px]`, admin `max-w-[1200px]`, gutters `px-4 sm:px-6`. Light and dark mode are a

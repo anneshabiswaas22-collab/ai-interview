@@ -12,8 +12,15 @@ import { auditRepo, type AuditFilter } from "../repositories/audit.repository";
 import { decodeTime, timePage } from "../repositories/keyset";
 
 export function audit(
-  entry: { actorId: string | null; action: string; entityType: string; entityId?: string | null; ip?: string | null; data?: Record<string, unknown> },
-  exec: Executor = db,
+  entry: {
+    actorId: string | null;
+    action: string;
+    entityType: string;
+    entityId?: string | null;
+    ip?: string | null;
+    data?: Record<string, unknown>;
+  },
+  exec: Executor = db
 ) {
   return exec
     .insertInto("audit_log")
@@ -30,9 +37,15 @@ export function audit(
 }
 
 /** GET /api/admin/audit: newest first, filtered, with the actors as person cards. */
-export async function listAudit(actor: Actor, q: AuditFilter & { cursor?: string; limit: number }): Promise<Page<AuditEntry>> {
+export async function listAudit(
+  actor: Actor,
+  q: AuditFilter & { cursor?: string; limit: number }
+): Promise<Page<AuditEntry>> {
   requireAdmin(actor);
-  const page = timePage(await auditRepo.list(q, { cursor: decodeTime(q.cursor), limit: q.limit }), q.limit);
+  const page = timePage(
+    await auditRepo.list(q, { cursor: decodeTime(q.cursor), limit: q.limit }),
+    q.limit
+  );
   const people = await loadSummaries(page.items.map((r) => r.actor_id));
   return {
     items: page.items.map((r) => ({

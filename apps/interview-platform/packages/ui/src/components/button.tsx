@@ -30,21 +30,27 @@ export const buttonVariants = cva(
       block: { true: "w-full" },
     },
     defaultVariants: { variant: "primary", size: "md" },
-  },
+  }
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, block, asChild, loading, disabled, children, type, ...props }, ref) => {
+  (
+    { className, variant, size, block, asChild, loading, disabled, children, type, ...props },
+    ref
+  ) => {
     if (asChild) {
       return (
-        <Slot ref={ref} className={cn(buttonVariants({ variant, size, block }), className)} {...props}>
+        <Slot
+          ref={ref}
+          className={cn(buttonVariants({ variant, size, block }), className)}
+          {...props}
+        >
           {children}
         </Slot>
       );
@@ -62,7 +68,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
       </button>
     );
-  },
+  }
 );
 Button.displayName = "Button";
 
@@ -83,11 +89,12 @@ const iconButtonVariants = cva(
       },
     },
     defaultVariants: { variant: "ghost", size: "md" },
-  },
+  }
 );
 
 export interface IconButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "aria-label">,
+  extends
+    Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "aria-label">,
     VariantProps<typeof iconButtonVariants> {
   /** Required: icon-only buttons need an accessible name. */
   label: string;
@@ -107,6 +114,6 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         {...props}
       />
     );
-  },
+  }
 );
 IconButton.displayName = "IconButton";

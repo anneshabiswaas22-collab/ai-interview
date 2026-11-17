@@ -62,21 +62,33 @@ export async function limitsFor(userId: string, exec: Executor = db): Promise<Li
   const tierInterviews = onTier ? row.t_interviews : row.d_interviews;
   const tierMinutes = onTier ? row.t_minutes : row.d_minutes;
   return {
-    monthlyInterviews: row.o_user && row.o_interviews !== null ? row.o_interviews : (tierInterviews ?? null),
-    monthlyVoiceMinutes: row.o_user && row.o_minutes !== null ? row.o_minutes : (tierMinutes ?? null),
+    monthlyInterviews:
+      row.o_user && row.o_interviews !== null ? row.o_interviews : (tierInterviews ?? null),
+    monthlyVoiceMinutes:
+      row.o_user && row.o_minutes !== null ? row.o_minutes : (tierMinutes ?? null),
     maxSessionMinutes: (onTier ? row.t_session : row.d_session) ?? 15,
   };
 }
 
 /** Interviews and voice seconds booked this month. */
-export async function usedThisMonth(userId: string, exec: Executor = db, now = new Date()): Promise<{ interviews: number; voiceSeconds: number }> {
+export async function usedThisMonth(
+  userId: string,
+  exec: Executor = db,
+  now = new Date()
+): Promise<{ interviews: number; voiceSeconds: number }> {
   const row = await exec
     .selectFrom("usage_daily")
-    .select([sql<number>`coalesce(sum(interviews), 0)::int`.as("interviews"), sql<number>`coalesce(sum(voice_seconds), 0)::bigint`.as("voice_seconds")])
+    .select([
+      sql<number>`coalesce(sum(interviews), 0)::int`.as("interviews"),
+      sql<number>`coalesce(sum(voice_seconds), 0)::bigint`.as("voice_seconds"),
+    ])
     .where("user_id", "=", userId)
     .where("day", ">=", sql<Date>`${utcDay(monthStart(now))}::date`)
     .executeTakeFirst();
-  return { interviews: Number(row?.interviews ?? 0), voiceSeconds: Number(row?.voice_seconds ?? 0) };
+  return {
+    interviews: Number(row?.interviews ?? 0),
+    voiceSeconds: Number(row?.voice_seconds ?? 0),
+  };
 }
 
 export async function usageOf(userId: string, now = new Date()): Promise<Usage> {
@@ -117,7 +129,10 @@ export async function voiceSecondsAllowed(userId: string, trx: Executor): Promis
   const sessionCap = limits.maxSessionMinutes * 60;
   if (limits.monthlyVoiceMinutes === null) return sessionCap;
   const left = limits.monthlyVoiceMinutes * 60 - used.voiceSeconds;
-  if (left < 30) throw quotaExceeded(`You have used this month's ${limits.monthlyVoiceMinutes} minutes of live voice`);
+  if (left < 30)
+    throw quotaExceeded(
+      `You have used this month's ${limits.monthlyVoiceMinutes} minutes of live voice`
+    );
   return Math.min(sessionCap, left);
 }
 
@@ -152,7 +167,7 @@ export async function recordUsage(u: UsageRecord, exec: Executor = db): Promise<
         input_tokens: eb("usage_daily.input_tokens", "+", eb.ref("excluded.input_tokens")),
         output_tokens: eb("usage_daily.output_tokens", "+", eb.ref("excluded.output_tokens")),
         voice_seconds: eb("usage_daily.voice_seconds", "+", eb.ref("excluded.voice_seconds")),
-      })),
+      }))
     )
     .execute();
 }

@@ -12,7 +12,15 @@ export const MAX_QUESTIONS_PER_ROUND = 8;
 export const MAX_QUESTION_CHARS = 2_500;
 
 /** Languages the code editor knows; anything else opens as plain text. */
-export const CODE_LANGUAGES = ["python", "javascript", "typescript", "java", "cpp", "go", "sql"] as const;
+export const CODE_LANGUAGES = [
+  "python",
+  "javascript",
+  "typescript",
+  "java",
+  "cpp",
+  "go",
+  "sql",
+] as const;
 
 const question = z.object({
   text: z.string().trim().min(5).max(MAX_QUESTION_CHARS),
@@ -58,7 +66,13 @@ export function normalisePlan(raw: unknown): PlanRound[] {
       })
       .slice(0, MAX_QUESTIONS_PER_ROUND);
     const parsed = round.safeParse({ ...rr, name: rr.name ?? rr.round, questions });
-    if (parsed.success) rounds.push({ name: parsed.data.name, focus: parsed.data.focus, description: parsed.data.description, questions });
+    if (parsed.success)
+      rounds.push({
+        name: parsed.data.name,
+        focus: parsed.data.focus,
+        description: parsed.data.description,
+        questions,
+      });
   }
   if (!rounds.length) throw new Error("The plan has no usable rounds");
   return rounds;
@@ -77,7 +91,12 @@ export function normaliseLanguage(given: string | null, text: string): string {
     if (s.includes("sql")) return "sql";
     return null;
   };
-  return (given && pick(given)) || pick(text.match(/(?:solution|answer|code) in ([A-Za-z+#]+)/i)?.[1] ?? "") || pick(text) || "python";
+  return (
+    (given && pick(given)) ||
+    pick(text.match(/(?:solution|answer|code) in ([A-Za-z+#]+)/i)?.[1] ?? "") ||
+    pick(text) ||
+    "python"
+  );
 }
 
 export function questionAt(plan: PlanRound[], roundIndex: number, questionIndex: number) {
@@ -89,8 +108,14 @@ export function questionCount(plan: PlanRound[] | null): number {
 }
 
 /** The position after (round, question), or null when that was the last question. */
-export function nextPosition(plan: PlanRound[], roundIndex: number, questionIndex: number): { round: number; question: number } | null {
-  if (questionIndex + 1 < (plan[roundIndex]?.questions.length ?? 0)) return { round: roundIndex, question: questionIndex + 1 };
-  for (let r = roundIndex + 1; r < plan.length; r++) if (plan[r].questions.length) return { round: r, question: 0 };
+export function nextPosition(
+  plan: PlanRound[],
+  roundIndex: number,
+  questionIndex: number
+): { round: number; question: number } | null {
+  if (questionIndex + 1 < (plan[roundIndex]?.questions.length ?? 0))
+    return { round: roundIndex, question: questionIndex + 1 };
+  for (let r = roundIndex + 1; r < plan.length; r++)
+    if (plan[r].questions.length) return { round: r, question: 0 };
   return null;
 }

@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { activeMention, extractMentions, extractTags, insertMention, isLong, parseInline, parseMarkdownLite, safeHref, tokenize } from "@/lib/text";
+import {
+  activeMention,
+  extractMentions,
+  extractTags,
+  insertMention,
+  isLong,
+  parseInline,
+  parseMarkdownLite,
+  safeHref,
+  tokenize,
+} from "@/lib/text";
 
 describe("tokenize", () => {
   it("finds urls, mentions and tags in order", () => {
@@ -18,7 +28,11 @@ describe("tokenize", () => {
   });
   it("keeps trailing punctuation outside links and supports www", () => {
     const s = tokenize("(see www.example.org)");
-    expect(s[1]).toMatchObject({ type: "url", href: "https://www.example.org/", text: "www.example.org" });
+    expect(s[1]).toMatchObject({
+      type: "url",
+      href: "https://www.example.org/",
+      text: "www.example.org",
+    });
     expect(s[2]).toMatchObject({ type: "text", text: ")" });
   });
   it("supports unicode tags and requires 3+ char usernames", () => {
@@ -67,7 +81,9 @@ describe("markdown-lite", () => {
     ]);
   });
   it("parses inline code and safe links only", () => {
-    expect(parseInline("use `npm i` then [docs](https://example.org) or [bad](javascript:x)")).toEqual([
+    expect(
+      parseInline("use `npm i` then [docs](https://example.org) or [bad](javascript:x)")
+    ).toEqual([
       { type: "text", text: "use " },
       { type: "code", text: "npm i" },
       { type: "text", text: " then " },

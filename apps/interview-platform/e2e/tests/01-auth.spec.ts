@@ -2,11 +2,17 @@ import { randomBytes } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { clientIp, newContext, signIn, signOut, uniq, verificationToken } from "../helpers";
 
-test("sign up in the UI, sign out, a wrong password is refused, the right one signs in", async ({ browser, request }) => {
+test("sign up in the UI, sign out, a wrong password is refused, the right one signs in", async ({
+  browser,
+  request,
+}) => {
   const ctx = await newContext(browser, clientIp());
   const page = await ctx.newPage();
   const username = uniq("su");
-  const user = { email: `${username}@example.com`, password: `Pw-${randomBytes(9).toString("base64url")}` };
+  const user = {
+    email: `${username}@example.com`,
+    password: `Pw-${randomBytes(9).toString("base64url")}`,
+  };
 
   await test.step("sign up lands on home, signed in", async () => {
     await page.goto("/signup");
@@ -14,7 +20,9 @@ test("sign up in the UI, sign out, a wrong password is refused, the right one si
     await page.locator("#displayName").fill("Signup Tester");
     await page.locator("#username").fill(username);
     await page.locator("#password").fill(user.password);
-    const responsePromise = page.waitForResponse((r) => r.url().endsWith("/api/auth/signup") && r.request().method() === "POST");
+    const responsePromise = page.waitForResponse(
+      (r) => r.url().endsWith("/api/auth/signup") && r.request().method() === "POST"
+    );
     await page.getByTestId("signup-submit").click();
     const response = await responsePromise;
     if (response.status() === 202) {

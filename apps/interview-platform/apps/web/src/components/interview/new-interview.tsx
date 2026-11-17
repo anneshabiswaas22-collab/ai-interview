@@ -41,8 +41,17 @@ export function NewInterview() {
   const create = useMutation({
     mutationFn: () =>
       from === "resume"
-        ? api().interviews.fromResume({ file: file!, fileName: file!.name, proctoring: proctoringOn && proctor })
-        : api().interviews.fromJobDescription({ company: company.trim(), role: role.trim(), jobDescription: jd.trim(), proctoring: proctoringOn && proctor }),
+        ? api().interviews.fromResume({
+            file: file!,
+            fileName: file!.name,
+            proctoring: proctoringOn && proctor,
+          })
+        : api().interviews.fromJobDescription({
+            company: company.trim(),
+            role: role.trim(),
+            jobDescription: jd.trim(),
+            proctoring: proctoringOn && proctor,
+          }),
     onSuccess: (iv) => {
       qc.setQueryData(qk.interview(iv.id), iv);
       void qc.invalidateQueries({ queryKey: qk.interviewsAll });
@@ -55,15 +64,30 @@ export function NewInterview() {
 
   const pick = (f: File | null | undefined) => {
     if (!f) return;
-    if (f.size > maxMb * 1024 * 1024) return toast.error({ title: "That file is too large", description: `Resumes can be up to ${maxMb} MB.` });
-    if (!/\.(pdf|docx)$/i.test(f.name)) return toast.error({ title: "Unsupported file", description: "Upload a PDF or a Word (.docx) file." });
+    if (f.size > maxMb * 1024 * 1024)
+      return toast.error({
+        title: "That file is too large",
+        description: `Resumes can be up to ${maxMb} MB.`,
+      });
+    if (!/\.(pdf|docx)$/i.test(f.name))
+      return toast.error({
+        title: "Unsupported file",
+        description: "Upload a PDF or a Word (.docx) file.",
+      });
     setFile(f);
   };
 
-  const ready = from === "resume" ? !!file : company.trim().length > 0 && role.trim().length > 1 && jd.trim().length >= 80;
+  const ready =
+    from === "resume"
+      ? !!file
+      : company.trim().length > 0 && role.trim().length > 1 && jd.trim().length >= 80;
   const tabs = [
-    ...(meta?.features.resumeUpload !== false ? [{ value: "resume" as const, label: "From a resume" }] : []),
-    ...(meta?.features.jobDescription !== false ? [{ value: "jd" as const, label: "From a job description" }] : []),
+    ...(meta?.features.resumeUpload !== false
+      ? [{ value: "resume" as const, label: "From a resume" }]
+      : []),
+    ...(meta?.features.jobDescription !== false
+      ? [{ value: "jd" as const, label: "From a job description" }]
+      : []),
   ];
 
   return (
@@ -77,8 +101,17 @@ export function NewInterview() {
         }}
       >
         <h1 className="font-display text-[28px] font-semibold tracking-[-0.02em]">New interview</h1>
-        <p className="mt-1.5 text-[15px] text-muted-foreground">The questions are written for you in about half a minute. You can review and edit them before you start.</p>
-        <UnderlineTabs className="mt-6" label="Start from" tabs={tabs} value={from} onChange={setFrom} />
+        <p className="mt-1.5 text-[15px] text-muted-foreground">
+          The questions are written for you in about half a minute. You can review and edit them
+          before you start.
+        </p>
+        <UnderlineTabs
+          className="mt-6"
+          label="Start from"
+          tabs={tabs}
+          value={from}
+          onChange={setFrom}
+        />
 
         {from === "resume" ? (
           <div className="mt-6">
@@ -93,34 +126,77 @@ export function NewInterview() {
               className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-card border border-dashed px-6 py-12 text-center transition-colors ${dragging ? "border-primary bg-primary-soft/50" : "border-input hover:bg-muted/50"}`}
             >
               <FileUp className="size-6 text-primary" aria-hidden />
-              <span className="text-[15px] font-medium">{file ? file.name : "Drop your resume here, or choose a file"}</span>
-              <span className="text-[13px] text-subtle-foreground">{file ? `${(file.size / 1024).toFixed(0)} KB` : `PDF or Word (.docx), up to ${maxMb} MB`}</span>
-              <input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="sr-only" data-testid="resume-input" onChange={(e) => pick(e.target.files?.[0])} />
+              <span className="text-[15px] font-medium">
+                {file ? file.name : "Drop your resume here, or choose a file"}
+              </span>
+              <span className="text-[13px] text-subtle-foreground">
+                {file
+                  ? `${(file.size / 1024).toFixed(0)} KB`
+                  : `PDF or Word (.docx), up to ${maxMb} MB`}
+              </span>
+              <input
+                type="file"
+                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                className="sr-only"
+                data-testid="resume-input"
+                onChange={(e) => pick(e.target.files?.[0])}
+              />
             </label>
             {file ? (
-              <button type="button" onClick={() => setFile(null)} className="mt-2 inline-flex items-center gap-1 text-[13px] text-subtle-foreground hover:text-foreground">
+              <button
+                type="button"
+                onClick={() => setFile(null)}
+                className="mt-2 inline-flex items-center gap-1 text-[13px] text-subtle-foreground hover:text-foreground"
+              >
                 <X className="size-3.5" /> Remove
               </button>
             ) : null}
-            <p className="mt-3 text-[13px] text-subtle-foreground">Your resume is read once to write the questions and a short summary for the interviewer. The file itself is never stored.</p>
+            <p className="mt-3 text-[13px] text-subtle-foreground">
+              Your resume is read once to write the questions and a short summary for the
+              interviewer. The file itself is never stored.
+            </p>
           </div>
         ) : (
           <div className="mt-6 space-y-5">
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="company">Company</Label>
-                <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} maxLength={120} placeholder="Example Labs" required />
+                <Input
+                  id="company"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  maxLength={120}
+                  placeholder="Example Labs"
+                  required
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="role">Role</Label>
-                <Input id="role" value={role} onChange={(e) => setRole(e.target.value)} maxLength={120} placeholder="Senior Backend Engineer" required />
+                <Input
+                  id="role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  maxLength={120}
+                  placeholder="Senior Backend Engineer"
+                  required
+                />
               </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="jd">Job description</Label>
-              <Textarea id="jd" value={jd} onChange={(e) => setJd(e.target.value)} rows={12} maxLength={maxJd} placeholder="Paste the responsibilities, required skills and qualifications." required />
+              <Textarea
+                id="jd"
+                value={jd}
+                onChange={(e) => setJd(e.target.value)}
+                rows={12}
+                maxLength={maxJd}
+                placeholder="Paste the responsibilities, required skills and qualifications."
+                required
+              />
               <p className="text-[12.5px] text-subtle-foreground">
-                {jd.trim().length < 80 ? `At least 80 characters (${jd.trim().length} so far).` : `${jd.length.toLocaleString()} of ${maxJd.toLocaleString()} characters.`}
+                {jd.trim().length < 80
+                  ? `At least 80 characters (${jd.trim().length} so far).`
+                  : `${jd.length.toLocaleString()} of ${maxJd.toLocaleString()} characters.`}
               </p>
             </div>
           </div>
@@ -131,7 +207,10 @@ export function NewInterview() {
             <Switch id="proctoring" checked={proctor} onCheckedChange={setProctoring} />
             <label htmlFor="proctoring" className="min-w-0">
               <span className="block text-[14.5px] font-medium">Practise with proctoring</span>
-              <span className="block text-[13px] text-subtle-foreground">Your camera checks that you stay in view and the tab notes when you leave it, like a proctored interview. Video stays on your device; only the events are saved.</span>
+              <span className="block text-[13px] text-subtle-foreground">
+                Your camera checks that you stay in view and the tab notes when you leave it, like a
+                proctored interview. Video stays on your device; only the events are saved.
+              </span>
             </label>
           </div>
         ) : null}

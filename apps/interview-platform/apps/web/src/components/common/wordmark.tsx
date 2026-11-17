@@ -24,14 +24,31 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-export function Wordmark({ compact, className, textClassName }: { compact?: boolean; className?: string; textClassName?: string }) {
+export function Wordmark({
+  compact,
+  className,
+  textClassName,
+}: {
+  compact?: boolean;
+  className?: string;
+  textClassName?: string;
+}) {
   const name = useProductName();
   const { lead, tail } = splitName(name);
   return (
-    <Link href="/" className={cn("flex min-w-0 items-center gap-2 rounded-md focus-visible:ring-2", className)} aria-label={`${name} home`}>
+    <Link
+      href="/"
+      className={cn("flex min-w-0 items-center gap-2 rounded-md focus-visible:ring-2", className)}
+      aria-label={`${name} home`}
+    >
       <LogoMark />
       {compact ? null : (
-        <span className={cn("truncate font-display text-[17px] font-semibold tracking-[-0.02em] text-foreground", textClassName)}>
+        <span
+          className={cn(
+            "truncate font-display text-[17px] font-semibold tracking-[-0.02em] text-foreground",
+            textClassName
+          )}
+        >
           {lead}
           {tail ? <span className="font-semibold text-muted-foreground"> {tail}</span> : null}
         </span>

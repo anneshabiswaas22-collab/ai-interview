@@ -20,11 +20,26 @@ export const RECOVERY_CODE_COUNT = 10;
 const RECOVERY_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
 
 function derivedKey(purpose: "totp-secret" | "recovery-code"): Buffer {
-  return Buffer.from(crypto.hkdfSync("sha256", Buffer.from(config.TOTP_ENCRYPTION_KEY, "base64"), Buffer.alloc(0), `open-conversation:${purpose}`, 32));
+  return Buffer.from(
+    crypto.hkdfSync(
+      "sha256",
+      Buffer.from(config.TOTP_ENCRYPTION_KEY, "base64"),
+      Buffer.alloc(0),
+      `open-conversation:${purpose}`,
+      32
+    )
+  );
 }
 
 function totp(secret: string, label: string): TOTP {
-  return new TOTP({ issuer: config.PRODUCT_NAME, label, algorithm: "SHA1", digits: 6, period: PERIOD, secret: Secret.fromBase32(secret) });
+  return new TOTP({
+    issuer: config.PRODUCT_NAME,
+    label,
+    algorithm: "SHA1",
+    digits: 6,
+    period: PERIOD,
+    secret: Secret.fromBase32(secret),
+  });
 }
 
 export function newTotpSecret(): string {
@@ -49,7 +64,11 @@ export function decryptTotpSecret(stored: string, userId: string): string | null
   if (!stored.startsWith("v1:")) return null;
   try {
     const raw = Buffer.from(stored.slice(3), "base64url");
-    const decipher = crypto.createDecipheriv("aes-256-gcm", derivedKey("totp-secret"), raw.subarray(0, 12));
+    const decipher = crypto.createDecipheriv(
+      "aes-256-gcm",
+      derivedKey("totp-secret"),
+      raw.subarray(0, 12)
+    );
     decipher.setAAD(Buffer.from(userId, "utf8"));
     decipher.setAuthTag(raw.subarray(12, 28));
     return Buffer.concat([decipher.update(raw.subarray(28)), decipher.final()]).toString("utf8");
@@ -73,7 +92,10 @@ export function verifyTotp(secret: string, code: string, now = Date.now()): numb
 /** Fresh recovery codes, formatted "xxxxx-xxxxx". */
 export function newRecoveryCodes(count = RECOVERY_CODE_COUNT): string[] {
   return Array.from({ length: count }, () => {
-    const chars = Array.from({ length: 10 }, () => RECOVERY_ALPHABET[crypto.randomInt(RECOVERY_ALPHABET.length)]).join("");
+    const chars = Array.from(
+      { length: 10 },
+      () => RECOVERY_ALPHABET[crypto.randomInt(RECOVERY_ALPHABET.length)]
+    ).join("");
     return `${chars.slice(0, 5)}-${chars.slice(5)}`;
   });
 }
@@ -84,5 +106,8 @@ export function normaliseRecoveryCode(code: string): string {
 }
 
 export function hashRecoveryCode(code: string, userId: string): string {
-  return crypto.createHmac("sha256", derivedKey("recovery-code")).update(`${userId}:${normaliseRecoveryCode(code)}`).digest("hex");
+  return crypto
+    .createHmac("sha256", derivedKey("recovery-code"))
+    .update(`${userId}:${normaliseRecoveryCode(code)}`)
+    .digest("hex");
 }

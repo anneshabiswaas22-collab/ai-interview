@@ -37,31 +37,74 @@ export const DELETED_DISPLAY_NAME = "Deleted user";
 /** Days between asking to delete an account and the purge. */
 export const DELETION_GRACE_DAYS = 14;
 
-export async function assertNotLastAdmin(userId: string, role: string, exec: Executor = db): Promise<void> {
+export async function assertNotLastAdmin(
+  userId: string,
+  role: string,
+  exec: Executor = db
+): Promise<void> {
   if (role !== "ADMIN") return;
-  const others = await exec.selectFrom("users").select("id").where("role", "=", "ADMIN").where("status", "=", "ACTIVE").where("id", "<>", userId).executeTakeFirst();
-  if (!others) throw conflict("You are the last administrator; make someone else an admin first", "LAST_ADMIN");
+  const others = await exec
+    .selectFrom("users")
+    .select("id")
+    .where("role", "=", "ADMIN")
+    .where("status", "=", "ACTIVE")
+    .where("id", "<>", userId)
+    .executeTakeFirst();
+  if (!others)
+    throw conflict(
+      "You are the last administrator; make someone else an admin first",
+      "LAST_ADMIN"
+    );
 }
 
 /** Ask for deletion: signed out everywhere now, erased after the grace period. */
-export async function requestDeletion(actor: Actor, input: { password: string; totp?: string; recoveryCode?: string }, meta: RequestMeta): Promise<{ purgeAfter: string }> {
+export async function requestDeletion(
+  actor: Actor,
+  input: { password: string; totp?: string; recoveryCode?: string },
+  meta: RequestMeta
+): Promise<{ purgeAfter: string }> {
   const user = await confirmIdentity(actor, input);
   await assertNotLastAdmin(user.id, user.role);
   const now = new Date();
   await withTransaction(async (trx) => {
-    await trx.updateTable("users").set({ deletion_requested_at: now, updated_at: now }).where("id", "=", user.id).execute();
+    await trx
+      .updateTable("users")
+      .set({ deletion_requested_at: now, updated_at: now })
+      .where("id", "=", user.id)
+      .execute();
     await sessionRepo.revokeAllForUser(user.id, trx);
     await userRepo.bumpTokenVersion(user.id, trx);
-    await audit({ actorId: user.id, action: "user.deletion_requested", entityType: "user", entityId: user.id, ip: meta.ip }, trx);
+    await audit(
+      {
+        actorId: user.id,
+        action: "user.deletion_requested",
+        entityType: "user",
+        entityId: user.id,
+        ip: meta.ip,
+      },
+      trx
+    );
   });
   return { purgeAfter: new Date(now.getTime() + DELETION_GRACE_DAYS * 86_400_000).toISOString() };
 }
 
 /** Signing in during the grace period keeps the account. Called by auth.service on a successful login. */
-export async function cancelDeletionOnSignIn(userId: string, exec: Executor = db): Promise<boolean> {
-  const r = await exec.updateTable("users").set({ deletion_requested_at: null }).where("id", "=", userId).where("deletion_requested_at", "is not", null).executeTakeFirst();
+export async function cancelDeletionOnSignIn(
+  userId: string,
+  exec: Executor = db
+): Promise<boolean> {
+  const r = await exec
+    .updateTable("users")
+    .set({ deletion_requested_at: null })
+    .where("id", "=", userId)
+    .where("deletion_requested_at", "is not", null)
+    .executeTakeFirst();
   const cancelled = Number(r.numUpdatedRows) > 0;
-  if (cancelled) await audit({ actorId: userId, action: "user.deletion_cancelled", entityType: "user", entityId: userId }, exec);
+  if (cancelled)
+    await audit(
+      { actorId: userId, action: "user.deletion_cancelled", entityType: "user", entityId: userId },
+      exec
+    );
   return cancelled;
 }
 
@@ -94,7 +137,11 @@ export async function anonymiseUser(id: string, trx: Executor): Promise<void> {
   await userRepo.bumpTokenVersion(id, trx);
 
   await trx.deleteFrom("shares").where("user_id", "=", id).execute();
-  await trx.deleteFrom("live_sessions").where("user_id", "=", id).where("status", "<>", "OPEN").execute();
+  await trx
+    .deleteFrom("live_sessions")
+    .where("user_id", "=", id)
+    .where("status", "<>", "OPEN")
+    .execute();
   await trx.deleteFrom("interviews").where("user_id", "=", id).execute();
   await trx.deleteFrom("user_preferences").where("user_id", "=", id).execute();
   await trx.deleteFrom("user_quota_overrides").where("user_id", "=", id).execute();
@@ -107,7 +154,11 @@ const EXPORT_PAGE = 500;
 type Section = { name: string; query: (after: string | null) => Promise<{ id: string }[]> };
 
 function sections(userId: string): Section[] {
-  const after = <Q extends { where: (...a: any[]) => Q }>(q: Q, col: string, cursor: string | null): Q => (cursor ? q.where(col, ">", cursor) : q);
+  const after = <Q extends { where: (...a: any[]) => Q }>(
+    q: Q,
+    col: string,
+    cursor: string | null
+  ): Q => (cursor ? q.where(col, ">", cursor) : q);
   return [
     {
       name: "interviews",
@@ -115,10 +166,25 @@ function sections(userId: string): Section[] {
         after(
           db
             .selectFrom("interviews")
-            .select(["id", "source", "status", "title", "company", "role", "domain", "summary", "job_description", "plan", "proctoring", "started_at", "completed_at", "created_at"])
+            .select([
+              "id",
+              "source",
+              "status",
+              "title",
+              "company",
+              "role",
+              "domain",
+              "summary",
+              "job_description",
+              "plan",
+              "proctoring",
+              "started_at",
+              "completed_at",
+              "created_at",
+            ])
             .where("user_id", "=", userId),
           "id",
-          c,
+          c
         )
           .orderBy("id")
           .limit(EXPORT_PAGE)
@@ -131,10 +197,26 @@ function sections(userId: string): Section[] {
           db
             .selectFrom("answers as a")
             .innerJoin("interviews as i", "i.id", "a.interview_id")
-            .select(["a.id", "a.interview_id", "a.round_index", "a.question_index", "a.kind", "a.transcript", "a.code", "a.language", "a.status", "a.evaluator_kind", "a.domain_rating", "a.communication_rating", "a.feedback", "a.created_at", "a.updated_at"])
+            .select([
+              "a.id",
+              "a.interview_id",
+              "a.round_index",
+              "a.question_index",
+              "a.kind",
+              "a.transcript",
+              "a.code",
+              "a.language",
+              "a.status",
+              "a.evaluator_kind",
+              "a.domain_rating",
+              "a.communication_rating",
+              "a.feedback",
+              "a.created_at",
+              "a.updated_at",
+            ])
             .where("i.user_id", "=", userId),
           "a.id",
-          c,
+          c
         )
           .orderBy("a.id")
           .limit(EXPORT_PAGE)
@@ -142,31 +224,116 @@ function sections(userId: string): Section[] {
     },
     {
       name: "textPracticeSessions",
-      query: (c) => after(
-        db.selectFrom("text_practice_sessions as s").innerJoin("interviews as i", "i.id", "s.interview_id")
-          .select(["s.interview_id as id", "s.version", "s.consented_at"]).where("i.user_id", "=", userId), "s.interview_id", c,
-      ).orderBy("s.interview_id").limit(EXPORT_PAGE).execute(),
+      query: (c) =>
+        after(
+          db
+            .selectFrom("text_practice_sessions as s")
+            .innerJoin("interviews as i", "i.id", "s.interview_id")
+            .select(["s.interview_id as id", "s.version", "s.consented_at"])
+            .where("i.user_id", "=", userId),
+          "s.interview_id",
+          c
+        )
+          .orderBy("s.interview_id")
+          .limit(EXPORT_PAGE)
+          .execute(),
     },
     {
       name: "textPracticeEvents",
-      query: (c) => after(
-        db.selectFrom("text_practice_events as e").innerJoin("interviews as i", "i.id", "e.interview_id")
-          .select(["e.id", "e.interview_id", "e.sequence", "e.kind", "e.round_index", "e.question_index", "e.text", "e.created_at"]).where("i.user_id", "=", userId), "e.id", c,
-      ).orderBy("e.id").limit(EXPORT_PAGE).execute(),
+      query: (c) =>
+        after(
+          db
+            .selectFrom("text_practice_events as e")
+            .innerJoin("interviews as i", "i.id", "e.interview_id")
+            .select([
+              "e.id",
+              "e.interview_id",
+              "e.sequence",
+              "e.kind",
+              "e.round_index",
+              "e.question_index",
+              "e.text",
+              "e.created_at",
+            ])
+            .where("i.user_id", "=", userId),
+          "e.id",
+          c
+        )
+          .orderBy("e.id")
+          .limit(EXPORT_PAGE)
+          .execute(),
     },
     {
       name: "proctorEvents",
       query: (c) =>
-        after(db.selectFrom("proctor_events as p").innerJoin("interviews as i", "i.id", "p.interview_id").select(["p.id", "p.interview_id", "p.kind", "p.round_index", "p.question_index", "p.occurred_at"]).where("i.user_id", "=", userId), "p.id", c)
+        after(
+          db
+            .selectFrom("proctor_events as p")
+            .innerJoin("interviews as i", "i.id", "p.interview_id")
+            .select([
+              "p.id",
+              "p.interview_id",
+              "p.kind",
+              "p.round_index",
+              "p.question_index",
+              "p.occurred_at",
+            ])
+            .where("i.user_id", "=", userId),
+          "p.id",
+          c
+        )
           .orderBy("p.id")
           .limit(EXPORT_PAGE)
           .execute(),
     },
     {
       name: "liveSessions",
-      query: (c) => after(db.selectFrom("live_sessions").select(["id", "interview_id", "provider_kind", "round_index", "question_index", "status", "seconds", "created_at", "ended_at"]).where("user_id", "=", userId), "id", c).orderBy("id").limit(EXPORT_PAGE).execute(),
+      query: (c) =>
+        after(
+          db
+            .selectFrom("live_sessions")
+            .select([
+              "id",
+              "interview_id",
+              "provider_kind",
+              "round_index",
+              "question_index",
+              "status",
+              "seconds",
+              "created_at",
+              "ended_at",
+            ])
+            .where("user_id", "=", userId),
+          "id",
+          c
+        )
+          .orderBy("id")
+          .limit(EXPORT_PAGE)
+          .execute(),
     },
-    { name: "sharedLinks", query: (c) => after(db.selectFrom("shares").select(["id", "interview_id", "include_transcript", "view_count", "revoked_at", "expires_at", "created_at"]).where("user_id", "=", userId), "id", c).orderBy("id").limit(EXPORT_PAGE).execute() },
+    {
+      name: "sharedLinks",
+      query: (c) =>
+        after(
+          db
+            .selectFrom("shares")
+            .select([
+              "id",
+              "interview_id",
+              "include_transcript",
+              "view_count",
+              "revoked_at",
+              "expires_at",
+              "created_at",
+            ])
+            .where("user_id", "=", userId),
+          "id",
+          c
+        )
+          .orderBy("id")
+          .limit(EXPORT_PAGE)
+          .execute(),
+    },
   ];
 }
 
@@ -175,15 +342,22 @@ export async function exportAccount(actor: Actor, res: Response): Promise<void> 
   const user = await userRepo.findById(actor.id);
   if (!user) return void res.status(404).end();
   const account = { ...(await toMe(user)), createdAt: user.created_at.toISOString() };
-  const prefs = await db.selectFrom("user_preferences").select(["voice", "transcription_language", "proctoring_default", "default_realtime_model_id"]).where("user_id", "=", user.id).executeTakeFirst();
+  const prefs = await db
+    .selectFrom("user_preferences")
+    .select(["voice", "transcription_language", "proctoring_default", "default_realtime_model_id"])
+    .where("user_id", "=", user.id)
+    .executeTakeFirst();
   // Record access before sending any data: an audit failure must not result in
   // a successful unaudited export. A disconnected transfer is still an attempt.
   await audit({ actorId: user.id, action: "user.export", entityType: "user", entityId: user.id });
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Content-Disposition", `attachment; filename="${user.username}-export.json"`);
   res.setHeader("Cache-Control", "no-store");
-  const write = (chunk: string) => new Promise<void>((resolve) => (res.write(chunk) ? resolve() : res.once("drain", resolve)));
-  await write(`{"exportedAt":${JSON.stringify(new Date().toISOString())},"account":${JSON.stringify(account)},"preferences":${JSON.stringify(prefs ?? null)}`);
+  const write = (chunk: string) =>
+    new Promise<void>((resolve) => (res.write(chunk) ? resolve() : res.once("drain", resolve)));
+  await write(
+    `{"exportedAt":${JSON.stringify(new Date().toISOString())},"account":${JSON.stringify(account)},"preferences":${JSON.stringify(prefs ?? null)}`
+  );
   for (const section of sections(user.id)) {
     await write(`,${JSON.stringify(section.name)}:[`);
     let cursor: string | null = null;

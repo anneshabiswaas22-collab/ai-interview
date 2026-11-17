@@ -15,7 +15,14 @@ export const DEFAULT_SETTINGS: AppSettings = {
   supportEmail: null,
   interviewerName: "Avani",
   interviewerAddendum: "",
-  features: { resumeUpload: true, jobDescription: true, codeQuestions: true, proctoring: true, sharing: true, pdfExport: true },
+  features: {
+    resumeUpload: true,
+    jobDescription: true,
+    codeQuestions: true,
+    proctoring: true,
+    sharing: true,
+    pdfExport: true,
+  },
   retentionDays: null,
   minSupportedVersion: null,
 };
@@ -34,19 +41,31 @@ export function mergeSettings(base: AppSettings, stored: Partial<AppSettings>): 
 
 export async function getSettings(exec: Executor = db): Promise<AppSettings> {
   if (cache && Date.now() - cache.at < TTL_MS) return cache.value;
-  const row = await exec.selectFrom("settings").select("value").where("key", "=", "app").executeTakeFirst();
+  const row = await exec
+    .selectFrom("settings")
+    .select("value")
+    .where("key", "=", "app")
+    .executeTakeFirst();
   const value = mergeSettings(DEFAULT_SETTINGS, (row?.value as Partial<AppSettings>) ?? {});
   cache = { at: Date.now(), value };
   return value;
 }
 
-export async function saveSettings(patch: Partial<AppSettings>, actorId: string | null, exec: Executor = db): Promise<{ before: AppSettings; after: AppSettings }> {
+export async function saveSettings(
+  patch: Partial<AppSettings>,
+  actorId: string | null,
+  exec: Executor = db
+): Promise<{ before: AppSettings; after: AppSettings }> {
   const before = await getSettings(exec);
   const after = mergeSettings(before, patch);
   await exec
     .insertInto("settings")
     .values({ key: "app", value: JSON.stringify(after), updated_by: actorId })
-    .onConflict((oc) => oc.column("key").doUpdateSet({ value: JSON.stringify(after), updated_by: actorId, updated_at: new Date() }))
+    .onConflict((oc) =>
+      oc
+        .column("key")
+        .doUpdateSet({ value: JSON.stringify(after), updated_by: actorId, updated_at: new Date() })
+    )
     .execute();
   cache = null;
   return { before, after };

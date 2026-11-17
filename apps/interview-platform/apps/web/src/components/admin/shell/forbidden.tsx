@@ -16,8 +16,13 @@ export function ForbiddenArea({
   homeLabel?: string;
 }) {
   return (
-    <div className="mx-auto flex min-h-[60dvh] max-w-md flex-col items-center justify-center px-4 text-center" data-testid="admin-forbidden">
-      <h1 className="font-display text-[22px] font-semibold tracking-[-0.015em] text-foreground">{title}</h1>
+    <div
+      className="mx-auto flex min-h-[60dvh] max-w-md flex-col items-center justify-center px-4 text-center"
+      data-testid="admin-forbidden"
+    >
+      <h1 className="font-display text-[22px] font-semibold tracking-[-0.015em] text-foreground">
+        {title}
+      </h1>
       <p className="mt-2 text-[14.5px] text-muted-foreground">{description}</p>
       <Button asChild variant="outline" size="sm" className="mt-5">
         <Link href={homeHref}>{homeLabel}</Link>

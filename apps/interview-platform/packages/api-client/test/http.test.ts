@@ -4,7 +4,10 @@ import { authResult, json } from "./fixtures";
 
 type Call = { url: string; init: RequestInit };
 
-function setup(handler: (call: Call, n: number) => Response | Promise<Response>, initialToken: string | null = "old") {
+function setup(
+  handler: (call: Call, n: number) => Response | Promise<Response>,
+  initialToken: string | null = "old"
+) {
   let token = initialToken;
   const calls: Call[] = [];
   const onRefresh = vi.fn((r) => {
@@ -53,12 +56,19 @@ describe("request basics", () => {
 
   it("downloads a file as a Blob with the bearer token, and maps a 404 to ApiError", async () => {
     let n = 0;
-    const { client, calls } = setup(() => (n++ === 0 ? new Response("{}", { status: 200, headers: { "Content-Type": "application/json" } }) : json(404, { error: "User not found", code: "NOT_FOUND" })));
+    const { client, calls } = setup(() =>
+      n++ === 0
+        ? new Response("{}", { status: 200, headers: { "Content-Type": "application/json" } })
+        : json(404, { error: "User not found", code: "NOT_FOUND" })
+    );
     const blob = await client.users.exportData();
     expect(await blob.text()).toBe("{}");
     expect(calls[0]!.url).toBe("/api/users/me/export");
     expect(authOf(calls[0]!)).toBe("Bearer old");
-    await expect(client.users.exportData()).rejects.toMatchObject({ status: 404, code: "NOT_FOUND" });
+    await expect(client.users.exportData()).rejects.toMatchObject({
+      status: 404,
+      code: "NOT_FOUND",
+    });
   });
 
   it("buildQuery repeats arrays", () => {
@@ -76,10 +86,15 @@ describe("refresh single-flight", () => {
         await new Promise((r) => setTimeout(r, 10));
         return json(200, authResult("new"));
       }
-      if (authOf(call) === "Bearer old") return json(401, { error: "Session expired", code: "TOKEN_INVALID" });
+      if (authOf(call) === "Bearer old")
+        return json(401, { error: "Session expired", code: "TOKEN_INVALID" });
       return json(200, { ok: call.url });
     });
-    const results = await Promise.all([client.auth.me(), client.users.sessions(), client.me.usage()]);
+    const results = await Promise.all([
+      client.auth.me(),
+      client.users.sessions(),
+      client.me.usage(),
+    ]);
     expect(refreshes).toBe(1);
     expect(onRefresh).toHaveBeenCalledTimes(1);
     expect(results).toHaveLength(3);
@@ -89,7 +104,9 @@ describe("refresh single-flight", () => {
 
   it("signs out when the refresh itself is rejected, and surfaces the original error", async () => {
     const { client, onSignedOut } = setup((call) =>
-      call.url.endsWith("/auth/refresh") ? json(401, { error: "Session expired", code: "SESSION_EXPIRED" }) : json(401, { error: "x", code: "TOKEN_INVALID" }),
+      call.url.endsWith("/auth/refresh")
+        ? json(401, { error: "Session expired", code: "SESSION_EXPIRED" })
+        : json(401, { error: "x", code: "TOKEN_INVALID" })
     );
     const err = (await client.auth.me().catch((e: unknown) => e)) as ApiError;
     expect(isApiError(err)).toBe(true);
@@ -108,19 +125,28 @@ describe("refresh single-flight", () => {
   });
 
   it("does not try to refresh a 401 for a request sent without a token", async () => {
-    const { client, calls } = setup(() => json(401, { error: "Sign in", code: "UNAUTHENTICATED" }), null);
+    const { client, calls } = setup(
+      () => json(401, { error: "Sign in", code: "UNAUTHENTICATED" }),
+      null
+    );
     await expect(client.auth.me()).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
     expect(calls).toHaveLength(1);
   });
 
   it("does not retry auth endpoints", async () => {
-    const { client, calls } = setup(() => json(401, { error: "Wrong", code: "INVALID_CREDENTIALS" }));
-    await expect(client.auth.login({ login: "a", password: "b" })).rejects.toMatchObject({ code: "INVALID_CREDENTIALS" });
+    const { client, calls } = setup(() =>
+      json(401, { error: "Wrong", code: "INVALID_CREDENTIALS" })
+    );
+    await expect(client.auth.login({ login: "a", password: "b" })).rejects.toMatchObject({
+      code: "INVALID_CREDENTIALS",
+    });
     expect(calls).toHaveLength(1);
   });
 
   it("starts a fresh refresh after the previous one settled", async () => {
-    const { client, calls } = setup((call) => (call.url.endsWith("/auth/refresh") ? json(200, authResult("n")) : json(200, {})));
+    const { client, calls } = setup((call) =>
+      call.url.endsWith("/auth/refresh") ? json(200, authResult("n")) : json(200, {})
+    );
     await client.refreshSession();
     await client.refreshSession();
     expect(calls.filter((c) => c.url.endsWith("/auth/refresh"))).toHaveLength(2);
@@ -130,9 +156,16 @@ describe("refresh single-flight", () => {
 describe("ApiError mapping", () => {
   it("carries code, status, details and request id from the error body", async () => {
     const { client } = setup(() =>
-      json(400, { error: "body: too short", code: "VALIDATION_FAILED", details: { fields: [{ path: "body", message: "too short" }] }, requestId: "req-1" }),
+      json(400, {
+        error: "body: too short",
+        code: "VALIDATION_FAILED",
+        details: { fields: [{ path: "body", message: "too short" }] },
+        requestId: "req-1",
+      })
     );
-    const err = (await client.users.updateMe({ displayName: "" }).catch((e: unknown) => e)) as ApiError;
+    const err = (await client.users
+      .updateMe({ displayName: "" })
+      .catch((e: unknown) => e)) as ApiError;
     expect(err).toBeInstanceOf(ApiError);
     expect(err.status).toBe(400);
     expect(err.code).toBe("VALIDATION_FAILED");
@@ -141,12 +174,22 @@ describe("ApiError mapping", () => {
   });
 
   it("exposes details.reason for DM denials", () => {
-    const err = toApiError(403, { error: "No", code: "DM_NOT_ALLOWED", details: { reason: "BLOCKED" } });
+    const err = toApiError(403, {
+      error: "No",
+      code: "DM_NOT_ALLOWED",
+      details: { reason: "BLOCKED" },
+    });
     expect(err.reason).toBe("BLOCKED");
   });
 
   it("falls back to a status-derived code for non-JSON bodies", async () => {
-    const { client } = setup(() => new Response("<html>bad gateway</html>", { status: 502, headers: { "content-type": "text/html" } }));
+    const { client } = setup(
+      () =>
+        new Response("<html>bad gateway</html>", {
+          status: 502,
+          headers: { "content-type": "text/html" },
+        })
+    );
     await expect(client.auth.me()).rejects.toMatchObject({ code: "BAD_GATEWAY", status: 502 });
     expect(toApiError(418, null).code).toBe("HTTP_418");
   });
@@ -166,7 +209,14 @@ describe("ApiError mapping", () => {
 describe("account endpoints", () => {
   it("downloads the data export as a Blob with the bearer token, and maps a 429 to ApiError", async () => {
     let n = 0;
-    const { client, calls } = setup(() => (++n === 1 ? new Response('{"profile":{}}', { status: 200, headers: { "Content-Type": "application/json" } }) : json(429, { error: "Slow down", code: "RATE_LIMITED" })));
+    const { client, calls } = setup(() =>
+      ++n === 1
+        ? new Response('{"profile":{}}', {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          })
+        : json(429, { error: "Slow down", code: "RATE_LIMITED" })
+    );
     const blob = await client.users.exportData();
     expect(await blob.text()).toBe('{"profile":{}}');
     expect(calls[0]!.url).toBe("/api/users/me/export");
@@ -184,7 +234,9 @@ describe("account endpoints", () => {
   });
 
   it("reads the public app meta without trying a refresh", async () => {
-    const { client, calls, onRefresh } = setup(() => json(401, { error: "no", code: "TOKEN_EXPIRED" }));
+    const { client, calls, onRefresh } = setup(() =>
+      json(401, { error: "no", code: "TOKEN_EXPIRED" })
+    );
     await expect(client.meta.get()).rejects.toBeInstanceOf(ApiError);
     expect(calls).toHaveLength(1);
     expect(onRefresh).not.toHaveBeenCalled();
@@ -193,7 +245,11 @@ describe("account endpoints", () => {
   it("sends a recovery code instead of a TOTP code on login", async () => {
     const { client, calls } = setup(() => json(200, authResult("t")), null);
     await client.auth.login({ login: "ada", password: "x", recoveryCode: "abcd-efgh" });
-    expect(JSON.parse(calls[0]!.init.body as string)).toEqual({ login: "ada", password: "x", recoveryCode: "abcd-efgh" });
+    expect(JSON.parse(calls[0]!.init.body as string)).toEqual({
+      login: "ada",
+      password: "x",
+      recoveryCode: "abcd-efgh",
+    });
   });
 });
 
@@ -209,7 +265,9 @@ describe("ready gate", () => {
       ready: () => gate,
       fetch: (async (url: string, init: RequestInit) => {
         urls.push(`${url} ${(init.headers as Record<string, string>).Authorization ?? "-"}`);
-        return url.endsWith("/auth/login") ? json(200, authResult("t")) : json(200, { items: [], nextCursor: null });
+        return url.endsWith("/auth/login")
+          ? json(200, authResult("t"))
+          : json(200, { items: [], nextCursor: null });
       }) as unknown as typeof fetch,
       crossTabLock: (fn) => fn(),
     });
@@ -230,7 +288,10 @@ describe("native token mode", () => {
     const client = createApiClient({
       baseUrl: "/api",
       getAccessToken: () => "stale",
-      native: { getRefreshToken: async () => stored, setRefreshToken: async (t) => void (stored = t) },
+      native: {
+        getRefreshToken: async () => stored,
+        setRefreshToken: async (t) => void (stored = t),
+      },
       fetch: (async (url: string, init: RequestInit) => {
         calls.push({ url, init });
         return handler(url, init);
@@ -242,8 +303,15 @@ describe("native token mode", () => {
   it("sends X-Client: native, refreshes with the stored token in the body and keeps the rotated one", async () => {
     let n = 0;
     const { client, calls, stored } = nativeClient((url) => {
-      if (url === "/api/auth/refresh") return json(200, { ...authResult("fresh"), refreshToken: "rt-2", refreshExpiresAt: "2030-01-01T00:00:00.000Z" });
-      return ++n === 1 ? json(401, { error: "expired", code: "TOKEN_INVALID" }) : json(200, { items: [], nextCursor: null });
+      if (url === "/api/auth/refresh")
+        return json(200, {
+          ...authResult("fresh"),
+          refreshToken: "rt-2",
+          refreshExpiresAt: "2030-01-01T00:00:00.000Z",
+        });
+      return ++n === 1
+        ? json(401, { error: "expired", code: "TOKEN_INVALID" })
+        : json(200, { items: [], nextCursor: null });
     });
     await client.interviews.list();
     const refresh = calls.find((c) => c.url === "/api/auth/refresh")!;
@@ -254,7 +322,15 @@ describe("native token mode", () => {
   });
 
   it("keeps the token from sign-in and sends it on sign-out, then forgets it", async () => {
-    const { client, calls, stored } = nativeClient((url) => (url === "/api/auth/login" ? json(200, { ...authResult("a"), refreshToken: "rt-login", refreshExpiresAt: "2030-01-01T00:00:00.000Z" }) : new Response(null, { status: 204 })));
+    const { client, calls, stored } = nativeClient((url) =>
+      url === "/api/auth/login"
+        ? json(200, {
+            ...authResult("a"),
+            refreshToken: "rt-login",
+            refreshExpiresAt: "2030-01-01T00:00:00.000Z",
+          })
+        : new Response(null, { status: 204 })
+    );
     await client.auth.login({ login: "ada", password: "x" });
     expect(stored()).toBe("rt-login");
     await client.auth.logout();
@@ -263,7 +339,9 @@ describe("native token mode", () => {
   });
 
   it("clears the stored token when the server ends the session", async () => {
-    const { client, stored } = nativeClient(() => json(401, { error: "Session expired", code: "SESSION_EXPIRED" }));
+    const { client, stored } = nativeClient(() =>
+      json(401, { error: "Session expired", code: "SESSION_EXPIRED" })
+    );
     await expect(client.refreshSession()).resolves.toBeNull();
     expect(stored()).toBeNull();
   });
@@ -285,9 +363,17 @@ describe("interview endpoints", () => {
     expect(JSON.parse(calls.at(-1)!.init.body as string)).toEqual({ round: 1, question: 2 });
     await client.interviews.endLive("01I", "01S");
     expect(calls.at(-1)!.url).toBe("/api/interviews/01I/live/01S/end");
-    await client.interviews.answer("01I", { round: 0, question: 0, transcript: [{ role: "candidate", text: "hi" }] });
+    await client.interviews.answer("01I", {
+      round: 0,
+      question: 0,
+      transcript: [{ role: "candidate", text: "hi" }],
+    });
     expect(calls.at(-1)!.url).toBe("/api/interviews/01I/answers");
-    await client.interviews.fromResume({ file: new Blob(["%PDF-1.4"], { type: "application/pdf" }), fileName: "cv.pdf", proctoring: true });
+    await client.interviews.fromResume({
+      file: new Blob(["%PDF-1.4"], { type: "application/pdf" }),
+      fileName: "cv.pdf",
+      proctoring: true,
+    });
     const init = calls.at(-1)!.init;
     expect(calls.at(-1)!.url).toBe("/api/interviews/from-resume");
     expect(init.body).toBeInstanceOf(FormData);

@@ -1,5 +1,12 @@
 /** Rows to DTOs for interviews and answers. Never includes another user's data: callers load by owner. */
-import type { AnswerFeedback, AnswerResult, Interview, InterviewSummary, PlanRound, RealtimeProvider } from "@open-conversation/types";
+import type {
+  AnswerFeedback,
+  AnswerResult,
+  Interview,
+  InterviewSummary,
+  PlanRound,
+  RealtimeProvider,
+} from "@open-conversation/types";
 import type { Selectable } from "kysely";
 import type { Answers, Interviews } from "../db/types";
 import { questionCount } from "../services/interview/plan";
@@ -43,7 +50,12 @@ export function toAnswer(a: AnswerRow): AnswerResult {
     question: a.question_index,
     kind: a.kind,
     status: a.status,
-    evaluationSource: a.evaluator_kind === "STUB" ? "simulated" : a.evaluator_kind ? "configured_provider" : "unknown",
+    evaluationSource:
+      a.evaluator_kind === "STUB"
+        ? "simulated"
+        : a.evaluator_kind
+          ? "configured_provider"
+          : "unknown",
     domainRating: a.domain_rating,
     communicationRating: a.communication_rating,
     feedback: (a.feedback as AnswerFeedback | null) ?? null,
@@ -55,7 +67,7 @@ export function toInterview(
   row: InterviewRow,
   stats: InterviewStats,
   answers: AnswerRow[],
-  realtimeModel: { id: string; displayName: string; provider: RealtimeProvider } | null,
+  realtimeModel: { id: string; displayName: string; provider: RealtimeProvider } | null
 ): Interview {
   return {
     ...toInterviewSummary(row, stats),

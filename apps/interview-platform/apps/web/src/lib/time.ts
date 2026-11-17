@@ -11,7 +11,11 @@ export function toDate(v: string | number | Date): Date {
 }
 
 /** Compact relative time for feeds and lists. */
-export function relativeTime(value: string | number | Date, now: number | Date = Date.now(), locale?: string): string {
+export function relativeTime(
+  value: string | number | Date,
+  now: number | Date = Date.now(),
+  locale?: string
+): string {
   const d = toDate(value);
   const ref = typeof now === "number" ? now : now.getTime();
   const diff = ref - d.getTime();
@@ -26,13 +30,21 @@ export function relativeTime(value: string | number | Date, now: number | Date =
   if (diff < 2 * DAY && isYesterday(d, ref)) return "Yesterday";
   if (diff < 7 * DAY) return `${Math.max(1, Math.floor(diff / DAY))}d`;
   const sameYear = d.getFullYear() === new Date(ref).getFullYear();
-  return new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", ...(sameYear ? {} : { year: "numeric" }) }).format(d);
+  return new Intl.DateTimeFormat(locale, {
+    month: "short",
+    day: "numeric",
+    ...(sameYear ? {} : { year: "numeric" }),
+  }).format(d);
 }
 
 function isYesterday(d: Date, ref: number): boolean {
   const y = new Date(ref);
   y.setDate(y.getDate() - 1);
-  return d.getFullYear() === y.getFullYear() && d.getMonth() === y.getMonth() && d.getDate() === y.getDate();
+  return (
+    d.getFullYear() === y.getFullYear() &&
+    d.getMonth() === y.getMonth() &&
+    d.getDate() === y.getDate()
+  );
 }
 
 function futureTime(d: Date, ref: number, locale?: string): string {
@@ -41,44 +53,83 @@ function futureTime(d: Date, ref: number, locale?: string): string {
   if (diff < HOUR) return rtf.format(Math.max(1, Math.round(diff / MIN)), "minute");
   if (diff < DAY) return rtf.format(Math.round(diff / HOUR), "hour");
   if (diff < 30 * DAY) return rtf.format(Math.round(diff / DAY), "day");
-  return new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "numeric" }).format(d);
+  return new Intl.DateTimeFormat(locale, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(d);
 }
 
 /** "Thursday, March 4, 2026 at 9:41 AM" for tooltips and title attributes. */
-export function fullTimestamp(value: string | number | Date, locale?: string, timeZone?: string): string {
+export function fullTimestamp(
+  value: string | number | Date,
+  locale?: string,
+  timeZone?: string
+): string {
   const d = toDate(value);
   if (Number.isNaN(d.getTime())) return "";
-  return new Intl.DateTimeFormat(locale, { dateStyle: "full", timeStyle: "short", ...(timeZone ? { timeZone } : {}) }).format(d);
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: "full",
+    timeStyle: "short",
+    ...(timeZone ? { timeZone } : {}),
+  }).format(d);
 }
 
 /** "9:41 AM" for chat bubbles. */
 export function clockTime(value: string | number | Date, locale?: string): string {
-  return new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "2-digit" }).format(toDate(value));
+  return new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "2-digit" }).format(
+    toDate(value)
+  );
 }
 
 /** Day divider label in chat: "Today", "Yesterday", "Monday, March 2". */
-export function dayLabel(value: string | number | Date, now: number = Date.now(), locale?: string): string {
+export function dayLabel(
+  value: string | number | Date,
+  now: number = Date.now(),
+  locale?: string
+): string {
   const d = toDate(value);
   const today = new Date(now);
   if (sameDay(d, today)) return "Today";
   if (isYesterday(d, now)) return "Yesterday";
   const sameYear = d.getFullYear() === today.getFullYear();
-  return new Intl.DateTimeFormat(locale, { weekday: "long", month: "long", day: "numeric", ...(sameYear ? {} : { year: "numeric" }) }).format(d);
+  return new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    ...(sameYear ? {} : { year: "numeric" }),
+  }).format(d);
 }
 
 export function sameDay(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
 }
 
 /** Event date range: "Mar 4, 9:00 AM to 11:00 AM" or across days. */
-export function eventRange(startsAt: string, endsAt: string, timeZone?: string, locale?: string): string {
+export function eventRange(
+  startsAt: string,
+  endsAt: string,
+  timeZone?: string,
+  locale?: string
+): string {
   const s = toDate(startsAt);
   const e = toDate(endsAt);
   const opts: Intl.DateTimeFormatOptions = { ...(timeZone ? { timeZone } : {}) };
-  const date = new Intl.DateTimeFormat(locale, { weekday: "short", month: "short", day: "numeric", ...opts });
+  const date = new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    ...opts,
+  });
   const time = new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "2-digit", ...opts });
   const sameDate = date.format(s) === date.format(e);
-  return sameDate ? `${date.format(s)}, ${time.format(s)} to ${time.format(e)}` : `${date.format(s)}, ${time.format(s)} to ${date.format(e)}, ${time.format(e)}`;
+  return sameDate
+    ? `${date.format(s)}, ${time.format(s)} to ${time.format(e)}`
+    : `${date.format(s)}, ${time.format(s)} to ${date.format(e)}, ${time.format(e)}`;
 }
 
 /** Short count: 950, 1.2K, 3.4M. */

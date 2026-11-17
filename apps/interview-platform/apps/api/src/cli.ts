@@ -22,7 +22,12 @@ function arg(name: string): string | undefined {
 
 async function adminCreate(): Promise<void> {
   const { createAdmin } = await import("./services/admin-bootstrap.service");
-  const result = await createAdmin({ email: arg("email") ?? "", username: arg("username"), name: arg("name"), printPassword: process.argv.includes("--print-password") });
+  const result = await createAdmin({
+    email: arg("email") ?? "",
+    username: arg("username"),
+    name: arg("name"),
+    printPassword: process.argv.includes("--print-password"),
+  });
   process.stdout.write(`\n${result.message}\n\n`);
 }
 
@@ -40,7 +45,9 @@ async function main(): Promise<void> {
 
 main()
   .catch((err) => {
-    process.stderr.write(`\n${process.argv[2] ?? "cli"} failed: ${err instanceof Error ? err.message : String(err)}\n\n`);
+    process.stderr.write(
+      `\n${process.argv[2] ?? "cli"} failed: ${err instanceof Error ? err.message : String(err)}\n\n`
+    );
     process.exitCode = 1;
   })
   .finally(() => closeDb());
