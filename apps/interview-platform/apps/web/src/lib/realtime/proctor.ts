@@ -121,7 +121,6 @@ export function useProctorEvents(
   // Proctoring without a camera is noted once, so the report says why there are no face events.
   useEffect(() => {
     if (active && cameraOff) push("CAMERA_OFF");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, cameraOff]);
 
   // Settled face states become events: no face, more than one, and back to one.

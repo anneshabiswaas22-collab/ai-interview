@@ -1,4 +1,4 @@
-/* global process, Buffer, URL, console, setTimeout */
+/* global process, Buffer, URL, setTimeout */
 /**
  * Deterministic stand-ins for every third party the interview system talks to, in one
  * dependency-free Node process (node:http, node:crypto). Development, CI and the
@@ -456,5 +456,5 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const port = Number(process.env.PORT ?? 5139);
   http
     .createServer((req, res) => void stubs.handler(req, res))
-    .listen(port, "0.0.0.0", () => console.log(`stubs listening on ${port}`));
+    .listen(port, "0.0.0.0", () => process.stdout.write(`stubs listening on ${port}\n`));
 }

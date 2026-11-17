@@ -73,6 +73,10 @@ export function formatTick(n: number, locale?: string): string {
   }).format(n);
 }
 
+function seriesValue(record: object, key: string): number {
+  return Number((record as Record<string, unknown>)[key] ?? 0) || 0;
+}
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export type ChartTone = "primary" | "brand" | "success" | "warning" | "danger" | "muted";
@@ -132,11 +136,10 @@ export function Chart<D extends { date: string }>({
     return () => ro.disconnect();
   }, []);
 
-  const val = (d: D, k: string) => Number((d as Record<string, unknown>)[k] ?? 0) || 0;
   const maxVal = useMemo(
-    () => Math.max(0, ...data.flatMap((d) => series.map((s) => val(d, s.key)))),
+    () => Math.max(0, ...data.flatMap((d) => series.map((s) => seriesValue(d, s.key)))),
     [data, series]
-  ); // eslint-disable-line react-hooks/exhaustive-deps
+  );
   const axis = niceTicks(maxVal);
   const left = M.left;
   const right = width - M.right;
@@ -261,7 +264,7 @@ export function Chart<D extends { date: string }>({
           {type === "bar"
             ? data.map((d, i) =>
                 series.map((s, si) => {
-                  const v = val(d, s.key);
+                  const v = seriesValue(d, s.key);
                   const h = Math.max(0, bottom - y(v));
                   const bx = xBar(i) - (barW * series.length) / 2 + si * barW + 1;
                   return (
@@ -280,7 +283,7 @@ export function Chart<D extends { date: string }>({
               )
             : series.map((s) => {
                 const pts = data
-                  .map((d, i) => `${x(i).toFixed(1)},${y(val(d, s.key)).toFixed(1)}`)
+                  .map((d, i) => `${x(i).toFixed(1)},${y(seriesValue(d, s.key)).toFixed(1)}`)
                   .join(" ");
                 return (
                   <g key={s.key}>
@@ -295,7 +298,7 @@ export function Chart<D extends { date: string }>({
                     {hover !== null && hovered ? (
                       <circle
                         cx={x(hover)}
-                        cy={y(val(hovered, s.key))}
+                        cy={y(seriesValue(hovered, s.key))}
                         r={4}
                         fill={TONE[s.tone ?? "primary"]}
                         stroke="hsl(var(--card))"
@@ -335,7 +338,7 @@ export function Chart<D extends { date: string }>({
                   {s.label}
                 </span>
                 <span className="font-semibold tabular-nums text-foreground">
-                  {formatValue(val(hovered, s.key))}
+                  {formatValue(seriesValue(hovered, s.key))}
                 </span>
               </p>
             ))}
@@ -380,7 +383,7 @@ export function Chart<D extends { date: string }>({
                 </th>
                 {series.map((s) => (
                   <td key={s.key} className="py-1.5 pr-4 text-right tabular-nums last:pr-0">
-                    {formatValue(val(d, s.key))}
+                    {formatValue(seriesValue(d, s.key))}
                   </td>
                 ))}
               </tr>
