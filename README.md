@@ -8,6 +8,8 @@
 
 ## Start here
 
+**Recovery checkpoint (18 November 2026):** [Preservation, fixes and remaining work](docs/recovery/RECOVERY_REPORT.md) · [Executed test results](docs/recovery/TEST_RESULTS.md) · [File dispositions](docs/recovery/INVENTORY.md).
+
 **Public source-study inventory:** [REFERENCE_REPOSITORIES.txt](REFERENCE_REPOSITORIES.txt) (public repos, model weights, licenses and competitor benchmarks).
 
 **Begin implementing:** [29-step ordered checklist](docs/delivery/IMPLEMENTATION_CHECKLIST.md) · [Verified implementation status](docs/delivery/IMPLEMENTATION_STATUS.md) · [First working code](packages/interview-core/README.md) · [Codex blocker handoff](docs/delivery/CODEX_BLOCKERS.md)

@@ -1,0 +1,77 @@
+{
+  "dependency_edges": 6530,
+  "dependency_resolution_counts": {
+    "external-or-alias": 1400,
+    "external-or-unresolved-python": 1482,
+    "local": 3332,
+    "unresolved-local": 3,
+    "workspace-package": 313
+  },
+  "directories_with_accounted_files": 558,
+  "exact_byte_duplicate_groups": 169,
+  "files_with_an_exact_byte_match": 433,
+  "ignored": {
+    "files_by_area": {
+      ".next": 2321,
+      ".turbo": 133,
+      "dist": 8,
+      "local environment configuration (contents not read)": 1,
+      "node_modules": 44954,
+      "other ignored runtime/build/tool artifacts (contents not read)": 8
+    },
+    "scope": "Git-ignored untracked paths counted by name only; no contents or secret values read",
+    "total_files": 47425
+  },
+  "limitations": [
+    "Automated classification is provisional, not a manual file-by-file review, reachability proof or security clearance.",
+    "RECOVERABLE means candidate preserved material, not recovered working behavior. No files are classified UNNECESSARY solely by extension or age.",
+    "Exact-byte matches do not establish functional redundancy, trust or permission to remove a copy.",
+    "Static JS/TS import regex can include comments and miss computed imports; Python AST does not resolve runtime sys.path or plugin discovery.",
+    "Generated evidence outputs are accounted but omit self-referential content hash and size. All other inventory files are hashed as bytes.",
+    "Ignored dependency/build/runtime files are counted without reading contents; Git object database and external Docker volumes are outside source inventory scope."
+  ],
+  "owner_counts": {
+    ".github": 6,
+    "AnalyseFuture": 13,
+    "apps/api": 123,
+    "apps/stubs": 6,
+    "apps/web": 150,
+    "docs": 39,
+    "experimental/interview-core": 5,
+    "packages/api-client": 16,
+    "packages/types": 5,
+    "packages/ui": 28,
+    "platform/db": 6,
+    "platform/deploy": 6,
+    "platform/docs": 1,
+    "platform/e2e": 13,
+    "platform/infra": 72,
+    "platform/scripts": 9,
+    "platform/third-party": 1,
+    "platform/workspace": 19,
+    "preserved/DeepInterview-main": 374,
+    "preserved/euron-open-real-time-ai-conversation-system-main": 503,
+    "preserved/grillkit-main": 577,
+    "preserved/local-ai-interviewer-main": 251,
+    "repository": 8,
+    "scripts": 4
+  },
+  "schema_version": 1,
+  "scope": "All git tracked plus nonignored untracked files, including hidden paths and recovery outputs",
+  "self_reference_exclusions": [
+    "docs/recovery/FILE_DISPOSITION.tsv",
+    "docs/recovery/DEPENDENCY_GRAPH.tsv",
+    "docs/recovery/INVENTORY_SUMMARY.json"
+  ],
+  "status_counts": {
+    "ACTIVE": 251,
+    "CONFIGURATION": 439,
+    "DOCUMENTATION": 221,
+    "FUTURE": 1,
+    "GENERATED": 3,
+    "LICENSE/PROVENANCE": 18,
+    "RECOVERABLE": 895,
+    "TEST": 407
+  },
+  "total_accounted_files": 2235
+}
