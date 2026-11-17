@@ -51,14 +51,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Boot: the refresh cookie (if any) gives us an access token.
   useEffect(() => {
     let cancelled = false;
+    const initialSession = session.getSnapshot();
+    const clearInitialSession = () => {
+      // Signup/verification can establish a session while this cookie-less request is
+      // in flight. Its older empty/error response must not erase that newer session.
+      if (!cancelled && session.getSnapshot() === initialSession) session.clear();
+    };
     api()
       .refreshSession()
       .then((r) => {
-        if (!cancelled && !r) session.clear();
+        if (!r) clearInitialSession();
       })
       .catch(() => {
-        // API unreachable or not ready: treat as signed out (pages show their signed-out state).
-        if (!cancelled) session.clear();
+        // API unreachable or not ready: settle the initial state unless auth changed.
+        clearInitialSession();
       });
     return () => {
       cancelled = true;
