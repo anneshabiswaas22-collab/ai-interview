@@ -78,4 +78,4 @@ Reviewers should see anonymized examples blinded to model variant. Record sample
 
 Use deterministic tests on every PR, a small sampled Promptfoo suite for prompt changes, nightly broader AI comparisons when affordable, and periodic expert reviews. Fail open? No: safety and authorization are **fail-closed**. Speech provider outage may degrade to transparent text-only mode.
 
-See [interview engine](INTERVIEW_ENGINE.md), [fine-tuning](MODEL_AND_FINETUNING.md), [security](SECURITY_AND_PRIVACY.md).
+See [interview engine](../architecture/INTERVIEW_ENGINE.md), [fine-tuning](MODEL_AND_FINETUNING.md), [security](../governance/SECURITY_AND_PRIVACY.md).

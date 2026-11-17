@@ -68,7 +68,7 @@ The follow-up probes a missing failure-mode concern; it does not switch topics a
 
 ## Separate evaluation service
 
-Prototype progress: `compileEvidenceReport` in [interview-core](../packages/interview-core/README.md) validates a trusted evaluator's rubric membership, exact quotations from candidate-answer events and observation references. This is an isolated contract, not an evaluator service or a deployed feature. It cannot determine whether an inference or score is accurate and requires expert validation and a server-authoritative transcript.
+Prototype progress: `compileEvidenceReport` in [interview-core](../../packages/interview-core/README.md) validates a trusted evaluator's rubric membership, exact quotations from candidate-answer events and observation references. This is an isolated contract, not an evaluator service or a deployed feature. It cannot determine whether an inference or score is accurate and requires expert validation and a server-authoritative transcript.
 
 The *interviewer* manages conversation. The *evaluator* reads the immutable transcript, role rubric, candidate code test outcomes and diagram evidence **after** the interview. It produces:
 - Criterion score, rubric version, evidence event IDs, strengths, missing elements, caveats and confidence
@@ -90,4 +90,4 @@ Do not let a browser field or candidate-provided prompt set evaluator scores.
 9. Network reconnect / duplicate event → no duplicated question or score.
 10. Adversarial text says "ignore prior instructions" → treated as answer content.
 
-See [evaluation](QUALITY_AND_TESTING.md), [contracts](API_CONTRACTS.md), [security](SECURITY_AND_PRIVACY.md).
+See [evaluation](../engineering/QUALITY_AND_TESTING.md), [contracts](API_CONTRACTS.md), [security](../governance/SECURITY_AND_PRIVACY.md).

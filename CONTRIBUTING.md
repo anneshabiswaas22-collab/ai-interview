@@ -4,14 +4,14 @@ Welcome! This repository is the source of truth for an AI interviewing project. 
 
 ## 1. Learn the project in 15 minutes
 
-- Start with [README.md](README.md), [vision](docs/VISION.md) and [requirements](docs/PRODUCT_REQUIREMENTS.md).
-- Read [architecture](docs/ARCHITECTURE.md), [feature matrix](docs/FEATURE_MATRIX.md) and [roadmap](docs/ROADMAP.md).
-- Before touching dependencies, read [reuse decisions](docs/REUSE_VS_BUILD.md) and [license audit](docs/LICENSE_AUDIT.md).
+- Start with [README.md](README.md), [vision](docs/product/VISION.md) and [requirements](docs/product/PRODUCT_REQUIREMENTS.md).
+- Read [architecture](docs/architecture/ARCHITECTURE.md), [feature matrix](docs/product/FEATURE_MATRIX.md) and [roadmap](docs/delivery/ROADMAP.md).
+- Before touching dependencies, read [reuse decisions](docs/governance/REUSE_VS_BUILD.md) and [license audit](docs/governance/LICENSE_AUDIT.md).
 - For AI/Codex work, [AGENTS.md](AGENTS.md) is mandatory.
 
 ## 2. Find your first task
 
-Review [implementation status](docs/IMPLEMENTATION_STATUS.md) and choose a scoped issue. The Euron development candidate is in `apps/interview-platform`; DeepInterview is preserved only as non-runtime research under `AnalyseFuture` and has not been adopted as another application.
+Review [implementation status](docs/delivery/IMPLEMENTATION_STATUS.md) and choose a scoped issue. The Euron development candidate is in `apps/interview-platform`; DeepInterview is preserved only as non-runtime research under `AnalyseFuture` and has not been adopted as another application.
 
 Good early contributions:
 - Verify upstream packages and test/demo instructions.
@@ -46,7 +46,7 @@ The owner intends to run a product under their own brand and control. **A projec
 
 ## 6. Security reporting
 
-Do not post real API keys, credentials, patient/candidate records, private resume contents, or exploitable production security details in public issues. Contact maintainers privately using available GitHub security reporting mechanisms before disclosure; see [security guidance](docs/SECURITY_AND_PRIVACY.md).
+Do not post real API keys, credentials, patient/candidate records, private resume contents, or exploitable production security details in public issues. Contact maintainers privately using available GitHub security reporting mechanisms before disclosure; see [security guidance](docs/governance/SECURITY_AND_PRIVACY.md).
 
 ## 7. PR checklist
 

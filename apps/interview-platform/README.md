@@ -48,4 +48,4 @@ Create an interview from a job description or resume, wait for its plan, and sel
 
 The demo's feedback is simulated. With a configured text provider, answers may be sent to that provider for feedback; no real-provider quality or cost validation has yet been completed. Feedback can be inaccurate, is not yet evidence-backed, and must not be used for hiring decisions. Deleting the interview removes its text-practice records; the account export includes them.
 
-The existing [interview-core](../../packages/interview-core/README.md) remains an experimental policy module; it is not wired into this application. There must ultimately be one authoritative session and evaluation implementation. See [the adoption decision](../../docs/decisions/0003-candidate-foundation.md) for the integration and release gates.
+The existing [interview-core](../../packages/interview-core/README.md) remains an experimental policy module; it is not wired into this application. There must ultimately be one authoritative session and evaluation implementation. See [the adoption decision](../../docs/architecture/decisions/0003-candidate-foundation.md) for the integration and release gates.

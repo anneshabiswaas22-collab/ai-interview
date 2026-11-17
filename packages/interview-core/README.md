@@ -38,7 +38,7 @@ From this directory:
 
 Before merging this domain policy into Euron, audit its existing interview/service implementation. If Euron already meets the same requirements, prefer adapting/extending Euron rather than maintaining competing state machines. The goal here is to exercise and test the intended behavior under a narrow contract, not mandate a new runtime service.
 
-Read [Interview Engine](../../docs/INTERVIEW_ENGINE.md) and [Implementation Checklist](../../docs/IMPLEMENTATION_CHECKLIST.md).
+Read [Interview Engine](../../docs/architecture/INTERVIEW_ENGINE.md) and [Implementation Checklist](../../docs/delivery/IMPLEMENTATION_CHECKLIST.md).
 
 ## Evidence report contract
 

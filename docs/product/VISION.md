@@ -70,4 +70,4 @@ Free limited practice; optional paid practice packs, longer voice interviews, pe
 
 **A first-time user completes an actual mock interview and can explain precisely what to improve next.** The software must work reliably, not merely display polished screens.
 
-See [requirements](PRODUCT_REQUIREMENTS.md), [feature matrix](FEATURE_MATRIX.md) and [roadmap](ROADMAP.md).
+See [requirements](PRODUCT_REQUIREMENTS.md), [feature matrix](FEATURE_MATRIX.md) and [roadmap](../delivery/ROADMAP.md).

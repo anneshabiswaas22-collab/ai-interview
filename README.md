@@ -10,21 +10,21 @@
 
 **Public source-study inventory:** [REFERENCE_REPOSITORIES.txt](REFERENCE_REPOSITORIES.txt) (public repos, model weights, licenses and competitor benchmarks).
 
-**Begin implementing:** [29-step ordered checklist](docs/IMPLEMENTATION_CHECKLIST.md) · [Verified implementation status](docs/IMPLEMENTATION_STATUS.md) · [First working code](packages/interview-core/README.md) · [Codex blocker handoff](docs/CODEX_BLOCKERS.md)
+**Begin implementing:** [29-step ordered checklist](docs/delivery/IMPLEMENTATION_CHECKLIST.md) · [Verified implementation status](docs/delivery/IMPLEMENTATION_STATUS.md) · [First working code](packages/interview-core/README.md) · [Codex blocker handoff](docs/delivery/CODEX_BLOCKERS.md)
 
-**Run the development candidate:** [Setup and limitations](apps/interview-platform/README.md) · [Text-practice contract](docs/TEXT_PRACTICE_DEVELOPMENT.md) · [Foundation decision](docs/decisions/0003-candidate-foundation.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+**Run the development candidate:** [Setup and limitations](apps/interview-platform/README.md) · [Text-practice contract](docs/engineering/TEXT_PRACTICE_DEVELOPMENT.md) · [Foundation decision](docs/architecture/decisions/0003-candidate-foundation.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 **Repository recovery and future analysis:** [Authoritative structure](PROJECT_STRUCTURE.md) · [Preserved sources](AnalyseFuture/README.md) · [Source inventory](AnalyseFuture/SOURCE_INVENTORY.md) · [Detailed long-term idea](AnalyseFuture/PROJECT_IDEA_AND_FUTURE_VISION.txt)
 
-**Quick handoff:** [Complete project context](docs/PROJECT_CONTEXT.md) · [Codex kickoff prompt](docs/CODEX_KICKOFF.md) · [First task: issue #1](https://github.com/anneshabiswaas22-collab/ai-interview/issues/1) · [All issues](https://github.com/anneshabiswaas22-collab/ai-interview/issues)
+**Quick handoff:** [Complete project context](docs/delivery/PROJECT_CONTEXT.md) · [Codex kickoff prompt](docs/delivery/CODEX_KICKOFF.md) · [First task: issue #1](https://github.com/anneshabiswaas22-collab/ai-interview/issues/1) · [All issues](https://github.com/anneshabiswaas22-collab/ai-interview/issues)
 
 | You are… | Read these first |
 | --- | --- |
-| A new developer | [Vision](docs/VISION.md) → [Requirements](docs/PRODUCT_REQUIREMENTS.md) → [Architecture](docs/ARCHITECTURE.md) → [Developer setup](docs/DEVELOPER_SETUP.md) |
-| An AI coding agent / Codex | [AGENTS.md](AGENTS.md) → [Reuse vs build](docs/REUSE_VS_BUILD.md) → [Roadmap](docs/ROADMAP.md) |
-| An ML engineer | [Interview engine](docs/INTERVIEW_ENGINE.md) → [Models and fine-tuning](docs/MODEL_AND_FINETUNING.md) → [Quality evaluation](docs/QUALITY_AND_TESTING.md) |
-| A product contributor | [Feature matrix](docs/FEATURE_MATRIX.md) → [Competitor benchmarks](docs/COMPETITOR_BENCHMARKS.md) |
-| A security or legal reviewer | [Security and privacy](docs/SECURITY_AND_PRIVACY.md) → [License audit](docs/LICENSE_AUDIT.md) |
+| A new developer | [Vision](docs/product/VISION.md) → [Requirements](docs/product/PRODUCT_REQUIREMENTS.md) → [Architecture](docs/architecture/ARCHITECTURE.md) → [Developer setup](docs/engineering/DEVELOPER_SETUP.md) |
+| An AI coding agent / Codex | [AGENTS.md](AGENTS.md) → [Reuse vs build](docs/governance/REUSE_VS_BUILD.md) → [Roadmap](docs/delivery/ROADMAP.md) |
+| An ML engineer | [Interview engine](docs/architecture/INTERVIEW_ENGINE.md) → [Models and fine-tuning](docs/engineering/MODEL_AND_FINETUNING.md) → [Quality evaluation](docs/engineering/QUALITY_AND_TESTING.md) |
+| A product contributor | [Feature matrix](docs/product/FEATURE_MATRIX.md) → [Competitor benchmarks](docs/product/COMPETITOR_BENCHMARKS.md) |
+| A security or legal reviewer | [Security and privacy](docs/governance/SECURITY_AND_PRIVACY.md) → [License audit](docs/governance/LICENSE_AUDIT.md) |
 
 ## Product in one minute
 
@@ -41,13 +41,13 @@ The candidate chooses a role and seniority, optionally provides a resume and job
 - [CodeSignal](https://codesignal.com/) — technical assessment workflows.
 - [HireVue](https://www.hirevue.com/) — enterprise hiring and governance.
 
-See [benchmarks](docs/COMPETITOR_BENCHMARKS.md) for what to research and how to avoid unsupported parity claims.
+See [benchmarks](docs/product/COMPETITOR_BENCHMARKS.md) for what to research and how to avoid unsupported parity claims.
 
 ## Architecture strategy
 
 **One modular monorepo; selective integration of mature open-source components.** Do not copy/merge all upstream applications wholesale.
 
-**Development foundation:** an adapted, pinned copy of [Euron Open Conversation](https://github.com/euron-sde-team/euron-open-real-time-ai-conversation-system) (MIT) is in [apps/interview-platform](apps/interview-platform/README.md). Its use is provisional and limited to development until the [release gates](docs/decisions/0003-candidate-foundation.md) pass. Study [DeepInterview](https://github.com/ngoanpv/DeepInterview) for its interview-agent architecture; integrate other components only where justified.
+**Development foundation:** an adapted, pinned copy of [Euron Open Conversation](https://github.com/euron-sde-team/euron-open-real-time-ai-conversation-system) (MIT) is in [apps/interview-platform](apps/interview-platform/README.md). Its use is provisional and limited to development until the [release gates](docs/architecture/decisions/0003-candidate-foundation.md) pass. Study [DeepInterview](https://github.com/ngoanpv/DeepInterview) for its interview-agent architecture; integrate other components only where justified.
 
 Important: a test of the upstream candidate is not automatically a test of the imported copy or real providers. Distinguish **verified**, **upstream claimed**, **planned**, **in progress**, and **implemented + tested** in every update.
 
@@ -61,7 +61,7 @@ The solution should eventually provide:
 - Provider-neutral AI layer, RAG, original evaluation suite and opt-in fine-tuning
 - Admin, quota, analytics and observability, and later employer accounts
 
-See [feature inventory](docs/FEATURE_MATRIX.md) and [technical architecture](docs/ARCHITECTURE.md).
+See [feature inventory](docs/product/FEATURE_MATRIX.md) and [technical architecture](docs/architecture/ARCHITECTURE.md).
 
 ## First executable engineering slice
 
@@ -83,7 +83,7 @@ The dependency-free [interview-core package](packages/interview-core/README.md) 
 
 ## Contribution workflow
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [developer setup guide](docs/DEVELOPER_SETUP.md). Choose a scoped GitHub issue, work on a feature branch, add tests/evidence, and open a PR. AI agents must follow [AGENTS.md](AGENTS.md). Changes affecting the architecture require an ADR.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [developer setup guide](docs/engineering/DEVELOPER_SETUP.md). Choose a scoped GitHub issue, work on a feature branch, add tests/evidence, and open a PR. AI agents must follow [AGENTS.md](AGENTS.md). Changes affecting the architecture require an ADR.
 
 ## Budget and ownership
 
@@ -95,10 +95,10 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [developer setup guide](docs/DEV
 
 ## Documentation index
 
-- **Product:** [Vision](docs/VISION.md), [Requirements](docs/PRODUCT_REQUIREMENTS.md), [Competitor benchmarks](docs/COMPETITOR_BENCHMARKS.md), [Feature matrix](docs/FEATURE_MATRIX.md)
-- **Engineering:** [Architecture](docs/ARCHITECTURE.md), [Interview engine](docs/INTERVIEW_ENGINE.md), [API contracts](docs/API_CONTRACTS.md), [Data model](docs/DATA_MODEL.md), [Voice/coding/whiteboard](docs/VOICE_CODING_WHITEBOARD.md)
-- **AI/quality:** [Model & fine-tuning](docs/MODEL_AND_FINETUNING.md), [Testing & evaluation](docs/QUALITY_AND_TESTING.md)
-- **Execution:** [Project context](docs/PROJECT_CONTEXT.md), [Codex kickoff](docs/CODEX_KICKOFF.md), [Pinned upstream refs](docs/UPSTREAM_SOURCES.md), [Operations](docs/OPERATIONS_DEPLOYMENT.md), [Roadmap](docs/ROADMAP.md), [Reuse vs build](docs/REUSE_VS_BUILD.md), [Credit efficiency](docs/CREDIT_OPTIMIZATION.md), [Developer setup](docs/DEVELOPER_SETUP.md), [AI agent instructions](AGENTS.md)
-- **Governance:** [Security & privacy](docs/SECURITY_AND_PRIVACY.md), [License audit](docs/LICENSE_AUDIT.md), [Architecture decisions](docs/decisions/0001-monorepo-reuse-first.md)
+- **Product:** [Vision](docs/product/VISION.md), [Requirements](docs/product/PRODUCT_REQUIREMENTS.md), [Competitor benchmarks](docs/product/COMPETITOR_BENCHMARKS.md), [Feature matrix](docs/product/FEATURE_MATRIX.md)
+- **Engineering:** [Architecture](docs/architecture/ARCHITECTURE.md), [Interview engine](docs/architecture/INTERVIEW_ENGINE.md), [API contracts](docs/architecture/API_CONTRACTS.md), [Data model](docs/architecture/DATA_MODEL.md), [Voice/coding/whiteboard](docs/architecture/VOICE_CODING_WHITEBOARD.md)
+- **AI/quality:** [Model & fine-tuning](docs/engineering/MODEL_AND_FINETUNING.md), [Testing & evaluation](docs/engineering/QUALITY_AND_TESTING.md)
+- **Execution:** [Project context](docs/delivery/PROJECT_CONTEXT.md), [Codex kickoff](docs/delivery/CODEX_KICKOFF.md), [Pinned upstream refs](docs/governance/UPSTREAM_SOURCES.md), [Operations](docs/operations/OPERATIONS_DEPLOYMENT.md), [Roadmap](docs/delivery/ROADMAP.md), [Reuse vs build](docs/governance/REUSE_VS_BUILD.md), [Credit efficiency](docs/governance/CREDIT_OPTIMIZATION.md), [Developer setup](docs/engineering/DEVELOPER_SETUP.md), [AI agent instructions](AGENTS.md)
+- **Governance:** [Security & privacy](docs/governance/SECURITY_AND_PRIVACY.md), [License audit](docs/governance/LICENSE_AUDIT.md), [Architecture decisions](docs/architecture/decisions/0001-monorepo-reuse-first.md)
 
 _This development candidate is not a deployed product. Last reviewed: 2026-11-14._

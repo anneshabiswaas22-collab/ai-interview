@@ -28,4 +28,4 @@ ai-interview/
 4. Update the feature/status documentation whenever behavior changes.
 5. Separate simulated, mocked, integration, real-provider, device, and production evidence.
 
-See [the preserved-source inventory](AnalyseFuture/SOURCE_INVENTORY.md) and [ADR 0003](docs/decisions/0003-candidate-foundation.md).
+See [the preserved-source inventory](AnalyseFuture/SOURCE_INVENTORY.md) and [ADR 0003](docs/architecture/decisions/0003-candidate-foundation.md).

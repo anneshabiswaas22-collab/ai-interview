@@ -1,6 +1,6 @@
 # Developer Onboarding and Local Setup
 
-The repository contains a development-only candidate application under [apps/interview-platform](../apps/interview-platform/README.md), plus a separate experimental interview-core package. The candidate is not production-ready; its default demo uses simulated model responses and scores. See [implementation status](IMPLEMENTATION_STATUS.md) and [the foundation decision](decisions/0003-candidate-foundation.md).
+The repository contains a development-only candidate application under [apps/interview-platform](../../apps/interview-platform/README.md), plus a separate experimental interview-core package. The candidate is not production-ready; its default demo uses simulated model responses and scores. See [implementation status](../delivery/IMPLEMENTATION_STATUS.md) and [the foundation decision](../architecture/decisions/0003-candidate-foundation.md).
 
 ## Obtain the source
 
@@ -9,7 +9,7 @@ git clone https://github.com/anneshabiswaas22-collab/ai-interview.git
 cd ai-interview
 ```
 
-Read `README.md`, `AGENTS.md`, the foundation README and [third-party notices](../THIRD_PARTY_NOTICES.md). If the change you want is still in a pull request, check out its branch before running these commands.
+Read `README.md`, `AGENTS.md`, the foundation README and [third-party notices](../../THIRD_PARTY_NOTICES.md). If the change you want is still in a pull request, check out its branch before running these commands.
 
 ## Run the candidate demo
 
@@ -46,6 +46,6 @@ pnpm build
 pnpm openapi --check
 ```
 
-The [candidate foundation workflow](../.github/workflows/candidate-foundation.yml) also starts isolated PostgreSQL and Redis services for integration tests and runs the offline browser suite. Do not point tests at a real database: the integration guard requires a database name ending in `_test` and recreates it.
+The [candidate foundation workflow](../../.github/workflows/candidate-foundation.yml) also starts isolated PostgreSQL and Redis services for integration tests and runs the offline browser suite. Do not point tests at a real database: the integration guard requires a database name ending in `_test` and recreates it.
 
-Real model and voice providers require separate configuration, consent, cost limits and testing. Do not commit keys, real resumes or recordings. The full application still needs the release gates in [ADR 0003](decisions/0003-candidate-foundation.md).
+Real model and voice providers require separate configuration, consent, cost limits and testing. Do not commit keys, real resumes or recordings. The full application still needs the release gates in [ADR 0003](../architecture/decisions/0003-candidate-foundation.md).

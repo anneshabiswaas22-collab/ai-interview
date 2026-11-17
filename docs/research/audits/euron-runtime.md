@@ -2,7 +2,7 @@
 
 Reviewed: 2026-11-14. This is an in-progress audit, not a security certification.
 
-> Historical decision note: this audit recorded the pre-import gate. Its original recommendation is preserved below as audit history. The browser verification and Zod remediation were subsequently completed, and [ADR 0003](../decisions/0003-candidate-foundation.md) authorized an adapted development-only import under `apps/interview-platform`. That import is not production approval.
+> Historical decision note: this audit recorded the pre-import gate. Its original recommendation is preserved below as audit history. The browser verification and Zod remediation were subsequently completed, and [ADR 0003](../../architecture/decisions/0003-candidate-foundation.md) authorized an adapted development-only import under `apps/interview-platform`. That import is not production approval.
 
 ## Exact sources
 

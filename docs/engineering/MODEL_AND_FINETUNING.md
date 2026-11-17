@@ -78,4 +78,4 @@ Include strong, weak, partial, silent, adversarial, multilingual and clarificati
 `ml/evaluation/`: fixture set, automatic checks, blinded human rating guide, model-comparison report.
 `docs/model_cards/`: checkpoint, intended uses, limits, hardware, license and results.
 
-See [quality and tests](QUALITY_AND_TESTING.md), [license audit](LICENSE_AUDIT.md).
+See [quality and tests](QUALITY_AND_TESTING.md), [license audit](../governance/LICENSE_AUDIT.md).

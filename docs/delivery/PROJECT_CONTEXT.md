@@ -29,7 +29,7 @@ The owner wants:
 
 ## Important truth as of 2026-11-13
 
-This GitHub repository was empty before the documentation and task tracker were initialized. **No Euron or other application source has been imported**, no production service is running, no live speech integration has been proven, and no model has been fine-tuned in this repository. Documents describe proposed behavior and upstream *claims* (not tested product features). An experimental dependency-free [interview-core module](../packages/interview-core/README.md) with verified unit tests has since been committed on an implementation branch; it is not an application and does not replace the upstream audit.
+This GitHub repository was empty before the documentation and task tracker were initialized. **No Euron or other application source has been imported**, no production service is running, no live speech integration has been proven, and no model has been fine-tuned in this repository. Documents describe proposed behavior and upstream *claims* (not tested product features). An experimental dependency-free [interview-core module](../../packages/interview-core/README.md) with verified unit tests has since been committed on an implementation branch; it is not an application and does not replace the upstream audit.
 
 ## Technical vision
 
@@ -46,8 +46,8 @@ The proposed architecture is modular; the final stack is a **decision after the 
 ## Priority and handoff
 
 1. Start with [issue #1 — Euron source/runtime audit](https://github.com/anneshabiswaas22-collab/ai-interview/issues/1).
-2. Follow [AGENTS.md](../AGENTS.md) for Codex and [CONTRIBUTING.md](../CONTRIBUTING.md) for human contributors.
-3. Read [Feature Matrix](FEATURE_MATRIX.md), [Roadmap](ROADMAP.md), [Architecture](ARCHITECTURE.md), [Reuse vs Build](REUSE_VS_BUILD.md), [License Audit](LICENSE_AUDIT.md).
+2. Follow [AGENTS.md](../../AGENTS.md) for Codex and [CONTRIBUTING.md](../../CONTRIBUTING.md) for human contributors.
+3. Read [Feature Matrix](../product/FEATURE_MATRIX.md), [Roadmap](ROADMAP.md), [Architecture](../architecture/ARCHITECTURE.md), [Reuse vs Build](../governance/REUSE_VS_BUILD.md), [License Audit](../governance/LICENSE_AUDIT.md).
 4. Contribute one real, testable vertical slice at a time, recording exact failures/skips and remaining limitations.
 
 ## Open decisions

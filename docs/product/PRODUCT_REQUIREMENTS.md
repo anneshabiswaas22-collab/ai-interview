@@ -90,4 +90,4 @@ One authenticated candidate creates a text interview for backend SDE II, answers
 
 Facial-analysis scores, secretive live-interview copilot, automated hire/reject decisions, celebrity voices/avatars, complex billing plans, video proctoring by default, guaranteed interview outcomes, copied premium question banks.
 
-References: [interview engine](INTERVIEW_ENGINE.md), [API proposal](API_CONTRACTS.md), [security](SECURITY_AND_PRIVACY.md).
+References: [interview engine](../architecture/INTERVIEW_ENGINE.md), [API proposal](../architecture/API_CONTRACTS.md), [security](../governance/SECURITY_AND_PRIVACY.md).

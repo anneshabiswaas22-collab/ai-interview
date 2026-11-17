@@ -1,6 +1,6 @@
 # Codex Handoff — Current Status and Blockers
 
-The pinned candidate application is imported under `apps/interview-platform`. Its clean-checkout unit, PostgreSQL/Redis integration and offline browser tests passed with simulated providers. Written practice, persisted questions and answers, retries, and a scoring-dispatch recovery path are implemented in the development branches. Read [implementation status](IMPLEMENTATION_STATUS.md), [the implementation checklist](IMPLEMENTATION_CHECKLIST.md), [text-practice contract](TEXT_PRACTICE_DEVELOPMENT.md), [foundation decision](decisions/0003-candidate-foundation.md), and [runtime audit](audits/euron-runtime.md).
+The pinned candidate application is imported under `apps/interview-platform`. Its clean-checkout unit, PostgreSQL/Redis integration and offline browser tests passed with simulated providers. Written practice, persisted questions and answers, retries, and a scoring-dispatch recovery path are implemented in the development branches. Read [implementation status](IMPLEMENTATION_STATUS.md), [the implementation checklist](IMPLEMENTATION_CHECKLIST.md), [text-practice contract](../engineering/TEXT_PRACTICE_DEVELOPMENT.md), [foundation decision](../architecture/decisions/0003-candidate-foundation.md), and [runtime audit](../research/audits/euron-runtime.md).
 
 ## Work still required
 
@@ -15,4 +15,4 @@ The local terminal used for this work lacked Docker, so clean runtime and browse
 
 ## Copy-ready instruction
 
-Read `AGENTS.md`, `docs/IMPLEMENTATION_CHECKLIST.md` and `docs/IMPLEMENTATION_STATUS.md`. Use the imported application and existing auth/database. Pick the next scoped issue, implement and test it, record the actual evidence and limitations, and submit a small reviewable PR. Do not claim the stub is a real AI evaluation or that the product is ready for public use.
+Read `AGENTS.md`, `docs/delivery/IMPLEMENTATION_CHECKLIST.md` and `docs/delivery/IMPLEMENTATION_STATUS.md`. Use the imported application and existing auth/database. Pick the next scoped issue, implement and test it, record the actual evidence and limitations, and submit a small reviewable PR. Do not claim the stub is a real AI evaluation or that the product is ready for public use.

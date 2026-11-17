@@ -8,7 +8,7 @@ This prompt is optional convenience text. The **source of truth** is the checked
 >
 > We are building my own commercially competitive, independently branded AI interviewing platform. Our initial market is candidate practice for software engineers, with later employer workflows. We prioritize realistic adaptive interviews, accurate technical assessments, system design, natural voice, evidence-backed reports, own-model options and low operating costs.
 >
-> **FIRST: Read** README.md, AGENTS.md, docs/PROJECT_CONTEXT.md, docs/VISION.md, docs/ROADMAP.md, docs/ARCHITECTURE.md, docs/REUSE_VS_BUILD.md, docs/LICENSE_AUDIT.md, docs/FEATURE_MATRIX.md and CONTRIBUTING.md. Do not ask me to repeat the history of this project; it is documented here.
+> **FIRST: Read** README.md, AGENTS.md, docs/delivery/PROJECT_CONTEXT.md, docs/product/VISION.md, docs/delivery/ROADMAP.md, docs/architecture/ARCHITECTURE.md, docs/governance/REUSE_VS_BUILD.md, docs/governance/LICENSE_AUDIT.md, docs/product/FEATURE_MATRIX.md and CONTRIBUTING.md. Do not ask me to repeat the history of this project; it is documented here.
 >
 > **Your immediate task is GitHub issue #1 — audit the Euron foundation.** Our repository contains documentation plus a small tested interview-core module, not a running candidate product. Inspect the public Euron code at a pinned SHA, run its tests and offline demo as resources allow, distinguish real provider execution from mocks and check architecture, security and commercial licensing. Inspect DeepInterview and GrillKit only as needed for the compare/reuse recommendation.
 >

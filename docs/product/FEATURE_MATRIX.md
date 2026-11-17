@@ -31,7 +31,7 @@ Legend: P0 = first working interview; P1 = competitive candidate product; P2 = c
 
 ## Working policy prototype (not an application feature)
 
-The [interview-core module](../packages/interview-core/README.md) supplies a bounded, owner-scoped interview state policy and evidence-linked coaching report input validation, with passing Node tests. It does **not** provide real adaptive AI, user authentication, persistence, voice or product reports. After the Euron source audit, reuse whichever session state model is sound and avoid maintaining redundant engines.
+The [interview-core module](../../packages/interview-core/README.md) supplies a bounded, owner-scoped interview state policy and evidence-linked coaching report input validation, with passing Node tests. It does **not** provide real adaptive AI, user authentication, persistence, voice or product reports. After the Euron source audit, reuse whichever session state model is sound and avoid maintaining redundant engines.
 
 ## Avoid duplicate effort
 

@@ -1,6 +1,6 @@
 # System Architecture — Development Candidate and Target
 
-**Architecture status:** an adapted Euron application is present under `apps/interview-platform` as the single development candidate. It uses Next.js, Express, PostgreSQL, and Redis. It is not production-approved or deployed. The diagram and long-term service boundaries below remain design targets; see [ADR 0003](decisions/0003-candidate-foundation.md) and [the repository structure](REPOSITORY_STRUCTURE.md).
+**Architecture status:** an adapted Euron application is present under `apps/interview-platform` as the single development candidate. It uses Next.js, Express, PostgreSQL, and Redis. It is not production-approved or deployed. The diagram and long-term service boundaries below remain design targets; see [ADR 0003](decisions/0003-candidate-foundation.md) and [the repository structure](../../PROJECT_STRUCTURE.md).
 
 ## Design goals
 
@@ -65,7 +65,7 @@ ai-interview/
   AGENTS.md
 ```
 
-This is an incremental target, not the current tree. Do not relocate the tested foundation merely to match it. Introduce a boundary only when a working component, migration plan, and tests justify it. The authoritative current layout is documented in [Repository Structure and Ownership](REPOSITORY_STRUCTURE.md).
+This is an incremental target, not the current tree. Do not flatten the tested application merely to match it. Introduce a boundary only when a working component, migration plan, and validation justify it. The authoritative current layout is documented in [Project Structure and Ownership](../../PROJECT_STRUCTURE.md).
 
 ## Responsibilities
 
@@ -134,4 +134,4 @@ Measure rather than promise. Establish p50/p95 streaming latency, voice interrup
 - [ADR-0001 — Modular monorepo and reuse-first](decisions/0001-monorepo-reuse-first.md)
 - [ADR-0002 — Candidate-first, evidence-based scoring](decisions/0002-candidate-first-evaluation.md)
 
-See [API contracts](API_CONTRACTS.md), [data model](DATA_MODEL.md), [security](SECURITY_AND_PRIVACY.md).
+See [API contracts](API_CONTRACTS.md), [data model](DATA_MODEL.md), [security](../governance/SECURITY_AND_PRIVACY.md).

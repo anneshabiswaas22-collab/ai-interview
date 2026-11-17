@@ -77,4 +77,4 @@ _No time estimates are guaranteed. Every milestone closes only after artifacts a
 4. Add evaluation fixtures and observability.
 5. Add voice/coding/diagram systems one at a time.
 
-See [credit optimization](CREDIT_OPTIMIZATION.md) before asking Codex to execute a large task.
+See [credit optimization](../governance/CREDIT_OPTIMIZATION.md) before asking Codex to execute a large task.

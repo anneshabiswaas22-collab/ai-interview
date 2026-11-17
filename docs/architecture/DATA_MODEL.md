@@ -64,4 +64,4 @@ Do not hardcode numeric retention durations before policy/legal review; build pe
 
 Use encryption in transit and at rest, secrets manager, strict tenant ownership, scoped tokens and fine-grained audit logging. Never expose hidden rubrics or provider credentials to the browser. Test for object-ID enumeration and authorization bypass.
 
-See [API](API_CONTRACTS.md) and [privacy](SECURITY_AND_PRIVACY.md).
+See [API](API_CONTRACTS.md) and [privacy](../governance/SECURITY_AND_PRIVACY.md).

@@ -68,4 +68,4 @@ Score architectural reasoning evidence, not neatness, drawing style or manual de
 4. Add whiteboard snapshots/replay.
 5. Add premium features only after usability and regression tests.
 
-See [architecture](ARCHITECTURE.md), [security](SECURITY_AND_PRIVACY.md) and [product requirements](PRODUCT_REQUIREMENTS.md).
+See [architecture](ARCHITECTURE.md), [security](../governance/SECURITY_AND_PRIVACY.md) and [product requirements](../product/PRODUCT_REQUIREMENTS.md).

@@ -51,4 +51,4 @@ Dependency/SBOM review; encryption; permission/tenant tests; isolated executor t
 - [ ] Budget limits and alerts enabled
 - [ ] Support and incident response plan documented
 
-See [roadmap](ROADMAP.md), [quality](QUALITY_AND_TESTING.md), [security](SECURITY_AND_PRIVACY.md).
+See [roadmap](../delivery/ROADMAP.md), [quality](../engineering/QUALITY_AND_TESTING.md), [security](../governance/SECURITY_AND_PRIVACY.md).

@@ -235,11 +235,11 @@ Later:  add vLLM if economics justify GPU hosting and Stripe (or another
 
 MORE PROJECT CONTEXT
 --------------------
-docs/PROJECT_CONTEXT.md
-docs/UPSTREAM_SOURCES.md
-docs/REUSE_VS_BUILD.md
-docs/LICENSE_AUDIT.md
-docs/IMPLEMENTATION_CHECKLIST.md
+docs/delivery/PROJECT_CONTEXT.md
+docs/governance/UPSTREAM_SOURCES.md
+docs/governance/REUSE_VS_BUILD.md
+docs/governance/LICENSE_AUDIT.md
+docs/delivery/IMPLEMENTATION_CHECKLIST.md
 AGENTS.md
 
 WARNING: The legal, maintenance and compatibility status can change at any
