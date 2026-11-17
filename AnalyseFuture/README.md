@@ -25,6 +25,8 @@ Nothing under `AnalyseFuture/sources/` is an active product dependency. Do not r
 
 See `SOURCE_INVENTORY.md` for the architecture, licensing, useful ideas, risks, and recommended disposition of each source. See `PROJECT_IDEA_AND_FUTURE_VISION.txt` for the consolidated product idea and long-term roadmap.
 
+Integrity and complete file-purpose metadata are in [`inventory/`](inventory/README.md). The manifest and checksums cover every archive and all 1,705 extracted files without executing them.
+
 ## Adoption rule
 
 An archived feature may enter the runnable product only through a scoped decision that records:

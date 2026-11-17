@@ -53,3 +53,5 @@ Project documentation is grouped by responsibility rather than file type.
 - [Detailed future vision](../AnalyseFuture/PROJECT_IDEA_AND_FUTURE_VISION.txt)
 
 The canonical repository layout and file-placement rules are in [PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md).
+
+For an exhaustive path-by-path role catalog, see [the complete file inventory](../AnalyseFuture/inventory/TRACKED_FILES.tsv).

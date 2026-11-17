@@ -1,0 +1,7 @@
+# Preserved third-party trees are research inputs, not first-party product code.
+AnalyseFuture/sources/** linguist-vendored=true
+AnalyseFuture/archives/** binary
+
+# Generated integrity catalogs should remain text but do not need line-level blame.
+AnalyseFuture/inventory/*.sha256 linguist-generated=true
+AnalyseFuture/inventory/TRACKED_FILES.tsv linguist-generated=true

@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - "**/*.md"
+      - "!AnalyseFuture/sources/**"
       - "scripts/check_docs.py"
       - ".github/workflows/docs-check.yml"
   pull_request:
     paths:
       - "**/*.md"
+      - "!AnalyseFuture/sources/**"
       - "scripts/check_docs.py"
       - ".github/workflows/docs-check.yml"
 
