@@ -55,7 +55,8 @@ services:
       - |
         set -e
         echo "waiting for floci..."
-        until wget -q -O /dev/null http://floci:4566/; do sleep 1; done
+        until HTTP_PROXY= HTTPS_PROXY= http_proxy= https_proxy= \
+          wget -q -O /dev/null http://floci:4566/health; do sleep 1; done
         mkdir -p /tfdata/state
         terraform init -input=false -no-color >/dev/null
         # State lives in the tfdata volume, so it shares the emulator's lifecycle
@@ -68,6 +69,10 @@ services:
       AWS_REGION: us-east-1
       TF_IN_AUTOMATION: "1"
       TF_DATA_DIR: /tfdata
+      # Docker clients may inject an outbound proxy into every container. The
+      # emulator is an internal service and must never be routed through it.
+      NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,::1},floci
+      no_proxy: ${no_proxy:-localhost,127.0.0.1,::1},floci
     volumes:
       - ../../infra/terraform:/infra
       - tfdata:/tfdata

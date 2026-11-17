@@ -61,7 +61,9 @@ for mail in outbox smtp ses; do
     DATA_DIR="$tmp_root/$n"
   )
   [[ "$mail" != outbox ]] && env_args+=("MAIL_FROM=Euron Open Conversation <no-reply@conversation.example.test>")
-  [[ "$mail" == smtp ]] && env_args+=(SMTP_HOST=localhost SMTP_PORT="$SMTP_PORT")
+  # Compose publishes Mailpit on IPv4 loopback. Using `localhost` can select
+  # ::1 first and leave Nodemailer waiting on an address that is not bound.
+  [[ "$mail" == smtp ]] && env_args+=(SMTP_HOST=127.0.0.1 SMTP_PORT="$SMTP_PORT")
   [[ "$mail" == ses ]] && env_args+=(AWS_ENDPOINT_URL="$FLOCI" AWS_REGION=us-east-1 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test
     SES_REGION=us-east-1 SES_CONFIGURATION_SET=open-conversation-local-mail)
 

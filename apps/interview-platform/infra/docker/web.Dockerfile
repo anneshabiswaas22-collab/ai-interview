@@ -16,7 +16,10 @@
 ARG NODE_IMAGE=node:22.23.4-bookworm-slim
 
 FROM ${NODE_IMAGE} AS base
-ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH CI=true NEXT_TELEMETRY_DISABLED=1
+# Node's fetch (used by Corepack) only honors HTTP(S)_PROXY when this flag is set.
+# A managed build can pass its private proxy CA as BuildKit secret `ca_cert`; local
+# and CI builds without that secret retain the image's normal public CA bundle.
+ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH CI=true NEXT_TELEMETRY_DISABLED=1 NODE_USE_ENV_PROXY=1
 RUN corepack enable
 WORKDIR /repo
 
@@ -26,7 +29,10 @@ ENV API_INTERNAL_URL=${API_INTERNAL_URL}
 # package.json too: it pins the pnpm version (packageManager) and carries the overrides
 # the frozen lockfile is checked against.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    --mount=type=secret,id=ca_cert \
+    if [ -s /run/secrets/ca_cert ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca_cert; fi; \
+    pnpm fetch
 COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --offline --frozen-lockfile --filter @open-conversation/web...

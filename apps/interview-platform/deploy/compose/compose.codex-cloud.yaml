@@ -1,0 +1,48 @@
+# Codex Cloud overlay. Use through scripts/codex-cloud-compose.sh so Docker
+# builds and runtime clients can reach HTTPS registries without weakening TLS.
+services:
+  migrate:
+    build:
+      args: &proxy-build-args
+        HTTP_PROXY: ${CONV_DOCKER_PROXY_URL:?run scripts/codex-cloud-compose.sh}
+        HTTPS_PROXY: ${CONV_DOCKER_PROXY_URL:?run scripts/codex-cloud-compose.sh}
+      secrets: &proxy-build-secrets
+        - source: codex_proxy_ca
+          target: ca_cert
+    environment: &node-proxy-env
+      NODE_USE_ENV_PROXY: "1"
+      NODE_EXTRA_CA_CERTS: /run/secrets/codex_proxy_ca
+      NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,::1},postgres,redis,mailpit,stubs,floci,api,worker,web
+      no_proxy: ${no_proxy:-localhost,127.0.0.1,::1},postgres,redis,mailpit,stubs,floci,api,worker,web
+    secrets: &node-proxy-secret
+      - source: codex_proxy_ca
+        target: codex_proxy_ca
+
+  api:
+    build:
+      args: *proxy-build-args
+      secrets: *proxy-build-secrets
+    environment: *node-proxy-env
+    secrets: *node-proxy-secret
+
+  worker:
+    build:
+      args: *proxy-build-args
+      secrets: *proxy-build-secrets
+    environment: *node-proxy-env
+    secrets: *node-proxy-secret
+
+  web:
+    build:
+      args: *proxy-build-args
+      secrets: *proxy-build-secrets
+
+  terraform:
+    environment:
+      SSL_CERT_FILE: /run/secrets/codex_proxy_ca
+      AWS_CA_BUNDLE: /run/secrets/codex_proxy_ca
+    secrets: *node-proxy-secret
+
+secrets:
+  codex_proxy_ca:
+    file: ${CODEX_PROXY_CERT:?Codex Cloud must provide CODEX_PROXY_CERT}
