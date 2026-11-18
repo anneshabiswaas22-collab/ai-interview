@@ -5,9 +5,13 @@
  * scores in type, a row per round, then every question with its scores, feedback, the
  * corrected snippet for code, and (when present) the transcript and the submitted code.
  */
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import type { InterviewReport, QuestionReport } from "@open-conversation/types";
+import type {
+  InterviewReport,
+  QuestionReport,
+  TextFeedbackEvidence,
+} from "@open-conversation/types";
 import { cn } from "@open-conversation/ui";
 import { minutes, proctorWord, scoreTone, scoreWord } from "@/components/interview/format";
 
@@ -188,7 +192,7 @@ function QuestionRow({ q }: { q: QuestionReport }) {
                 ? "Being scored"
                 : a.status === "FAILED"
                   ? "Could not be scored"
-                  : `Domain ${a.domainRating} · Communication ${a.communicationRating}${q.code ? " · Code" : ""} · ${a.evaluationSource === "simulated" ? "Simulated demo feedback" : a.evaluationSource === "configured_provider" ? "Provider-generated feedback" : "Feedback source unknown"}`}
+                  : `Domain ${a.domainRating ?? "n/a"} · Communication ${a.communicationRating ?? "n/a"}${q.code ? " · Code" : ""} · ${a.evaluationSource === "simulated" ? "Simulated demo feedback" : a.evaluationSource === "configured_provider" ? "Provider-generated feedback" : "Feedback source unknown"}`}
           </span>
         </span>
         <span
@@ -211,7 +215,9 @@ function QuestionRow({ q }: { q: QuestionReport }) {
         <div className="ml-12 mt-4 space-y-5 text-[14.5px] leading-relaxed">
           {q.code ? <p className="whitespace-pre-line text-muted-foreground">{q.text}</p> : null}
           {f?.analysis ? <p className="whitespace-pre-line">{f.analysis}</p> : null}
-          {f ? (
+          {f?.textEvidence ? (
+            <EvidenceFeedback feedback={f.textEvidence} />
+          ) : f ? (
             <div className="grid gap-5 sm:grid-cols-3">
               <List title="Strengths" items={f.strengths} />
               <List title="To improve" items={f.weaknesses} />
@@ -263,6 +269,71 @@ function QuestionRow({ q }: { q: QuestionReport }) {
         </div>
       ) : null}
     </li>
+  );
+}
+
+function EvidenceFeedback({ feedback }: { feedback: TextFeedbackEvidence }) {
+  const id = useId();
+  return (
+    <section aria-label="Written answer evidence" className="space-y-5">
+      <p className="text-[13px] text-muted-foreground">
+        Quotations were checked against your saved answer. This does not establish that the feedback
+        is correct. Confidence is reported by the evaluator and is not calibrated.
+      </p>
+      {feedback.criteria.map((criterion) => (
+        <section key={criterion.criterionId} className="space-y-3">
+          <h4 className="font-semibold">
+            {criterion.criterionId === "domain" ? "Domain knowledge" : "Written communication"}
+          </h4>
+          <p className="text-[13px] text-muted-foreground">
+            {criterion.score === null
+              ? "Insufficient evidence to score"
+              : `Score: ${criterion.score} / 100`}
+            {" · "}Evaluator-reported confidence: {criterion.confidence}
+          </p>
+          {criterion.observations.length ? (
+            <ul className="space-y-3">
+              {criterion.observations.map((observation, index) => (
+                <li key={index}>
+                  <span className="font-medium">
+                    {observation.kind === "strength"
+                      ? "Strength"
+                      : observation.kind === "gap"
+                        ? "To improve"
+                        : "Try next time"}
+                    :
+                  </span>{" "}
+                  {observation.text}{" "}
+                  {observation.evidenceIndexes.map((evidenceIndex) => (
+                    <a
+                      key={evidenceIndex}
+                      className="mr-2 text-primary underline underline-offset-2"
+                      href={`#${id}-${criterion.criterionId}-${evidenceIndex}`}
+                    >
+                      Evidence {evidenceIndex + 1}
+                    </a>
+                  ))}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {criterion.evidence.length ? (
+            <ol className="space-y-3" aria-label={`${criterion.criterionId} quotations`}>
+              {criterion.evidence.map((evidence, index) => (
+                <li key={index} id={`${id}-${criterion.criterionId}-${index}`}>
+                  <p className="break-all text-[12px] text-subtle-foreground">
+                    Evidence {index + 1} · Answer event {evidence.eventId}
+                  </p>
+                  <blockquote className="mt-1 whitespace-pre-wrap border-l-2 border-border pl-3">
+                    {evidence.quote}
+                  </blockquote>
+                </li>
+              ))}
+            </ol>
+          ) : null}
+        </section>
+      ))}
+    </section>
   );
 }
 

@@ -133,6 +133,22 @@ export interface AnswerInput {
   advance?: boolean;
 }
 
+/** Server-validated quotations from persisted written answer events, not proof of accuracy. */
+export interface TextFeedbackEvidence {
+  rubricVersion: "text-practice-v1";
+  criteria: {
+    criterionId: "domain" | "communication";
+    score: number | null;
+    confidence: "low" | "medium" | "high" | "insufficient";
+    evidence: { eventId: string; quote: string }[];
+    observations: {
+      kind: "strength" | "gap" | "next_step";
+      text: string;
+      evidenceIndexes: number[];
+    }[];
+  }[];
+}
+
 export interface AnswerFeedback {
   strengths: string[];
   weaknesses: string[];
@@ -140,6 +156,8 @@ export interface AnswerFeedback {
   analysis: string;
   /** Code answers: a short corrected or clearer version, when one helps. */
   correctedSnippet: string | null;
+  /** Absent on legacy, voice and code feedback. Withheld on shares without transcript consent. */
+  textEvidence?: TextFeedbackEvidence;
 }
 
 export interface AnswerResult {

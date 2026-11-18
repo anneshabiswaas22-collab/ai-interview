@@ -1,8 +1,10 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
+import { logger } from "../../src/core/logger";
 import {
   failFromResponse,
   maskSecrets,
   ProviderError,
+  providerFetch,
   readSse,
   type SseEvent,
 } from "../../src/integrations/http";
@@ -98,6 +100,8 @@ describe("maskSecrets", () => {
 });
 
 describe("failFromResponse", () => {
+  afterEach(() => vi.restoreAllMocks());
+
   const fail = async (status: number, body: unknown) => {
     const res = new Response(typeof body === "string" ? body : JSON.stringify(body), { status });
     return (await failFromResponse("prov", res).catch((e: unknown) => e)) as ProviderError;
@@ -164,5 +168,46 @@ describe("failFromResponse", () => {
     });
     expect(e.message).toBe("prov: AUTH (401)");
     expect(e.message).not.toMatch(/Incorrect|sk-live/);
+  });
+
+  test.each([
+    [401, "", "AUTH"],
+    [403, "", "AUTH"],
+    [429, "", "RATE_LIMITED"],
+    [400, "maximum context length", "CONTEXT_TOO_LONG"],
+    [413, "input is too long", "CONTEXT_TOO_LONG"],
+    [422, "blocked by moderation", "CONTENT_FILTER"],
+    [400, "invalid request", "BAD_REQUEST"],
+    [500, "", "UNAVAILABLE"],
+  ])("logs only safe metadata for status %s and hint %s", async (status, hint, failure) => {
+    const warn = vi.spyOn(logger, "warn").mockImplementation(() => undefined);
+    // Arbitrary secrets and echoed interview content cannot be reliably recognized by token regexes.
+    const privateText = "Synthetic Candidate: private resume detail. custom-secret=opaque-value";
+    const error = await fail(status, `${hint}\n${privateText}`);
+    expect(error).toMatchObject({ provider: "prov", status, failure });
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      { provider: "prov", status, failure },
+      "provider call failed"
+    );
+    expect(JSON.stringify(warn.mock.calls)).not.toContain(privateText);
+    expect(error.message).toBe(`prov: ${failure} (${status})`);
+  });
+
+  test("network exception text stays out of logs and errors", async () => {
+    const warn = vi.spyOn(logger, "warn").mockImplementation(() => undefined);
+    const privateText = "https://provider.example/path?custom_key=opaque-value private resume";
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error(privateText));
+    await expect(providerFetch("prov", "https://provider.example", {})).rejects.toMatchObject({
+      provider: "prov",
+      failure: "UNAVAILABLE",
+      status: null,
+      message: "prov: UNAVAILABLE",
+    });
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      { provider: "prov", failure: "UNAVAILABLE" },
+      "provider unreachable"
+    );
+    expect(JSON.stringify(warn.mock.calls)).not.toContain(privateText);
   });
 });

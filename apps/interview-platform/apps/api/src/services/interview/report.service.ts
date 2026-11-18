@@ -100,12 +100,16 @@ export async function buildReport(
   const questions: QuestionReport[] = plan.flatMap((r, ri) =>
     r.questions.map((q, qi) => {
       const a = answerAt.get(`${ri}:${qi}`) ?? null;
+      const answer = a ? toAnswer(a) : null;
+      // Grounded observations can repeat answer text, not just the explicit quotes.
+      // Withhold the whole grounded feedback when transcript sharing is disabled.
+      if (answer?.feedback?.textEvidence && !opts.includeTranscript) answer.feedback = null;
       return {
         round: ri,
         question: qi,
         text: q.text,
         code: q.code,
-        answer: a ? toAnswer(a) : null,
+        answer,
         transcript:
           a && opts.includeTranscript
             ? ((a.transcript as unknown as TranscriptLine[]) ?? [])

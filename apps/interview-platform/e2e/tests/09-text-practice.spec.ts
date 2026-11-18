@@ -38,6 +38,13 @@ test("text practice asks for consent, survives a reload, and opens the report", 
   await expect(page.getByText(/^2 of 2 questions answered/)).toBeVisible();
   await expect(page.getByText(/feedback is simulated for the demo/)).toBeVisible();
   await expect(page.getByTestId("report-question-0-0")).toContainText("Simulated demo feedback");
+  const first = page.getByTestId("report-question-0-0");
+  await first.getByRole("button").click();
+  await expect(
+    first.getByText("I built a service for tracking orders.", { exact: true }).first()
+  ).toBeVisible();
+  await expect(first.getByText(/Quotations were checked against your saved answer/)).toBeVisible();
+  await expect(first.getByRole("link", { name: /Evidence 1/ }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Proctoring" })).toHaveCount(0);
   await page.context().close();
 });

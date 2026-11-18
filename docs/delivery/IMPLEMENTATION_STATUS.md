@@ -1,4 +1,4 @@
-# Implementation Status — 2026-11-14
+# Implementation Status — 2026-11-18
 
 ## Development candidate
 
@@ -10,7 +10,7 @@ The pinned patched upstream candidate previously passed [232 unit tests, 150 Pos
 
 A consent-based written practice mode is implemented on the existing application database and authentication. The server chooses questions from the frozen plan, stores the conversation, and serializes retries and concurrent answers. It exports and deletes its own records with the interview. The separate voice mode still uses browser-authored transcript data. Its [clean-checkout PostgreSQL/Redis integration and offline browser workflow](https://github.com/anneshabiswaas22-collab/ai-interview/actions/runs/43584618534) passed with simulated providers.
 
-Feedback still uses the existing model scorer; its quality, evidence links, and real-provider behavior have not been validated. New scores record their provider kind, and reports distinguish simulated demo feedback from configured-provider or unknown sources. The default local provider is simulated. A transactional score-dispatch outbox has been added for development; its clean database and browser checks must pass in the feature pull request. Planning and other jobs still use best-effort dispatch.
+Written feedback now uses the existing model scorer with strict quotations linked to server-owned answer events and observations linked to those quotations. Fabricated evidence fails closed and insufficient evidence yields null scores. Reports expose these citations only when transcript disclosure is permitted. Quality, calibration and real-provider behavior remain unvalidated; voice and code feedback still use the older scorer. See [recovery evidence](../recovery/RECOVERY_REPORT.md). New scores record their provider kind, and reports distinguish simulated demo feedback from configured-provider or unknown sources. The default local provider is simulated. A transactional score-dispatch outbox has been added for development; its clean database and browser checks must pass in the feature pull request. Planning and other jobs still use best-effort dispatch.
 
 ## Experimental policy core
 
@@ -20,7 +20,7 @@ Feedback still uses the existing model scorer; its quality, evidence links, and 
 
 1. Verify the text-practice change with clean-checkout database and browser checks.
 2. Make session position, interviewer events, retries and transcripts server-authoritative with transactional persistence.
-3. Integrate evidence-backed evaluator validation into the selected application, and run real-provider and expert quality evaluations.
+3. Evaluate the integrated written-evidence contract with real providers and expert-reviewed quality cases; extend authoritative evidence handling to voice.
 4. Complete privacy, accessibility, security and dependency-license reviews before a public release.
 
 The default local demo uses simulated model responses and scores. Real voice, real model quality, fine-tuning and production deployment have not been verified.

@@ -2,9 +2,8 @@
  * Shared plumbing for provider calls: timeouts that combine with a caller's abort
  * signal, a Server-Sent Events reader, and one classification of provider failures.
  *
- * Provider error bodies are logged (truncated, with anything key-shaped masked) and never
- * returned to a user: the legacy chat passed raw provider text through, which leaked
- * model names, quota details and sometimes request ids of the operator's account.
+ * Provider error bodies are used only to classify failures, never logged or returned to
+ * a user. They may echo private interview content or credentials in arbitrary formats.
  */
 import { logger } from "../core/logger";
 
@@ -46,20 +45,21 @@ const CONTEXT_HINTS =
   /context(_| )length|maximum context|too many tokens|prompt is too long|input is too long|exceeds the (model'?s )?(maximum|context)/i;
 const FILTER_HINTS = /content[_ ]?(policy|filter|management)|safety|blocked|moderation/i;
 
-/** Turn a non-2xx provider response into a ProviderError, logging a masked excerpt. */
+/** Turn a non-2xx provider response into a ProviderError, logging only safe metadata. */
 export async function failFromResponse(provider: string, res: Response): Promise<never> {
   const body = await res.text().catch(() => "");
-  const excerpt = maskSecrets(body.slice(0, 600));
-  logger.warn({ provider, status: res.status, body: excerpt }, "provider call failed");
-  if (res.status === 401 || res.status === 403)
-    throw new ProviderError("AUTH", provider, res.status);
-  if (res.status === 429) throw new ProviderError("RATE_LIMITED", provider, res.status);
-  if (res.status === 400 || res.status === 413 || res.status === 422) {
-    if (CONTEXT_HINTS.test(body)) throw new ProviderError("CONTEXT_TOO_LONG", provider, res.status);
-    if (FILTER_HINTS.test(body)) throw new ProviderError("CONTENT_FILTER", provider, res.status);
-    throw new ProviderError("BAD_REQUEST", provider, res.status);
+  let failure: ProviderFailure = "UNAVAILABLE";
+  if (res.status === 401 || res.status === 403) failure = "AUTH";
+  else if (res.status === 429) failure = "RATE_LIMITED";
+  else if (res.status === 400 || res.status === 413 || res.status === 422) {
+    failure = CONTEXT_HINTS.test(body)
+      ? "CONTEXT_TOO_LONG"
+      : FILTER_HINTS.test(body)
+        ? "CONTENT_FILTER"
+        : "BAD_REQUEST";
   }
-  throw new ProviderError("UNAVAILABLE", provider, res.status);
+  logger.warn({ provider, status: res.status, failure }, "provider call failed");
+  throw new ProviderError(failure, provider, res.status);
 }
 
 /** fetch with provider failure mapping for network errors and timeouts. */
@@ -78,7 +78,7 @@ export async function providerFetch(
       throw new ProviderError("TIMEOUT", provider);
     // The caller cancelled (the user pressed stop): not a provider failure.
     if ((err as Error).name === "AbortError") throw err;
-    logger.warn({ provider, err: (err as Error).message }, "provider unreachable");
+    logger.warn({ provider, failure: "UNAVAILABLE" }, "provider unreachable");
     throw new ProviderError("UNAVAILABLE", provider);
   }
   if (!res.ok) await failFromResponse(provider, res);

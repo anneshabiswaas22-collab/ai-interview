@@ -12,7 +12,7 @@ Legend: P0 = first working interview; P1 = competitive candidate product; P2 = c
 | Interview plan | P0 | Euron planning | Imported; default model is a stub | Typed schema + fixtures |
 | Adaptive questioning | P0 | Provider-backed interview | Adapters imported; real-provider validation pending | Follow-up scenario suite |
 | Text interview and transcript | P0 | Euron API and persistence | Consent-based text mode added for development, with server-selected questions, durable history and retry handling; voice transcript remains client-authored | End-to-end saved interview |
-| Evidence-backed evaluator | P0 | Own rubric service and structured output | Evidence-validation prototype; not integrated into app scoring | Expert-reviewed scoring samples and model evaluation integration |
+| Evidence-backed evaluator | P0 | Own rubric service and structured output | Written-practice quotation validation integrated into the existing scorer and reports; real-provider accuracy and calibration unvalidated | Expert-reviewed scoring samples and model evaluation integration |
 | Voice STT / TTS | P1 | Configurable provider adapters | Imported; real audio not verified | Real device + reconnection tests |
 | Streaming speech interruption | P1 | LiveKit Agents | Not implemented | Barge-in latency test |
 | Coding editor | P1 | Existing Euron editor | Imported; no secure code execution | Editor + autosave E2E |

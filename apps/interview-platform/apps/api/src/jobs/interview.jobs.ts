@@ -14,6 +14,7 @@
 import { z } from "zod";
 import { captureError, logger } from "../core/logger";
 import { db } from "../db/kysely";
+import { textEvidenceOutput, validateTextEvidence } from "../domain/text-evidence";
 import { generateJson, ModelOutputError } from "../services/interview/ai";
 import { hangup, sweepLiveSessions } from "../services/interview/live.service";
 import { normalisePlan, plannerOutput, questionAt } from "../services/interview/plan";
@@ -135,18 +136,75 @@ export async function scoreAnswer(answerId: string, version: string): Promise<vo
       .set({ status: "FAILED" })
       .where("id", "=", a.id)
       .where("updated_at", "=", a.updated_at)
+      .where("status", "=", "SCORING")
       .execute();
   if (!row || !q) return void (await markFailed());
   const model = await resolveTextModel(row.text_model_id);
   if (!model) return void (await markFailed());
   const transcript = (a.transcript as { role: "interviewer" | "candidate"; text: string }[]) ?? [];
+  // Only persisted server-owned answer events can ground written feedback. Never
+  // accept evidence from a client-authored voice transcript or a model's quotation.
+  const answerEvents =
+    a.kind === "TEXT"
+      ? await db
+          .selectFrom("text_practice_events")
+          .select(["id", "text"])
+          .where("interview_id", "=", a.interview_id)
+          .where("round_index", "=", a.round_index)
+          .where("question_index", "=", a.question_index)
+          .where("kind", "=", "ANSWER")
+          .execute()
+      : [];
+  if (a.kind === "TEXT" && answerEvents.length !== 1) return void (await markFailed());
   const prompt =
     a.kind === "CODE"
       ? codeScorer({ question: q.text, code: a.code ?? "", language: a.language, role: row.role })
       : a.kind === "TEXT"
-        ? textScorer({ question: q.text, transcript, role: row.role })
+        ? textScorer({ question: q.text, answers: answerEvents, role: row.role })
         : voiceScorer({ question: q.text, transcript, role: row.role });
   try {
+    if (a.kind === "TEXT") {
+      const out = await generateJson({
+        model,
+        userId: row.user_id,
+        system: prompt.system,
+        user: prompt.user,
+        schema: textEvidenceOutput,
+        maxOutputTokens: 4000,
+        temperature: 0.2,
+      });
+      // Invalid citations fail closed, without persisting or logging model content.
+      let textEvidence;
+      try {
+        textEvidence = validateTextEvidence(out, answerEvents);
+      } catch {
+        throw new ModelOutputError("The written feedback did not cite the saved answer");
+      }
+      const observations = textEvidence.criteria.flatMap((c) => c.observations);
+      await db
+        .updateTable("answers")
+        .set({
+          status: "SCORED",
+          evaluator_kind: model.kind,
+          domain_rating: textEvidence.criteria[0]!.score,
+          communication_rating: textEvidence.criteria[1]!.score,
+          feedback: JSON.stringify({
+            strengths: observations.filter((o) => o.kind === "strength").map((o) => o.text),
+            weaknesses: observations.filter((o) => o.kind === "gap").map((o) => o.text),
+            suggestions: observations.filter((o) => o.kind === "next_step").map((o) => o.text),
+            analysis:
+              "Quotations were checked against your saved written answer. This does not establish the accuracy of the feedback.",
+            correctedSnippet: null,
+            textEvidence,
+          }),
+          scored_at: new Date(),
+        })
+        .where("id", "=", a.id)
+        .where("updated_at", "=", a.updated_at)
+        .where("status", "=", "SCORING")
+        .execute();
+      return;
+    }
     const out = await generateJson({
       model,
       userId: row.user_id,
@@ -178,6 +236,7 @@ export async function scoreAnswer(answerId: string, version: string): Promise<vo
       })
       .where("id", "=", a.id)
       .where("updated_at", "=", a.updated_at)
+      .where("status", "=", "SCORING")
       .execute();
   } catch (err) {
     if (!(err instanceof ModelOutputError))
